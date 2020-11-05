@@ -1,0 +1,116 @@
+#!/bin/sh
+
+dev_mode=0
+for arg in "$@"
+do
+    if [ "$arg" == "dev" ]; then
+        echo "Running in dev mode..."
+        dev_mode=1
+    else
+        echo "./run: illegal option -- $arg"
+        echo "Usage: ./run [dev]"
+        exit 1
+    fi
+done
+LOGS=logs
+if [ ! -d "$LOGS" ]; then
+    mkdir $LOGS
+fi
+rm logs/sync_*.log > /dev/null 2>&1
+rm logs/vmr_*.log > /dev/null 2>&1
+rm logs/wind_*.log > /dev/null 2>&1
+rm logs/report_*.log > /dev/null 2>&1
+if [ $dev_mode == 0 ]; then
+    find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
+    rm -rf temp/* > /dev/null 2>&1
+fi
+CONFIG=conf
+RICONF=conf/riwhale.config
+if [ ! -d "$CONFIG" ]; then
+    mkdir $CONFIG
+    echo "Config directory not found. Creating directory: ./$CONFIG ."
+    exit 1
+else
+    if [ ! -f "$RICONF" ]; then
+        echo "Missing config file. ./$RICONF does not exist."
+        exit 1
+    fi
+fi
+REPO=html/riwhale.github.io/
+OAUTH_TOKEN="$( jq -r ".oauth" "$RICONF" )"
+if [ ! -d "$REPO" ]; then
+    HTML=html
+    if [ ! -d "$HTML" ]; then
+        mkdir $HTML
+    fi
+    cd html
+    git clone https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
+    cd ..
+fi
+SRCDIR=src
+if [ ! -d "$SRCDIR" ]; then
+    echo "No src directory found."
+    echo "Please follow the installation instructions at https://github.com/davnajork/maritime-whale-map and try again."
+    exit 1
+fi
+TEMP=temp
+if [ ! -d "$TEMP" ]; then
+    mkdir $TEMP
+fi
+# USEFUL SENSOR INFO (DO NOT DELETE):
+# 41004 ch off 32.501 /  -79.099
+# 41008 sv off 31.400 / -80.866
+# 41029 ch near 32.803 /  -79.624
+# 41033 sv near 32.279 / -80.406
+BUOYS="41004 41029 41033"
+for BUOY in $BUOYS; do
+  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
+done
+ADV_BUOYS="41008"
+for BUOY in $ADV_BUOYS; do
+  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.cwind -o "$TEMP/$BUOY.cwind" 2>> logs/wind_err.log 1>> logs/wind_out.log
+done
+cd html/riwhale.github.io
+git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+yes | cp -rf blacklist.txt ../../cache/blacklist.txt
+cd ../../src
+MAIN_RET_VAL=1
+if [ $dev_mode == 0 ]; then
+    python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
+    MAIN_RET_VAL=$?
+    # echo $MAIN_RET_VAL
+    # cat ../logs/vmr_*.log # (USE FOR TESTING WET RUN / NON-DEV)
+else
+    python3 main.py
+fi
+cd ../html/riwhale.github.io
+if [ $dev_mode == 0 ]; then
+    PLOT=../level_one.html
+    if [ ! -f "$PLOT" ]; then
+        echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+    else
+        echo "Initiating upload..." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "wipe plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../../cache/master-*.xlsx . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../../cache/blacklist.txt . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../*.html . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "upload plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        cd ../../src
+        if [ $MAIN_RET_VAL == 0 ]; then
+            python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            # cat ../logs/report_*.log # can remove in final script
+        else
+            # WORST ERROR CASE
+            echo "SILENT -- FATAL (RIWHALE) ERROR CASE" 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            # HAIL MARY
+            python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+        fi
+        cd ../html/riwhale.github.io
+    fi
+fi
+
+cd ../..
+exit 0

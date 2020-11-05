@@ -1,0 +1,32 @@
+#!/bin/sh
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # ...
+    echo "(linux) OS not supported."
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    # echo "darwin"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    brew install jq
+    brew install python
+    sudo easy_install pip
+    pip3 install pandas
+    pip3 install plotly
+    pip3 install openpyxl
+    pip3 install func-timeout
+    pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+    # POSIX compatibility layer and Linux environment emulation for Windows
+    echo "(cygwin) OS not supported"
+elif [[ "$OSTYPE" == "msys" ]]; then
+    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+    echo "(msys) OS not supported"
+elif [[ "$OSTYPE" == "win32" ]]; then
+    # I'm not sure this can happen.
+    echo "(win32) OS not supported"
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    # ...
+    echo "(freebsd) OS not supported"
+else
+    # Unknown.
+    echo "(unknown) OS not supported"
+fi
