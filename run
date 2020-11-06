@@ -72,6 +72,10 @@ for BUOY in $ADV_BUOYS; do
 done
 cd html/riwhale.github.io
 git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+CACHE=../../cache
+if [ ! -d "$CACHE" ]; then
+    mkdir $CACHE
+fi
 yes | cp -rf blacklist.txt ../../cache/blacklist.txt
 cd ../../src
 MAIN_RET_VAL=1

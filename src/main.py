@@ -13,10 +13,6 @@ import glob
 import os
 
 def main():
-    # create temp and cache directories if they do not exist
-    os.makedirs(os.path.dirname("../temp/"), exist_ok=True)
-    os.makedirs(os.path.dirname("../cache/"), exist_ok=True)
-
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     data_frames = []
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
