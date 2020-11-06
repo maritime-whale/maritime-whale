@@ -37,4 +37,4 @@ Fetches daily vessel movement report from Gmail. Imports, cleans, and caches dat
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
 4. Run the `./run` command with `dev` mode **_DISABLED_**: `./run`.
 
-_For more help please refer to the maritime-whale [documentation](http://riwhale.github.io/) or contact [dev.riwhale@gmail.com](dev.riwhale@gmail.com)._
+_For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/) or contact @riwhale at [dev.riwhale@gmail.com](dev.riwhale@gmail.com)._
