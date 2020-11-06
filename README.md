@@ -39,4 +39,4 @@ Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
 Execute the `run` script with `dev` mode **_DISABLED_**: `./run`.
 
-_For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/docs/docs.txt) or contact [@riwhale](https://github.com/riwhale) at [dev.riwhale@gmail.com](mailto:dev.riwhale@gmail.com)._
+_For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/docs/docs.txt) or contact [@riwhale](https://github.com/riwhale) at [dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
