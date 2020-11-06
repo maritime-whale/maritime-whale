@@ -1,11 +1,15 @@
-# maritime-whale-map
+# maritime-whale
 # Description
-Maritime vessel traffic speed plotter.
+Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & _Savannah, Georgia_.
+**_Maritime Whale Web App Engine_** - Fetches daily vessel movement reports and wind data. Imports, cleans, and caches data; perform statistical analysis on data and generates HTML plot files using Plotly -- pushing plot files, wrangled data files, and a vessel blacklist file to the https://github.com/riwhale/riwhale.github.io/ repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Plots and wrangled data files are embed within the www.maritimewhale.com website.
 
-Fetches daily vessel movement report from Gmail. Imports, cleans, and caches data. Generates HTML plot files using Plotly, pushing plot files to the https://github.com/riwhale/riwhale.github.io/ repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Embed the plot webpages in the www.maritimewhale.com website using the URLs for the GitHub hosted HTML files.
+# Key Features
+* Plots
+* Meeting and passing
+* *etc. (TO BE COMPLETED)*
 
 # Installation Instructions
-1. Simply clone this repo or download it as a ZIP (**NOTE:** the ZIP method is **_NOT_** recommended for developers).
+1. Simply clone this repo or download it as a ZIP (**NOTE:** _the ZIP method is **NOT** recommended for developers_).
 2. Open a terminal session.
 3. Navigate to the root directory of the repo.
 4. Ensure the `install` script has the correct permissions by running `chmod a+x install`.
