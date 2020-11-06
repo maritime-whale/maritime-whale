@@ -36,17 +36,6 @@ def import_report(path):
     for key in stats.keys():
         aggregate[key] = stats[key]
     aggregate = aggregate.reset_index()
-    aggregate = aggregate[(aggregate.COURSE >= 115) &
-                          (aggregate.COURSE <= 125) |
-                          (aggregate.COURSE >= 295) &
-                          (aggregate.COURSE <= 305)]
-    aggregate.COURSE = round(aggregate.COURSE).astype("int")
-    courses = {}
-    for i in range (115, 126):
-        courses[i] = "Outbound"
-    for i in range (295, 306):
-        courses[i] = "Inbound"
-    aggregate.COURSE = aggregate.COURSE.replace(courses).astype("str")
     aggregate = aggregate[~aggregate.MMSI.isin(blacklist)]
     new_blacklisters = []
     for i in range(aggregate.shape[0]):
@@ -61,5 +50,28 @@ def import_report(path):
     aggregate = aggregate[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
         "Mean speed kn", "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE"]]
     ch = aggregate[aggregate.Latitude >= 32.033]
+    ch = ch[(ch.COURSE >= 100) &
+              (ch.COURSE <= 140) |
+              (ch.COURSE >= 280) &
+              (ch.COURSE <= 320)]
+    ch.COURSE = round(ch.COURSE).astype("int")
+    courses = {}
+    for i in range (100, 141):
+        courses[i] = "Outbound"
+    for i in range (280, 321):
+        courses[i] = "Inbound"
+    ch.COURSE = ch.COURSE.replace(courses).astype("str")
+
     sv = aggregate[aggregate.Latitude < 32.033]
+    sv = sv[(sv.COURSE >= 100) &
+              (sv.COURSE <= 160) |
+              (sv.COURSE >= 280) &
+              (sv.COURSE <= 340)]
+    sv.COURSE = round(sv.COURSE).astype("int")
+    courses = {}
+    for i in range (100, 161):
+        courses[i] = "Outbound"
+    for i in range (280, 341):
+        courses[i] = "Inbound"
+    sv.COURSE = sv.COURSE.replace(courses).astype("str")
     return ch, sv

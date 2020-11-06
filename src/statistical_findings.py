@@ -7,6 +7,9 @@ import plotly.graph_objects as go
 import scipy
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
+import glob
+
 
 def import_report(path):
     # import data from vessel movement reports (csv format); clean and
@@ -96,22 +99,43 @@ def import_report(path):
 
     return ch, sv
 
-path = "2020-11-05.csv"
-ch = import_report(path)[0]
-sv = import_report(path)[1]
+# dir = "../temp/"
+# files = os.listdir(dir)
+# for file in files:
+#     path = dir + file
+#     print(path)
+path = "../temp/*.csv"
+ch_agg = []
+sv_agg = []
+for filename in glob.glob(path):
+    report = import_report("../temp/" + filename)
+    ch_agg.append(report[0])
+    sv_agg.append(report[1])
 
-ch_panamax = ch[ch['vessel class'] == 'Panamax']
-ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+# print(pd.concat(ch_agg).shape)
+# print(pd.concat(sv_agg).shape)
 
-sv_panamax = sv[sv['vessel class'] == 'Panamax']
-sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
+plt.scatter(x=pd.concat(sv_agg).Longitude,
+            y=pd.concat(sv_agg).Latitude)
 
-# CHARLESTON COMPLIANCE RATES
-print('Panamax Transit Compliance: ' + str(round(sum(ch_panamax['SPEED'] <= 10) / ch_panamax.shape[0] * 100, 2)) + '%')
-print('Post Panamax Transit Compliance: ' + str(round(sum(ch_post_panamax['SPEED'] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + '%')
-print('Total Transit Compliance: ' + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + '%')
-
-# Savannah COMPLIANCE RATES
-print('Panamax Transit Compliance: ' + str(round(sum(sv_panamax['SPEED'] <= 10) / sv_panamax.shape[0] * 100, 2)) + '%')
-print('Post Panamax Transit Compliance: ' + str(round(sum(sv_post_panamax['SPEED'] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + '%')
-print('Total Transit Compliance: ' + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + '%')
+plt.show()
+#file = "2020-11-05.csv"
+# path = dir + file
+# ch = import_report(path)[0]
+# sv = import_report(path)[1]
+#
+# ch_panamax = ch[ch['vessel class'] == 'Panamax']
+# ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+#
+# sv_panamax = sv[sv['vessel class'] == 'Panamax']
+# sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
+#
+# # CHARLESTON COMPLIANCE RATES
+# print('Panamax Transit Compliance: ' + str(round(sum(ch_panamax['SPEED'] <= 10) / ch_panamax.shape[0] * 100, 2)) + '%')
+# print('Post Panamax Transit Compliance: ' + str(round(sum(ch_post_panamax['SPEED'] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + '%')
+# print('Total Transit Compliance: ' + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + '%')
+#
+# # Savannah COMPLIANCE RATES
+# print('Panamax Transit Compliance: ' + str(round(sum(sv_panamax['SPEED'] <= 10) / sv_panamax.shape[0] * 100, 2)) + '%')
+# print('Post Panamax Transit Compliance: ' + str(round(sum(sv_post_panamax['SPEED'] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + '%')
+# print('Total Transit Compliance: ' + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + '%')
