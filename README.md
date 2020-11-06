@@ -1,28 +1,30 @@
-# maritime-whale-map
+# maritime-whale
 # Description
-Maritime vessel traffic speed plotter.
+Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & _Savannah, Georgia_.<br/>
+**_Maritime Whale Web App Engine_** - Fetches daily vessel movement reports and wind data. Imports, cleans, and caches data; perform statistical analysis on data and generates HTML plot files using Plotly -- pushing plot files, wrangled data files, and a vessel blacklist file to the https://github.com/riwhale/riwhale.github.io/ repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Plots and wrangled data files are embed within the www.maritimewhale.com website.
 
-Fetches daily vessel movement report from Gmail. Imports, cleans, and caches data. Generates HTML plot files using Plotly, pushing plot files to the https://github.com/riwhale/riwhale.github.io/ repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Embed the plot webpages in the www.maritimewhale.com website using the URLs for the GitHub hosted HTML files.
+# Key Features
+* Plots
+* Meeting and passing
+* *etc. (TO BE COMPLETED)*
 
 # Installation Instructions
-1. Simply clone this repo or download it as a ZIP.
+1. Simply clone this repo or download it as a ZIP (**NOTE:** _the ZIP method is **NOT** recommended for developers_).
 2. Open a terminal session.
 3. Navigate to the root directory of the repo.
 4. Ensure the `install` script has the correct permissions by running `chmod a+x install`.
 5. Run the `./install` command.
 
-# How to Use
+# First-time Use & Validation
 1. Open a terminal session.
 2. Navigate to the root directory of the repo.
-3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.
-4. Run the `./run` command with `dev` mode enabled: `./run dev`.<br/>
-*Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
+3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
+***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
+4. Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.<br/>
 *Do **_NOT_** run without `dev` if this is your first time running the `run` script.*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*If this is your first time running the `run` script follow the steps below...*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;*`./run` will produce a message like:*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;*`./run dev` should produce the following message:*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*`Config directory not found. Creating directory: ./conf .`*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;*OR*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;*`Missing config file. ./conf/riwhale.config does not exist.`*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*Don't worry **this is normal**...*<br/>
 5. Move a valid `credentials.json` and `riwhale.config` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` too).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*If there is no `.token.pickle` present in the `conf`dir, then one will need to be generated.*
@@ -30,4 +32,11 @@ Fetches daily vessel movement report from Gmail. Imports, cleans, and caches dat
 7. Run `./run dev` again.
 8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser) -- must complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
-_For more help please refer to the maritime-whale [documentation](http://riwhale.github.io/) or contact [dev.riwhale@gmail.com](dev.riwhale@gmail.com)._
+# How to Use (*dev* mode *ENABLED*)
+Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.
+
+# How to Use (*dev* mode *DISABLED*)
+***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
+Execute the `run` script with `dev` mode **_DISABLED_**: `./run`.
+
+_For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/docs/docs.txt) or contact [@riwhale](https://github.com/riwhale) at [dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
