@@ -1,0 +1,9 @@
+logs
+html
+temp
+cache
+tests
+conf
+*__pycache__
+*/.token.pickle
+!tests/sample.zip
