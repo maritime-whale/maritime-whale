@@ -80,7 +80,7 @@ def main():
     zip = "../temp/webapp_logs"
     shutil.make_archive(zip, "zip", "../logs/")
     msg = create_message_with_attachment(my_email, my_email,
-                                         "Maritime Whale Webapp Health Report",
+                                         "Maritime Whale Web App Health Report",
                                          "Status: " + get_webapp_health_status(),
                                          zip + ".zip")
     if msg:
