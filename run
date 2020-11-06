@@ -115,6 +115,5 @@ if [ $dev_mode == 0 ]; then
         cd ../html/riwhale.github.io
     fi
 fi
-
 cd ../..
 exit 0
