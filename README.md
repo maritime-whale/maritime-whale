@@ -20,7 +20,7 @@ Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & 
 2. Navigate to the root directory of the repo.
 3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
-4. Run the `./run` command with `dev` mode _ENABLED_: `./run dev`.<br/>
+4. Run the `./run` command with `dev` mode **_ENABLED_**: `./run dev`.<br/>
 *Do **_NOT_** run without `dev` if this is your first time running the `run` script.*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*If this is your first time running the `run` script follow the steps below...*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*`./run dev` should produce the following message:*<br/>
