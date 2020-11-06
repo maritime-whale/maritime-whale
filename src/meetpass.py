@@ -1,4 +1,12 @@
+import pandas as pd
 from datetime import timedelta
+import numpy as np
+import plotly.express as px
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+import scipy
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def import_report(path):
     # import data from vessel movement reports (csv format); clean and
@@ -17,16 +25,17 @@ def import_report(path):
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
 
     df = df[(df.COURSE >= 115) &
-            (df.COURSE <= 125) |
-            (df.COURSE >= 295) &
-            (df.COURSE <= 305)]
+                          (df.COURSE <= 125) |
+                          (df.COURSE >= 295) &
+                          (df.COURSE <= 305)]
     df.COURSE = round(df.COURSE).astype("int")
+    df['course behavior'] = df.COURSE
     courses = {}
     for i in range (115, 126):
         courses[i] = "Outbound"
     for i in range (295, 306):
         courses[i] = "Inbound"
-    df.COURSE = df.COURSE.replace(courses).astype("str")
+    df['course behavior'] = df['course behavior'].replace(courses).astype("str")
     new_blacklisters = []
     for i in range(df.shape[0]):
         if df.iloc[i]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36,
@@ -36,13 +45,37 @@ def import_report(path):
 
     df = df[~df.MMSI.isin(new_blacklisters)]
     df = df[["Name", "MMSI", "Date/Time UTC", "SPEED",
-                           "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE", "AIS TYPE"]]
+                           "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE", "course behavior",
+             "AIS TYPE", 'HEADING']]
+
+    panamax_index = df[df['LOA ft'] <= 965].index
+    post_panamax_index = df[df['LOA ft'] > 965].index
+    panamax = pd.Series(['Panamax' for i in range(len(panamax_index))],
+                        index = panamax_index)
+    post_panamax = pd.Series(['Post Panamax' for i in range(len(post_panamax_index))],
+                        index = post_panamax_index)
+    vessel_class = pd.concat([panamax, post_panamax]).sort_index(axis=0).to_frame().rename(
+                                                                                    {0:'vessel class'}, axis=1)
+    df['vessel class'] = vessel_class
+
     ch = df[df.Latitude >= 32.033]
     #sv = df[df.Latitude < 32.033]
+    # Missing near and offshore in Savannah because Jon only wants charleston for now...
+    ch_nearshore_index = ch[ch['Longitude'] <= -79.74169].index
+    ch_offshore_index = ch[ch['Longitude'] > -79.74169].index
+    ch_nearshore = pd.Series(['nearshore' for i in range(len(ch_nearshore_index))],
+                        index = ch_nearshore_index)
+    ch_offshore = pd.Series(['offshore' for i in range(len(ch_offshore_index))],
+                        index = ch_offshore_index)
+    ch_location = pd.concat([ch_offshore, ch_nearshore]).sort_index(axis=0).to_frame().rename(
+                                                                                    {0:'location'}, axis=1)
+    ch['location'] = ch_location
+
     return ch
 
 
-def meetpass_helper_helper(EC, time_interval):
+
+def meetpass_helper(EC, time_interval):
     """This function takes in a cleaned up entry channel dataframe plus desired time_interval (int),
        and returns potential meeting/passing positions from the entry channel"""
     from datetime import timedelta
@@ -74,7 +107,7 @@ def timeavg(time_series):
 
 # use '2020-10-05.csv' path for testing
 almost = meetpass_helper(ch_agg[4],1).groupby(
-        ['MMSI', 'COURSE', pd.Grouper(
+        ['MMSI', 'course behavior', pd.Grouper(
             key='Date/Time UTC', freq='min')])[['Date/Time UTC']].size()
 
 #meetpass_helper(ch_agg[4],1).groupby(['Name', 'MMSI', 'COURSE'])[['Date/Time UTC']].apply(timeavg).sort_values('Date/Time UTC')
