@@ -32,11 +32,11 @@ Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & 
 7. Run `./run dev` again.
 8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser) -- must complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
+# How to Use (*dev* mode *ENABLED*)
+Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.
+
 # How to Use (*dev* mode *DISABLED*)
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
 Execute the `run` script with `dev` mode **_DISABLED_**: `./run`.
-
-# How to Use (*dev* mode *ENABLED*)
-Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.
 
 _For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/docs/docs.txt) or contact [@riwhale](https://github.com/riwhale) at [dev.riwhale@gmail.com](mailto:dev.riwhale@gmail.com)._
