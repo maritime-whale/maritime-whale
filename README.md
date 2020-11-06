@@ -19,7 +19,7 @@ Fetches daily vessel movement report from Gmail. Imports, cleans, and caches dat
 4. Run the `./run` command with `dev` mode _ENABLED_: `./run dev`.<br/>
 *Do **_NOT_** run without `dev` if this is your first time running the `run` script.*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*If this is your first time running the `run` script follow the steps below...*<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;*`./run dev` should produce one of the following message:*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;*`./run dev` should produce the following message:*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*`Config directory not found. Creating directory: ./conf .`*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*Don't worry **this is normal**...*<br/>
 5. Move a valid `credentials.json` and `riwhale.config` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` too).<br/>
