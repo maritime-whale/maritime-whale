@@ -23,19 +23,6 @@ def import_report(path):
     df = df[df["LOA m"] >= 200]
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
-
-    df = df[(df.COURSE >= 115) &
-                          (df.COURSE <= 125) |
-                          (df.COURSE >= 295) &
-                          (df.COURSE <= 305)]
-    df.COURSE = round(df.COURSE).astype("int")
-    df['course behavior'] = df.COURSE
-    courses = {}
-    for i in range (115, 126):
-        courses[i] = "Outbound"
-    for i in range (295, 306):
-        courses[i] = "Inbound"
-    df['course behavior'] = df['course behavior'].replace(courses).astype("str")
     new_blacklisters = []
     for i in range(df.shape[0]):
         if df.iloc[i]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36,
@@ -45,7 +32,7 @@ def import_report(path):
 
     df = df[~df.MMSI.isin(new_blacklisters)]
     df = df[["Name", "MMSI", "Date/Time UTC", "SPEED",
-                           "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE", "course behavior",
+                           "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE",
              "AIS TYPE", 'HEADING']]
 
     panamax_index = df[df['LOA ft'] <= 965].index
@@ -59,8 +46,6 @@ def import_report(path):
     df['vessel class'] = vessel_class
 
     ch = df[df.Latitude >= 32.033]
-    #sv = df[df.Latitude < 32.033]
-    # Missing near and offshore in Savannah because Jon only wants charleston for now...
     ch_nearshore_index = ch[ch['Longitude'] <= -79.74169].index
     ch_offshore_index = ch[ch['Longitude'] > -79.74169].index
     ch_nearshore = pd.Series(['nearshore' for i in range(len(ch_nearshore_index))],
@@ -71,7 +56,45 @@ def import_report(path):
                                                                                     {0:'location'}, axis=1)
     ch['location'] = ch_location
 
-    return ch
+    ch = ch[(ch.COURSE >= 100) &
+              (ch.COURSE <= 140) |
+              (ch.COURSE >= 280) &
+              (ch.COURSE <= 320)]
+    ch.COURSE = round(ch.COURSE).astype("int")
+    ch['course behavior'] = ch.COURSE
+    courses = {}
+    for i in range (100, 141):
+        courses[i] = "Outbound"
+    for i in range (280, 321):
+        courses[i] = "Inbound"
+    ch['course behavior'] = ch['course behavior'].replace(courses).astype("str")
+
+    sv = df[df.Latitude < 32.033]
+    sv_nearshore_index = sv[sv['Longitude'] <= -80.78522].index
+    sv_offshore_index = sv[sv['Longitude'] > -80.78522].index
+    sv_nearshore = pd.Series(['nearshore' for i in range(len(sv_nearshore_index))],
+                        index = sv_nearshore_index)
+    sv_offshore = pd.Series(['offshore' for i in range(len(sv_offshore_index))],
+                        index = sv_offshore_index)
+    sv_location = pd.concat([sv_offshore, sv_nearshore]).sort_index(axis=0).to_frame().rename(
+                                                                                    {0:'location'}, axis=1)
+    sv['location'] = sv_location
+
+    sv = sv[(sv.COURSE >= 100) &
+              (sv.COURSE <= 160) |
+              (sv.COURSE >= 280) &
+              (sv.COURSE <= 340)]
+    sv.COURSE = round(sv.COURSE).astype("int")
+    sv['course behavior'] = sv.COURSE
+    courses = {}
+    for i in range (100, 161):
+        courses[i] = "Outbound"
+    for i in range (280, 341):
+        courses[i] = "Inbound"
+    sv['course behavior'] = sv['course behavior'].replace(courses).astype("str")
+
+
+    return ch, sv
 
 
 
