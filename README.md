@@ -20,7 +20,7 @@ Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & 
 2. Navigate to the root directory of the repo.
 3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
-4. Run the `./run` command with `dev` mode **_ENABLED_**: `./run dev`.<br/>
+4. Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.<br/>
 *Do **_NOT_** run without `dev` if this is your first time running the `run` script.*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*If this is your first time running the `run` script follow the steps below...*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;*`./run dev` should produce the following message:*<br/>
@@ -32,11 +32,11 @@ Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & 
 7. Run `./run dev` again.
 8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser) -- must complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
-# How to Use (*dev* mode disabled)
-1. Open a terminal session.
-2. Navigate to the root directory of the repo.
-3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
+# How to Use (*dev* mode *DISABLED*)
 ***_WARNING!_** Do **_NOT_** run without `dev` unless you know the consequences.*<br/>
-4. Run the `./run` command with `dev` mode **_DISABLED_**: `./run`.
+Execute the `run` script with `dev` mode **_DISABLED_**: `./run`.
+
+# How to Use (*dev* mode *ENABLED*)
+Execute the `run` script with `dev` mode **_ENABLED_**: `./run dev`.
 
 _For more help please refer to the **maritime-whale** [documentation](http://riwhale.github.io/docs/docs.txt) or contact [@riwhale](https://github.com/riwhale) at [dev.riwhale@gmail.com](mailto:dev.riwhale@gmail.com)._
