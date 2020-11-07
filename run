@@ -1,8 +1,7 @@
 #!/bin/sh
 
 dev_mode=0
-for arg in "$@"
-do
+for arg in "$@"; do
     if [ "$arg" == "dev" ]; then
         echo "Running in dev mode..."
         dev_mode=1
