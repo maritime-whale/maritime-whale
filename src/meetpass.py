@@ -97,11 +97,9 @@ def import_report(path):
     return ch, sv
 
 
-
 def meetpass_helper(EC, time_interval):
     """This function takes in a cleaned up entry channel dataframe plus desired time_interval (int),
        and returns potential meeting/passing positions from the entry channel"""
-    from datetime import timedelta
     #sorts the time stamp such that entry channel data is in chronological order
     times = EC.sort_values("Date/Time UTC")
 
@@ -123,17 +121,11 @@ def meetpass_helper(EC, time_interval):
     return df2
 
 
-def timeavg(time_series):
-    delta = time_series.max() - time_series.min()
-    return time_series.min() + delta
-
-
+df = import_report("../tests/2020-10-05.csv")
 # use '2020-10-05.csv' path for testing
-almost = meetpass_helper(ch_agg[4],1).groupby(
+almost = meetpass_helper(df[0], 1).groupby(
         ['MMSI', 'course behavior', pd.Grouper(
             key='Date/Time UTC', freq='min')])[['Date/Time UTC']].size()
-
-#meetpass_helper(ch_agg[4],1).groupby(['Name', 'MMSI', 'COURSE'])[['Date/Time UTC']].apply(timeavg).sort_values('Date/Time UTC')
 
 sub = {}
 for level in almost.index.unique(0):
@@ -161,4 +153,7 @@ while len(sub):
         cur_val = multiindex
         i += 1
 
-print(targets)
+
+almost
+
+#targets

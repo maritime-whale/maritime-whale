@@ -112,13 +112,12 @@ for filename in glob.glob(path):
     ch_agg.append(report[0])
     sv_agg.append(report[1])
 
-# print(pd.concat(ch_agg).shape)
-# print(pd.concat(sv_agg).shape)
+print(pd.concat(ch_agg).shape), print(pd.concat(sv_agg).shape)
 
-plt.scatter(x=pd.concat(sv_agg).Longitude,
-            y=pd.concat(sv_agg).Latitude)
-
-plt.show()
+# plt.scatter(x=pd.concat(sv_agg).Longitude,
+#             y=pd.concat(sv_agg).Latitude)
+#
+# plt.show()
 #file = "2020-11-05.csv"
 # path = dir + file
 # ch = import_report(path)[0]
