@@ -93,13 +93,13 @@ if [ $dev_mode == 0 ]; then
         echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
     else
         echo "Initiating upload..." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "wipe plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../../cache/master-*.xlsx . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "wipe plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../../cache/master-*.* . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../../cache/blacklist.txt . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../*.html . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "upload plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "upload plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         cd ../../src
         if [ $MAIN_RET_VAL == 0 ]; then

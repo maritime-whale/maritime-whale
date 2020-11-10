@@ -81,6 +81,8 @@ def main():
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
         create_xlsx_cache(map_data[0] + temp_ch, "master-ch")
         create_xlsx_cache(map_data[1] + temp_sv, "master-sv")
+        create_csv_cache(map_data[0] + temp_ch, "master-ch")
+        create_csv_cache(map_data[1] + temp_sv, "master-sv")
         for i in range(len(map_data)):
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
         lvl1, lvl2_CH, lvl2_SV = generate_plots(map_data)
