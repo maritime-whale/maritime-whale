@@ -5,8 +5,8 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import scipy
-import seaborn as sns
-import matplotlib.pyplot as plt
+#import seaborn as sns
+#import matplotlib.pyplot as plt
 
 def import_report(path):
     # import data from vessel movement reports (csv format); clean and
@@ -105,13 +105,13 @@ def meetpass_helper(EC, time_interval):
 
     mmsi = list(times.MMSI)
     timestamp = list(times["Date/Time UTC"])
-    course = list(times.COURSE)
+    course = list(times["course behavior"])
 
     potential_times = []
 
     for i in range(len(mmsi) - 1):
             if mmsi[i] != mmsi[i + 1]:
-                if (timestamp[i + 1] - timestamp[i]) <= timedelta(minutes = time_interval):
+                if (timestamp[i + 1] - timestamp[i]) <= timedelta(minutes=time_interval):
                     if course[i] != course[i + 1]:
                         potential_times.append(timestamp[i])
                         potential_times.append(timestamp[i + 1])
@@ -120,19 +120,28 @@ def meetpass_helper(EC, time_interval):
     df2 = times[times["Date/Time UTC"].isin(potential_times)]
     return df2
 
+    def calc_dist(lat1, long1, lat2, long2):
+        return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
-df = import_report("../tests/2020-10-05.csv")
-# use '2020-10-05.csv' path for testing
-almost = meetpass_helper(df[0], 1).groupby(
+# use '2020-10-06.csv' path for testing
+df = import_report("../tests/2020-10-06.csv")
+rounded_df = df[0].copy()
+rounded_df['Date/Time UTC'] = df[0]["Date/Time UTC"].values.astype('<M8[m]')
+flagged = meetpass_helper(df[0], 1).groupby(
         ['MMSI', 'course behavior', pd.Grouper(
             key='Date/Time UTC', freq='min')])[['Date/Time UTC']].size()
 
+# sub should contain all the flagged times
 sub = {}
-for level in almost.index.unique(0):
-    sub[level] = almost.xs(level, level=0).index
+for level in flagged.index.unique(0):
+    sub[level] = flagged.xs(level, level=0).index
+sub.items()
 
-targets = []
-tolerance = 5
+pot_encs = []
+# {key:(MMSI_i, MMSI_j) val:([timestamp_i, timestamp_j], distance)}
+# WHERE MMSI_i < MMSI_j and where [Timestamps] is a list of between 1 or 2 (no more no less) Timestamps; MMSI_i -> Timestamp_i
+true_encs = {}
+tolerance = 2
 # FUTURE OPTIMIZATION: minimize comparison operations between timestamps
 while len(sub):
     item = sub.popitem()
@@ -140,20 +149,46 @@ while len(sub):
     cur_val = item[1]
     i = 0
     while not cur_val.empty:
+        this_course = cur_val.get_level_values(0)[0]
         this_time = cur_val.get_level_values(1)[0]
+        this_lat = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Latitude.values[0].round(5)
+        this_long = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Longitude.values[0].round(5)
         for inner_key, inner_val in sub.items():
-            for j, that_time in enumerate(inner_val.get_level_values(1)):
-                if abs(that_time - this_time) <= timedelta(minutes=tolerance):
-                    potential_encounter = ((cur_key,
-                                            cur_val.get_level_values(1)[0]),
-                                           (inner_key,
-                                            inner_val.get_level_values(1)[j]))
-                    targets.append(potential_encounter)
+            for j, that in enumerate(inner_val):
+                that_course = that[0]
+                that_time = that[1]
+                that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Latitude.values[0].round(5)
+                that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Longitude.values[0].round(5)
+                if (abs(that_time - this_time) <=
+                    timedelta(minutes=tolerance)) and (that_course != this_course):
+                    pot_enc = ((cur_key,cur_val.get_level_values(1)[0]),
+                              (inner_key,inner_val.get_level_values(1)[j]))
+                    # pot_encs.append(pot_enc)
+                    # find distance (some func)
+                    print(calc_dist(this_lat, this_long, that_lat, that_long))
+                    #calc_dist(this_lat, this_long, that_lat, that_long)
+                    #exit(0)
+
+                    # CHECK if true encounter
+                    # this means that the vessels must be within a certain minimum distance of one another
+                    # if distance < 1:
+                    # if it is a NEW true encounter, then add it to true_encs
+                    # otherwise, encounter doesn't exist in our dictionary of encounter (true_encs)
+                    # therefore we should see if we have just found a smaller distance than the current time/distance stored for that MMSI combo key/val pair
+                    #
+                    # data =
+                    #true_encs.append(data)
+
         multiindex = cur_val.delete(0)
         cur_val = multiindex
         i += 1
 
 
-almost
+# loop thru ALL potential encounters
+# for each potential_encounter
 
-#targets
+#rounded_df
+#flagged
+
+#meetpass_helper(df[0], 1)
+#pot_encs
