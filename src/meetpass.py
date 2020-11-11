@@ -120,8 +120,8 @@ def meetpass_helper(EC, time_interval):
     df2 = times[times["Date/Time UTC"].isin(potential_times)]
     return df2
 
-    def calc_dist(lat1, long1, lat2, long2):
-        return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
+def calc_dist(lat1, long1, lat2, long2):
+    return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 # use '2020-10-06.csv' path for testing
 df = import_report("../tests/2020-10-06.csv")
