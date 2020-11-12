@@ -120,11 +120,31 @@ def meetpass_helper(EC, time_interval):
     df2 = times[times["Date/Time UTC"].isin(potential_times)]
     return df2
 
+<<<<<<< Updated upstream
 def calc_dist(lat1, long1, lat2, long2):
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 # use '2020-10-06.csv' path for testing
 df = import_report("../tests/2020-10-06.csv")
+=======
+def calc_naut_dist(lat1, long1, lat2, long2):
+    return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
+
+# def gen_val(key1, key2, time1, time2):
+#     times = None
+#     if time1 == time2:
+#         return [time1]
+#     if key1 > key2: # key1 = 222, key2 = 111 --> (key2, key1)
+#         times = [time2, time1]
+#     else:
+#         times = [time1, time2]
+#     return times
+
+
+
+# use '2020-10-06.csv' path for testing
+df = import_report("../tests/2020-10-05.csv")
+>>>>>>> Stashed changes
 rounded_df = df[0].copy()
 rounded_df['Date/Time UTC'] = df[0]["Date/Time UTC"].values.astype('<M8[m]')
 flagged = meetpass_helper(df[0], 1).groupby(
@@ -137,11 +157,18 @@ for level in flagged.index.unique(0):
     sub[level] = flagged.xs(level, level=0).index
 sub.items()
 
+<<<<<<< Updated upstream
 pot_encs = []
 # {key:(MMSI_i, MMSI_j) val:([timestamp_i, timestamp_j], distance)}
 # WHERE MMSI_i < MMSI_j and where [Timestamps] is a list of between 1 or 2 (no more no less) Timestamps; MMSI_i -> Timestamp_i
 true_encs = {}
 tolerance = 2
+=======
+# pot_encs = []
+# {key:(MMSI_i, MMSI_j) val:(timestamp_i, min_recorded_distance)}
+true_encs = {}
+min_dist = 0.1
+>>>>>>> Stashed changes
 # FUTURE OPTIMIZATION: minimize comparison operations between timestamps
 while len(sub):
     item = sub.popitem()
@@ -157,6 +184,7 @@ while len(sub):
             for j, that in enumerate(inner_val):
                 that_course = that[0]
                 that_time = that[1]
+<<<<<<< Updated upstream
                 that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Latitude.values[0].round(5)
                 that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Longitude.values[0].round(5)
                 if (abs(that_time - this_time) <=
@@ -170,6 +198,38 @@ while len(sub):
                     #exit(0)
 
                     # CHECK if true encounter
+=======
+                #print("cur_key=" + str(cur_key) + ", inner_key=" + str(inner_key))
+                that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Latitude.values[0].round(5)
+                that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Longitude.values[0].round(5)
+                if (this_time == that_time) and (this_course != that_course):
+                    # pot_enc = ((cur_key,cur_val.get_level_values(1)[0]),
+                    #           (inner_key,inner_val.get_level_values(1)[j]))
+                    # pot_encs.append(pot_enc)
+                    # print(cur_key)
+                    # print(inner_key)
+                    # find distance
+                    dist = calc_naut_dist(this_lat, this_long, that_lat, that_long)
+                    #print(dist)
+                    #calc_naut_dist(this_lat, this_long, that_lat, that_long)
+
+                    # CHECK if true encounter
+                    if min_dist >= dist:
+                        # print(cur_key)
+                        # print(inner_key)
+                        #print(dist)
+                        key = tuple(sorted([cur_key, inner_key]))
+                        if key not in true_encs:
+                            true_encs[key] = (this_time, dist)
+                            # print("1 " + str(key))
+                        else:
+                            # check that is min distance
+                            # print("2 " + str(key))
+                            if true_encs[key][1] > dist:
+                                true_encs[key] = (this_time, dist)
+                                # print("3 " + str(key))
+
+>>>>>>> Stashed changes
                     # this means that the vessels must be within a certain minimum distance of one another
                     # if distance < 1:
                     # if it is a NEW true encounter, then add it to true_encs
@@ -184,11 +244,22 @@ while len(sub):
         i += 1
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 # loop thru ALL potential encounters
 # for each potential_encounter
 
 #rounded_df
+<<<<<<< Updated upstream
 #flagged
 
 #meetpass_helper(df[0], 1)
 #pot_encs
+=======
+print(true_encs)
+
+#meetpass_helper(df[0], 1)
+flagged
+>>>>>>> Stashed changes
