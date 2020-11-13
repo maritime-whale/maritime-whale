@@ -96,45 +96,93 @@ def import_report(path):
         courses[i] = "Inbound"
     sv['course behavior'] = sv['course behavior'].replace(courses).astype("str")
 
-
     return ch, sv
 
-# dir = "../temp/"
-# files = os.listdir(dir)
-# for file in files:
-#     path = dir + file
-#     print(path)
-path = "../temp/*.csv"
+# running multiple days of data at once
+path = "../tests/*.csv"
 ch_agg = []
 sv_agg = []
 for filename in glob.glob(path):
-    report = import_report("../temp/" + filename)
+    report = import_report("../tests/" + filename)
     ch_agg.append(report[0])
     sv_agg.append(report[1])
 
-print(pd.concat(ch_agg).shape), print(pd.concat(sv_agg).shape)
+ch = pd.concat(ch_agg)
+sv = pd.concat(sv_agg)
 
-# plt.scatter(x=pd.concat(sv_agg).Longitude,
-#             y=pd.concat(sv_agg).Latitude)
-#
-# plt.show()
-#file = "2020-11-05.csv"
-# path = dir + file
+# running one day of data at a time
+# path = "../tests/2020-10-05.csv"
 # ch = import_report(path)[0]
 # sv = import_report(path)[1]
-#
-# ch_panamax = ch[ch['vessel class'] == 'Panamax']
-# ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
-#
-# sv_panamax = sv[sv['vessel class'] == 'Panamax']
-# sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
-#
-# # CHARLESTON COMPLIANCE RATES
-# print('Panamax Transit Compliance: ' + str(round(sum(ch_panamax['SPEED'] <= 10) / ch_panamax.shape[0] * 100, 2)) + '%')
-# print('Post Panamax Transit Compliance: ' + str(round(sum(ch_post_panamax['SPEED'] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + '%')
-# print('Total Transit Compliance: ' + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + '%')
-#
-# # Savannah COMPLIANCE RATES
-# print('Panamax Transit Compliance: ' + str(round(sum(sv_panamax['SPEED'] <= 10) / sv_panamax.shape[0] * 100, 2)) + '%')
-# print('Post Panamax Transit Compliance: ' + str(round(sum(sv_post_panamax['SPEED'] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + '%')
-# print('Total Transit Compliance: ' + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + '%')
+
+
+ch_panamax = ch[ch['vessel class'] == 'Panamax']
+ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+
+sv_panamax = sv[sv['vessel class'] == 'Panamax']
+sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
+
+# Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
+# Note: no need to split stats up into Panamax and Post-Panamax (not really important).
+# Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
+
+# CHARLESTON
+ch_dat = {'Proportion of Transits':[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + '%',
+                                str(round(ch_post_panamax.shape[0]/ch.shape[0]*100, 2)) + '%',
+                                "100%"],
+
+          'Compliance Rate':[str(round(sum(ch_panamax['SPEED'] <= 10) / ch_panamax.shape[0] * 100, 2)) + '%',
+                        str(round(sum(ch_post_panamax['SPEED'] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + '%',
+                        str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + '%'],
+
+          'Nearshore Median Speed':[str(round(ch_panamax[ch_panamax['location'] == 'nearshore']['SPEED'].median(),2)),
+                                    str(round(ch_post_panamax[ch_post_panamax['location'] == 'nearshore']['SPEED'].median(),2)),
+                                    str(round(ch[ch['location'] == 'nearshore']['SPEED'].median(),2))],
+
+          'Offshore Median Speed':[str(round(ch_panamax[ch_panamax['location'] == 'offshore']['SPEED'].median(),2)),
+                                  str(round(ch_post_panamax[ch_post_panamax['location'] == 'offshore']['SPEED'].median(),2)),
+                                  str(round(ch[ch['location'] == 'offshore']['SPEED'].median(),2))],
+
+          'Inbound Median Speed':[str(round(ch_panamax[ch_panamax['course behavior'] == 'Inbound']['SPEED'].median(),2)),
+                                    str(round(ch_post_panamax[ch_post_panamax['course behavior'] == 'Inbound']['SPEED'].median(),2)),
+                                    str(round(ch[ch['course behavior'] == 'Inbound']['SPEED'].median(),2))],
+
+          'Outbound Median Speed':[str(round(ch_panamax[ch_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
+                        str(round(ch_post_panamax[ch_post_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
+                        str(round(ch[ch['course behavior'] == 'Outbound']['SPEED'].median(),2))]}
+
+ch_index = ['Panamax', 'Post Panamax', 'Combined']
+
+# SAVANNAH
+sv_dat = {'Proportion of Transits':[str(round(sv_panamax.shape[0]/sv.shape[0]*100, 2)) + '%',
+                                str(round(sv_post_panamax.shape[0]/sv.shape[0]*100, 2)) + '%',
+                                "100%"],
+
+          'Compliance Rate':[str(round(sum(sv_panamax['SPEED'] <= 10) / sv_panamax.shape[0] * 100, 2)) + '%',
+                        str(round(sum(sv_post_panamax['SPEED'] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + '%',
+                        str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + '%'],
+
+          'Nearshore Median Speed':[str(round(sv_panamax[sv_panamax['location'] == 'nearshore']['SPEED'].median(),2)),
+                                    str(round(sv_post_panamax[sv_post_panamax['location'] == 'nearshore']['SPEED'].median(),2)),
+                                    str(round(sv[sv['location'] == 'nearshore']['SPEED'].median(),2))],
+
+          'Offshore Median Speed':[str(round(sv_panamax[sv_panamax['location'] == 'offshore']['SPEED'].median(),2)),
+                                  str(round(sv_post_panamax[sv_post_panamax['location'] == 'offshore']['SPEED'].median(),2)),
+                                  str(round(sv[sv['location'] == 'offshore']['SPEED'].median(),2))],
+
+          'Inbound Median Speed':[str(round(sv_panamax[sv_panamax['course behavior'] == 'Inbound']['SPEED'].median(),2)),
+                                    str(round(sv_post_panamax[sv_post_panamax['course behavior'] == 'Inbound']['SPEED'].median(),2)),
+                                    str(round(sv[sv['course behavior'] == 'Inbound']['SPEED'].median(),2))],
+
+          'Outbound Median Speed':[str(round(sv_panamax[sv_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
+                        str(round(sv_post_panamax[sv_post_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
+                        str(round(sv[sv['course behavior'] == 'Outbound']['SPEED'].median(),2))]}
+
+sv_index = ['Panamax', 'Post Panamax', 'Combined']
+
+
+print(pd.DataFrame(ch_dat, ch_index))
+# pd.DataFrame(ch_dat, ch_index)
+
+print(pd.DataFrame(sv_dat, sv_index))
+# pd.DataFrame(sv_dat, sv_index)
