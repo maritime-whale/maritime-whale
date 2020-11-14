@@ -98,32 +98,41 @@ def import_report(path):
 
     return ch, sv
 
-path = "../tests/2020-11-12.csv"
+path = "../tests/2020-11-13.csv"
 ch = import_report(path)[0]
 sv = import_report(path)[1]
+
+year = ch['Date/Time UTC'].iloc[0].strftime('%Y')
+month = ch['Date/Time UTC'].iloc[0].strftime('%m')
+day = ch['Date/Time UTC'].iloc[0].strftime('%d')
+print(year, month, day)
+
+ch_off_wind = pd.read_csv("../tests/41004.txt", delim_whitespace=True).drop(0)
+ch_near_wind = pd.read_csv("../tests/41029.txt", delim_whitespace=True).drop(0)
+sv_off_wind = pd.read_csv("../tests/41008.cwind", delim_whitespace=True).drop(0)
+sv_near_wind = pd.read_csv("../tests/41033.txt", delim_whitespace=True).drop(0)
+
+for df in [ch_off_wind, ch_near_wind, sv_off_wind, sv_near_wind]:
+    new_df = df[(df['#YY'] == year) & (df['MM'] == month) & (df['DD'] == day)]
+    new_df[new_df.columns[0:5]]
+    
+
+
+
+
 
 # round the datetime stamp for easier matching to windspeed data
 ch_rounded_times = ch.copy()
 sv_rounded_times = sv.copy()
-ch_rounded_times['Date/Time UTC'] = ch["Date/Time UTC"].values.astype('<M8[m]').astype(str)
-sv_rounded_times['Date/Time UTC'] = sv["Date/Time UTC"].values.astype('<M8[m]').astype(str)
+ch_rounded_times['Date/Time UTC'] = ch["Date/Time UTC"].values.astype('<M8[m]')
+sv_rounded_times['Date/Time UTC'] = sv["Date/Time UTC"].values.astype('<M8[m]')
 
-
+# windspeeds will be matched to these four dataframes based on location..
 ch_off = ch_rounded_times[ch_rounded_times['location'] == 'offshore']
 ch_near = ch_rounded_times[ch_rounded_times['location'] == 'nearshore']
 sv_off = sv_rounded_times[sv_rounded_times['location'] == 'offshore']
 sv_near = sv_rounded_times[sv_rounded_times['location'] == 'nearshore']
 
-ch_off.head(3)
-test = ch_off['Date/Time UTC'].iloc[0]
-test
-year = test[0:4]
-month = test[5:7]
-day = test[8:10]
-hour = test[11:13]
-min = test[14:17]
-
-# '2020 11 12 03 20 160  9.0 13.0    MM    MM    MM  MM 1014.7  26.6  25.7  23.7   MM   MM    MM\n',
 
 # offshore: 41004 (ch), 41008 (sv)
 # nearshore: 41029 (ch), 41033 (sv)
@@ -131,9 +140,7 @@ min = test[14:17]
 # we need only update everyday by looking at newest rows
 # of data corresponding to that day and match with our ship data
 
-ch_off_wind = pd.read_csv("../tests/41004.txt", delim_whitespace=True)
-ch_near_wind = pd.read_csv("../tests/41029.txt", delim_whitespace=True)
-sv_off_wind = pd.read_csv("../tests/41008.cwind", delim_whitespace=True)
-sv_near_wind = pd.read_csv("../tests/41033.txt", delim_whitespace=True)
 
-ch_off_wind
+
+
+pd.to_datetime(test['#YY']+test['MM']+test['DD']+test['hh']+test['mm'], infer_datetime_format=True)
