@@ -107,19 +107,34 @@ month = ch['Date/Time UTC'].iloc[0].strftime('%m')
 day = ch['Date/Time UTC'].iloc[0].strftime('%d')
 print(year, month, day)
 
+# offshore: 41004 (ch), 41008 (sv)
+# nearshore: 41029 (ch), 41033 (sv)
+
+# Add if statement in ./run that checks whether there is available windspeeds data
+# before downloading and attempting all the windspeed coersion, matching, and analysis
+# the script should be able to default to how it's working now in the case the NOAA site is down...
+# Some rows having missing values 'MM' which can potentially throw off the whole script if
+# the dependencies arent structured correctly. not sure what MM means but removing them for now..
 ch_off_wind = pd.read_csv("../tests/41004.txt", delim_whitespace=True).drop(0)
 ch_near_wind = pd.read_csv("../tests/41029.txt", delim_whitespace=True).drop(0)
 sv_off_wind = pd.read_csv("../tests/41008.cwind", delim_whitespace=True).drop(0)
 sv_near_wind = pd.read_csv("../tests/41033.txt", delim_whitespace=True).drop(0)
 
+wind_dat = []
 for df in [ch_off_wind, ch_near_wind, sv_off_wind, sv_near_wind]:
-    new_df = df[(df['#YY'] == year) & (df['MM'] == month) & (df['DD'] == day)]
-    new_df[new_df.columns[0:5]]
-    
+    df = df[(df['#YY'] == year) & (df['MM'] == month) & (df['DD'] == day)]
+    df['Date/Time UTC'] = pd.to_datetime(df['#YY']+df['MM']+df['DD']+df['hh']+df['mm'],
+                                         infer_datetime_format=True)
+    df.rename({'WDIR':'WDIR degT', 'WSPD':'WSPD m/s', 'GST':'GST m/s'}, axis=1, inplace=True)
+    df = df[(df['WDIR degT'] != 'MM') &
+                (df['WSPD m/s'] != 'MM') &
+                (df['GST m/s'] != 'MM')]
+    wind_dat.append(df[['Date/Time UTC', 'WDIR degT', 'WSPD m/s', 'GST m/s']])
 
-
-
-
+ch_off_wind = wind_dat[0]
+ch_near_wind = wind_dat[1]
+sv_off_wind = wind_dat[2]
+sv_near_wind = wind_dat[3]
 
 # round the datetime stamp for easier matching to windspeed data
 ch_rounded_times = ch.copy()
@@ -133,14 +148,12 @@ ch_near = ch_rounded_times[ch_rounded_times['location'] == 'nearshore']
 sv_off = sv_rounded_times[sv_rounded_times['location'] == 'offshore']
 sv_near = sv_rounded_times[sv_rounded_times['location'] == 'nearshore']
 
+# now need to write script to match the date/time columns between the wind and ships
+# if there are no exact matches, then should round and grab the closest data..?
 
-# offshore: 41004 (ch), 41008 (sv)
-# nearshore: 41029 (ch), 41033 (sv)
-# these files contain multiple days worth of data
-# we need only update everyday by looking at newest rows
-# of data corresponding to that day and match with our ship data
-
-
-
-
-pd.to_datetime(test['#YY']+test['MM']+test['DD']+test['hh']+test['mm'], infer_datetime_format=True)
+# you can see the times are reverse chronological order in the wind data
+ch_off_wind['Date/Time UTC'].plot()
+ch_off['Date/Time UTC'].plot()
+ch_near['Date/Time UTC'].plot()
+sv_off['Date/Time UTC'].plot()
+sv_near['Date/Time UTC'].plot()
