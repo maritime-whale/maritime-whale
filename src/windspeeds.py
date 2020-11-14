@@ -137,6 +137,7 @@ sv_off_wind = wind_dat[2]
 sv_near_wind = wind_dat[3]
 
 # round the datetime stamp for easier matching to windspeed data
+# could add this to the main import_report above to make things cleaner..
 ch_rounded_times = ch.copy()
 sv_rounded_times = sv.copy()
 ch_rounded_times['Date/Time UTC'] = ch["Date/Time UTC"].values.astype('<M8[m]')
