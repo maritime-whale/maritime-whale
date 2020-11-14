@@ -180,4 +180,4 @@ while len(sub):
 
 print(true_encs)
 print(len(true_encs))
-# flagged
+# print(flagged)
