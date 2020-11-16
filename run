@@ -63,11 +63,11 @@ fi
 # 41033 sv near 32.279 / -80.406
 BUOYS="41004 41029 41033"
 for BUOY in $BUOYS; do
-  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
+    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
 ADV_BUOYS="41008"
 for BUOY in $ADV_BUOYS; do
-  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.cwind -o "$TEMP/$BUOY.cwind" 2>> logs/wind_err.log 1>> logs/wind_out.log
+    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.cwind -o "$TEMP/$BUOY.cwind" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
 cd html/riwhale.github.io
 git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
