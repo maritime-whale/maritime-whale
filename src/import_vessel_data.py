@@ -9,7 +9,6 @@ def import_report(path):
     df = pd.read_csv(path)
     df = df[~df.MMSI.isin(df[df.SPEED >= 40].MMSI.values)]
     df = df[~df.MMSI.isin(df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
-    # df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values
     df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude"}, axis=1,
                inplace=True)
@@ -21,36 +20,8 @@ def import_report(path):
     df = df[df["LOA m"] >= 200]
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
-    mean = pd.DataFrame(
-        df.groupby(["Name", "MMSI"])["SPEED"].mean()).rename(
-        {"SPEED": "Mean speed kn"}, axis=1).round(1)
-    maxes = pd.DataFrame(
-        df.groupby(["Name", "MMSI"])["SPEED"].max()).rename(
-        {"SPEED": "Max speed kn"}, axis=1)
-    aggregate = maxes.merge(mean, on=["Name", "MMSI"])
-    d = aggregate["Max speed kn"].to_dict()
-    stats = {"Longitude":[], "Latitude":[], "Date/Time UTC":[], "LOA m":[],
-             "LOA ft":[], "COURSE":[], "AIS TYPE":[]}
-    for key, value in d.items():
-        for k in stats.keys():
-            stats[k].append(df[(df.Name == key[0]) &
-                               (df.SPEED == value)][k].iloc[0])
-    for key in stats.keys():
-        aggregate[key] = stats[key]
-    aggregate = aggregate.reset_index()
-    aggregate = aggregate[~aggregate.MMSI.isin(blacklist)]
-    new_blacklisters = []
-    for i in range(aggregate.shape[0]):
-        if aggregate.iloc[i]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36,
-                                             37, 51, 52, 53, 55, 57, 58, 59]:
-            new_blacklisters.append(aggregate.iloc[i].MMSI)
-    with open("../cache/blacklist.txt", "a") as f:
-        f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]))
-
-    aggregate = aggregate[~aggregate.MMSI.isin(new_blacklisters)]
-    aggregate.sort_values("Max speed kn", ascending=False, inplace=True)
-    aggregate = aggregate[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
-        "Mean speed kn", "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE"]]
+    df = df[["Date/Time UTC", "Name", "MMSI", "LOA m", "LOA ft",
+             "Latitude", "Longitude", "COURSE", "AIS TYPE", "HEADING", "SPEED"]]
 
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340))
@@ -58,7 +29,7 @@ def import_report(path):
     course_behavior = ("Outbound", "Inbound")
     ports = [None, None] # ch, sv
     for i in range(len(course_ranges)):
-        ports[i] = aggregate[aggregate.Latitude >= 32.033] if (i == 0) else aggregate[aggregate.Latitude < 32.033]
+        ports[i] = df[df.Latitude >= 32.033] if (i == 0) else df[df.Latitude < 32.033]
         ports[i] = ports[i][(ports[i].COURSE >= course_ranges[i][0][0]) &
                             (ports[i].COURSE <= course_ranges[i][0][1]) |
                             (ports[i].COURSE >= course_ranges[i][1][0]) &
@@ -72,65 +43,36 @@ def import_report(path):
                 courses[j] = behavior
         ports[i].COURSE = ports[i].COURSE.replace(courses).astype("str")
 
-    # mean = pd.DataFrame(
-    #     df.groupby(["Name", "MMSI"])["SPEED"].mean()).rename(
-    #     {"SPEED": "Mean speed kn"}, axis=1).round(1)
-    # maxes = pd.DataFrame(
-    #     df.groupby(["Name", "MMSI"])["SPEED"].max()).rename(
-    #     {"SPEED": "Max speed kn"}, axis=1)
-    # aggregate = maxes.merge(mean, on=["Name", "MMSI"])
-    # d = aggregate["Max speed kn"].to_dict()
-    # stats = {"Longitude":[], "Latitude":[], "Date/Time UTC":[], "LOA m":[],
-    #          "LOA ft":[], "COURSE":[], "AIS TYPE":[]}
-    # for key, value in d.items():
-    #     for k in stats.keys():
-    #         stats[k].append(df[(df.Name == key[0]) &
-    #                            (df.SPEED == value)][k].iloc[0])
-    # for key in stats.keys():
-    #     aggregate[key] = stats[key]
-    # aggregate = aggregate.reset_index()
-    # aggregate = aggregate[~aggregate.MMSI.isin(blacklist)]
-    # new_blacklisters = []
-    # for i in range(aggregate.shape[0]):
-    #     if aggregate.iloc[i]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36,
-    #                                          37, 51, 52, 53, 55, 57, 58, 59]:
-    #         new_blacklisters.append(aggregate.iloc[i].MMSI)
-    # with open("../cache/blacklist.txt", "a") as f:
-    #     f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]))
-    #
-    # aggregate = aggregate[~aggregate.MMSI.isin(new_blacklisters)]
-    # aggregate.sort_values("Max speed kn", ascending=False, inplace=True)
-    # aggregate = aggregate[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
-    #     "Mean speed kn", "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE"]]
+        mean = pd.DataFrame(
+            ports[i].groupby(["Name", "MMSI"])["SPEED"].mean()).rename(
+            {"SPEED": "Mean speed kn"}, axis=1).round(1)
+        maxes = pd.DataFrame(
+            ports[i].groupby(["Name", "MMSI"])["SPEED"].max()).rename(
+            {"SPEED": "Max speed kn"}, axis=1)
+        merged_speeds = maxes.merge(mean, on=["Name", "MMSI"])
+        d = merged_speeds["Max speed kn"].to_dict()
+        columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[], "LOA m":[],
+                 "LOA ft":[], "COURSE":[], "AIS TYPE":[]}
+        for key, value in d.items():
+            for k in columns.keys():
+                columns[k].append(ports[i][(ports[i].Name == key[0]) &
+                                   (ports[i].SPEED == value)][k].iloc[0])
+        for key in columns.keys():
+            merged_speeds[key] = columns[key]
+        merged_speeds = merged_speeds.reset_index()
+        merged_speeds = merged_speeds[~merged_speeds.MMSI.isin(blacklist)]
+        new_blacklisters = []
+        for j in range(merged_speeds.shape[0]):
+            if merged_speeds.iloc[j]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36,
+                                                 37, 51, 52, 53, 55, 57, 58, 59]:
+                new_blacklisters.append(merged_speeds.iloc[j].MMSI)
+        with open("../cache/blacklist.txt", "a") as f:
+            f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]))
 
+        merged_speeds = merged_speeds[~merged_speeds.MMSI.isin(new_blacklisters)]
+        merged_speeds.sort_values("Max speed kn", ascending=False, inplace=True)
+        merged_speeds = merged_speeds[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
+            "Mean speed kn", "LOA m", "LOA ft", "Latitude", "Longitude", "COURSE"]]
+        ports[i] = merged_speeds
 
-
-
-    ############################################################################
-    # ch = aggregate[aggregate.Latitude >= 32.033]
-    # ch = ch[(ch.COURSE >= 100) &
-    #           (ch.COURSE <= 140) |
-    #           (ch.COURSE >= 280) &
-    #           (ch.COURSE <= 320)]
-    # ch.COURSE = round(ch.COURSE).astype("int")
-    # courses = {}
-    # for i in range(100, 141):
-    #     courses[i] = "Outbound"
-    # for i in range(280, 321):
-    #     courses[i] = "Inbound"
-    # ch.COURSE = ch.COURSE.replace(courses).astype("str")
-    #
-    # sv = aggregate[aggregate.Latitude < 32.033]
-    # sv = sv[(sv.COURSE >= 100) &
-    #           (sv.COURSE <= 160) |
-    #           (sv.COURSE >= 280) &
-    #           (sv.COURSE <= 340)]
-    # sv.COURSE = round(sv.COURSE).astype("int")
-    # courses = {}
-    # for i in range(100, 161):
-    #     courses[i] = "Outbound"
-    # for i in range(280, 341):
-    #     courses[i] = "Inbound"
-    # sv.COURSE = sv.COURSE.replace(courses).astype("str")
-    # return ch, sv
-    return ports[0], ports[1]
+    return ports[0], ports[1] # ch, sv
