@@ -131,6 +131,8 @@ for df in [ch_off_wind, ch_near_wind, sv_off_wind, sv_near_wind]:
                 (df['GST m/s'] != 'MM')]
     df['WSPD mph'] = df['WSPD m/s'].astype('float') * 2.237
     df['GST mph'] = df['GST m/s'].astype('float') * 2.237
+    df['WSPD mph'] = df['WSPD mph'].round(2)
+    df['GST mph'] = df['GST mph'].round(2)
     wind_dat.append(df[['Date/Time UTC', 'WDIR degT', 'WSPD mph', 'GST mph']])
 
 ch_off_wind = wind_dat[0]
