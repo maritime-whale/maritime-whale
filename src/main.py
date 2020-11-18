@@ -2,6 +2,7 @@ from import_vessel_data import *
 from fetch_vessel_data import *
 from cache import *
 from plot import *
+from util import *
 from log import *
 
 import plotly.graph_objects as go
@@ -29,7 +30,7 @@ def main():
             if not sync_required:
                 sync_required = True
             input_filename = day.strftime("%Y-%m-%d.csv")
-            data_frames.append(import_report("../temp/" + input_filename))
+            data_frames.append(import_report("../temp/" + input_filename, STATS))
             log(logfile, "Importing data from " + input_filename + "...")
             os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
             map_data = [[], []] # [charleston, savannah]

@@ -181,8 +181,8 @@ sv_dat = {'Proportion of Transits':[str(round(sv_panamax.shape[0]/sv.shape[0]*10
 sv_index = ['Panamax', 'Post Panamax', 'Combined']
 
 
-print(pd.DataFrame(ch_dat, ch_index))
+pd.DataFrame(ch_dat, ch_index)
 # pd.DataFrame(ch_dat, ch_index)
 
-print(pd.DataFrame(sv_dat, sv_index))
+pd.DataFrame(sv_dat, sv_index)
 # pd.DataFrame(sv_dat, sv_index)

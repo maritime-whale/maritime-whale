@@ -142,16 +142,16 @@ sv_near_wind = wind_dat[3]
 
 # round the datetime stamp for easier matching to windspeed data
 # could add this to the main import_report above to make things cleaner..
-ch_rounded_times = ch.copy()
-sv_rounded_times = sv.copy()
-ch_rounded_times['Date/Time UTC'] = ch["Date/Time UTC"].values.astype('<M8[m]')
-sv_rounded_times['Date/Time UTC'] = sv["Date/Time UTC"].values.astype('<M8[m]')
+# ch_rounded_times = ch.copy()
+# sv_rounded_times = sv.copy()
+# ch['Date/Time UTC'] = ch["Date/Time UTC"].values.astype('<M8[m]')
+# sv['Date/Time UTC'] = sv["Date/Time UTC"].values.astype('<M8[m]')
 
 # windspeeds will be matched to these four dataframes based on location..
-ch_off = ch_rounded_times[ch_rounded_times['location'] == 'offshore']
-ch_near = ch_rounded_times[ch_rounded_times['location'] == 'nearshore']
-sv_off = sv_rounded_times[sv_rounded_times['location'] == 'offshore']
-sv_near = sv_rounded_times[sv_rounded_times['location'] == 'nearshore']
+ch_off = ch[ch['location'] == 'offshore']
+ch_near = ch[ch['location'] == 'nearshore']
+sv_off = sv[sv['location'] == 'offshore']
+sv_near = sv[sv['location'] == 'nearshore']
 
 # now need to write script to match the date/time columns between the wind and ships
 # if there are no exact matches, then should round and grab the closest data..?
