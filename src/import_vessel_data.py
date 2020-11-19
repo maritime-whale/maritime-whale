@@ -110,23 +110,25 @@ def import_report(path, mode):
                 input_times = list(ports[i][ports[i]['location'] == 'offshore']['Date/Time UTC'])
             for ii in range(len(input_times)):
                 min_timedelta = timedelta(hours=time_tolerance)
+                min_timedelta_index = -1
                 for jj in range(len(target_times)):
-                    # delta = timedelta(abs(input_times[ii] - target_times[jj]))
-                    # (input_times[ii] - target_times[jj]) <= timedelta(time_tolerance)
-                    if abs(input_times[ii] - target_times[jj]) <= timedelta(hours=time_tolerance):
-                        min_timedelta = min(min_timedelta, abs(input_times[ii] - target_times[jj]))
+                    delta = abs(input_times[ii] - target_times[jj])
+                    if delta <= timedelta(hours=time_tolerance):
+                        if min_timedelta > delta:
+                            min_timedelta = delta
+                            min_timedelta_index = jj
                     else:
                         continue
-                if min_timedelta < timedelta(hours=time_tolerance):
+                if min_timedelta < timedelta(hours=time_tolerance) and min_timedelta_index != -1:
                     for k in final_winds:
-                        final_winds[k].append(wind_data[k].iloc[jj])
+                        final_winds[k].append(wind_data[k].iloc[min_timedelta_index])
                 else:
                     for k in final_winds:
                         final_winds[k].append(float("NaN"))
 
         for k in final_winds:
-            # ports[i][k] = final_winds[k] #chain version
-            ports[i].loc[:, k] = final_winds[k]
+            ports[i][k] = final_winds[k] #chain version
+            # ports[i].loc[:, k] = final_winds[k] # loc version (might be broken)
 
 
 
