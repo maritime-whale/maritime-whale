@@ -1,6 +1,8 @@
 from util import *
+from datetime import *
 
 import pandas as pd
+# import timedelta
 import sys
 
 
@@ -50,12 +52,14 @@ def import_report(path, mode):
         offshore = pd.Series(['offshore' for j in range(len(offshore_index))],
                             index = offshore_index)
         location = pd.concat([offshore, nearshore]).sort_index(axis=0).to_frame().rename({0:'location'}, axis=1)
-        ports[i]['location'] = location
-
+        # ports[i]['location'] = location #chain method
+        ports[i].loc[:, 'location'] = location
         # offshore: 41004 (ch), 41008 (sv)
         # nearshore: 41029 (ch), 41033 (sv)
-        # winds = None
-        dir = "tests" # switch to temp and delete this variable when done testing
+        #########################
+        ### REMOVE LINE BELOW ###
+        #########################
+        dir = "temp" # switch to temp and delete this variable when done testing
         year = ports[i]['Date/Time UTC'].iloc[0].strftime('%Y')
         month = ports[i]['Date/Time UTC'].iloc[0].strftime('%m')
         day = ports[i]['Date/Time UTC'].iloc[0].strftime('%d')
@@ -65,7 +69,8 @@ def import_report(path, mode):
             except FileNotFoundError:
                 sys.stderr.write("Error: Wind data not found for buoy with ID: " + buoy + "...\n")
                 continue
-        for buoy in buoys[i].items():
+        final_winds = {"WDIR degT":[], "WSPD mph":[], "GST mph":[]} # [wind_dir, wind_speed, gust]
+        for j, buoy in enumerate(buoys[i].items()):
             id = buoy[0]
             data = buoy[1]
             data = data[(data['#YY'] == year) &
@@ -77,7 +82,9 @@ def import_report(path, mode):
                                  str(day) + " for buoy with ID: " +
                                  id + "...\n")
                 continue
-            data['Date/Time UTC'] = pd.to_datetime(data['#YY'] + data['MM'] + data['DD'] + data['hh'] + data['mm'],
+            # data['Date/Time UTC'] = pd.to_datetime(data['#YY'] + data['MM'] + data['DD'] + data['hh'] + data['mm'],
+            #                                      infer_datetime_format=True) chain method
+            data.loc[:, "Date/Time UTC"] = pd.to_datetime(data['#YY'] + data['MM'] + data['DD'] + data['hh'] + data['mm'],
                                                  infer_datetime_format=True)
             data.rename({'WDIR':'WDIR degT', 'WSPD':'WSPD m/s', 'GST':'GST m/s'}, axis=1, inplace=True)
             data = data[(data['WDIR degT'] != 'MM') &
@@ -89,6 +96,37 @@ def import_report(path, mode):
             data['GST mph'] = data['GST mph'].round(2)
             buoys[i][id] = data[['Date/Time UTC', 'WDIR degT', 'WSPD mph', 'GST mph']]
             # do windspeed matching here
+            # offshore: 41004 (ch), 41008 (sv)
+            # nearshore: 41029 (ch), 41033 (sv)
+            input_times = None
+            time_tolerance = 2
+            wind_data = buoys[i][id]
+            target_times = list(wind_data['Date/Time UTC'])
+            # nearshore
+            if j % 2:
+                input_times = list(ports[i][ports[i]['location'] == 'nearshore']['Date/Time UTC'])
+            # offshore
+            else:
+                input_times = list(ports[i][ports[i]['location'] == 'offshore']['Date/Time UTC'])
+            for ii in range(len(input_times)):
+                min_timedelta = timedelta(hours=time_tolerance)
+                for jj in range(len(target_times)):
+                    # delta = timedelta(abs(input_times[ii] - target_times[jj]))
+                    # (input_times[ii] - target_times[jj]) <= timedelta(time_tolerance)
+                    if abs(input_times[ii] - target_times[jj]) <= timedelta(hours=time_tolerance):
+                        min_timedelta = min(min_timedelta, abs(input_times[ii] - target_times[jj]))
+                    else:
+                        continue
+                if min_timedelta < timedelta(hours=time_tolerance):
+                    for k in final_winds:
+                        final_winds[k].append(wind_data[k].iloc[jj])
+                else:
+                    for k in final_winds:
+                        final_winds[k].append(float("NaN"))
+
+        for k in final_winds:
+            # ports[i][k] = final_winds[k] #chain version
+            ports[i].loc[:, k] = final_winds[k]
 
 
 
@@ -98,7 +136,8 @@ def import_report(path, mode):
                             (ports[i].COURSE >= course_ranges[i][1][0]) &
                             (ports[i].COURSE <= course_ranges[i][1][1])]
         ports[i].COURSE = round(ports[i].COURSE).astype("int")
-        ports[i]['course behavior'] = ports[i].COURSE
+        # ports[i]['course behavior'] = ports[i].COURSE #chain version
+        ports[i].loc[:, 'course behavior'] = ports[i].COURSE
         courses = {}
         for behavior, course_range in zip(course_behavior, course_ranges[i]):
             lower_bound = course_range[0]
@@ -135,7 +174,8 @@ def import_report(path, mode):
                                 index = post_panamax_index)
             vessel_class = pd.concat([panamax, post_panamax]).sort_index(axis=0).to_frame().rename(
                                         {0:'vessel class'}, axis=1)
-            ports[i]['vessel class'] = vessel_class
+            # ports[i]['vessel class'] = vessel_class #chain method
+            ports[i].loc[:, 'vessel class'] = vessel_class
 
             ### location specification
             # nearshore_index = ports[i][ports[i]['Longitude'] <= channel_midpoint[i]].index
@@ -156,7 +196,7 @@ def import_report(path, mode):
             # non_compliant = pd.Series([float("NaN") for i in range(len(non_compliant_index))],
             #                     index=non_compliant_index)
             # yaw = pd.concat([compliant, non_compliant]).sort_index(axis=0).to_frame().rename({0: "Yaw"}, axis=1)
-            # ports[i]["Yaw"] = yaw
+            # ports[i].loc[:, "Yaw"] = yaw
 
         res = None
         if mode == LVL_PLTS:
@@ -181,9 +221,9 @@ def import_report(path, mode):
         elif mode == STATS:
             res = res[["Name", "MMSI", "Date/Time UTC", "SPEED", "LOA m",
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
-                       "course behavior", "HEADING", "location", "vessel class"#,
+                       "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
-                       ]]
+                       "WDIR degT", "WSPD mph", "GST mph"]]
 
         ports[i] = res
 
