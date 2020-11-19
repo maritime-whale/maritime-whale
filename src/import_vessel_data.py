@@ -52,20 +52,16 @@ def import_report(path, mode):
         offshore = pd.Series(['offshore' for j in range(len(offshore_index))],
                             index = offshore_index)
         location = pd.concat([offshore, nearshore]).sort_index(axis=0).to_frame().rename({0:'location'}, axis=1)
-        # ports[i]['location'] = location #chain method
+        # ports[i]['location'] = location # chain method
         ports[i].loc[:, 'location'] = location
         # offshore: 41004 (ch), 41008 (sv)
         # nearshore: 41029 (ch), 41033 (sv)
-        #########################
-        ### REMOVE LINE BELOW ###
-        #########################
-        dir = "temp" # switch to temp and delete this variable when done testing
         year = ports[i]['Date/Time UTC'].iloc[0].strftime('%Y')
         month = ports[i]['Date/Time UTC'].iloc[0].strftime('%m')
         day = ports[i]['Date/Time UTC'].iloc[0].strftime('%d')
         for buoy in buoys[i].keys():
             try:
-                buoys[i][buoy] = pd.read_csv("../" + dir + "/" + buoy + ".txt", delim_whitespace=True).drop(0)
+                buoys[i][buoy] = pd.read_csv("../temp/" + buoy + ".txt", delim_whitespace=True).drop(0)
             except FileNotFoundError:
                 sys.stderr.write("Error: Wind data not found for buoy with ID: " + buoy + "...\n")
                 continue
@@ -130,15 +126,12 @@ def import_report(path, mode):
             ports[i][k] = final_winds[k] #chain version
             # ports[i].loc[:, k] = final_winds[k] # loc version (might be broken)
 
-
-
-
         ports[i] = ports[i][(ports[i].COURSE >= course_ranges[i][0][0]) &
                             (ports[i].COURSE <= course_ranges[i][0][1]) |
                             (ports[i].COURSE >= course_ranges[i][1][0]) &
                             (ports[i].COURSE <= course_ranges[i][1][1])]
         ports[i].COURSE = round(ports[i].COURSE).astype("int")
-        # ports[i]['course behavior'] = ports[i].COURSE #chain version
+        # ports[i]['course behavior'] = ports[i].COURSE # chain version
         ports[i].loc[:, 'course behavior'] = ports[i].COURSE
         courses = {}
         for behavior, course_range in zip(course_behavior, course_ranges[i]):
@@ -176,7 +169,7 @@ def import_report(path, mode):
                                 index = post_panamax_index)
             vessel_class = pd.concat([panamax, post_panamax]).sort_index(axis=0).to_frame().rename(
                                         {0:'vessel class'}, axis=1)
-            # ports[i]['vessel class'] = vessel_class #chain method
+            # ports[i]['vessel class'] = vessel_class # chain method
             ports[i].loc[:, 'vessel class'] = vessel_class
 
             ### location specification
