@@ -2,14 +2,14 @@ from import_vessel_data import *
 from datetime import timedelta
 from util import *
 
-import pandas as pd
-import numpy as np
-import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
-import scipy
-#import seaborn as sns
 #import matplotlib.pyplot as plt
+import plotly.express as px
+#import seaborn as sns
+import pandas as pd
+import numpy as np
+import scipy
 
 # # use '2020-10-06.csv' path for testing
 # path = "../tests/2020-10-06.csv"
@@ -75,24 +75,34 @@ def meetpass(df):
             this_time = cur_val.get_level_values(1)[0]
             this_lat = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Latitude.values[0].round(5)
             this_long = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Longitude.values[0].round(5)
+            this_class = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['vessel class'].values[0]
+            this_wdir = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['WDIR degT'].values[0]
+            this_wspd = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['WSPD mph'].values[0]
+            this_gst = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['GST mph'].values[0]
             for inner_key, inner_val in sub.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
                     that_time = that[1]
                     that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Latitude.values[0].round(5)
                     that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Longitude.values[0].round(5)
+                    that_class = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['vessel class'].values[0]
+                    that_wdir = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['WDIR degT'].values[0]
+                    that_wspd = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['WSPD mph'].values[0]
+                    that_gst = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['GST mph'].values[0]
                     if (this_time == that_time) and (this_course != that_course):
                         dist = calc_naut_dist(this_lat, this_long, that_lat, that_long)
                         # check if true encounter (within minimum distance)
                         if min_dist >= dist:
-                            key = tuple(sorted([cur_key, inner_key]))
+                            key = tuple(sorted([cur_key, inner_key]) + [this_class, that_class])
                             if key not in true_encs:
                                 # create new entry
-                                true_encs[key] = (this_time, dist)
+                                true_encs[key] = (this_time, dist, this_wdir, this_wspd, this_gst)
+                                # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
                             else:
                                 # minimize distance (update)
                                 if true_encs[key][1] > dist:
-                                    true_encs[key] = (this_time, dist)
+                                    true_encs[key] = (this_time, dist, this_wdir, this_wspd, this_gst)
+                                    # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
             multiindex = cur_val.delete(0)
             cur_val = multiindex
             i += 1
@@ -104,8 +114,8 @@ out = import_report(path, STATS)
 ch = out[0]
 sv = out[1]
 
+# show edge case to jon at 12:23 where there's nearshore and offshore meetpass instance
+# ch[(ch['MMSI'] == 232013520) | (ch['MMSI'] == 255806004)]
+
 print(meetpass(ch))
 print(len(meetpass(ch)))
-
-
-ch[ch.isnull().any(axis=1)]
