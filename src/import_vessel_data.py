@@ -1,5 +1,5 @@
-from util import *
 from datetime import *
+from util import *
 
 import pandas as pd
 # import timedelta
@@ -65,8 +65,8 @@ def import_report(path, mode):
             except FileNotFoundError:
                 sys.stderr.write("Error: Wind data not found for buoy with ID: " + buoy + "...\n")
                 continue
-        final_winds = {"WDIR degT":[], "WSPD mph":[], "GST mph":[]} # [wind_dir, wind_speed, gust]
         for j, buoy in enumerate(buoys[i].items()):
+            final_winds = {"WDIR degT":[], "WSPD mph":[], "GST mph":[]} # {wind_dir, wind_speed, gust}
             id = buoy[0]
             data = buoy[1]
             data = data[(data['#YY'] == year) &
@@ -95,7 +95,6 @@ def import_report(path, mode):
             # offshore: 41004 (ch), 41008 (sv)
             # nearshore: 41029 (ch), 41033 (sv)
             input_times = None
-            time_tolerance = 2
             wind_data = buoys[i][id]
             target_times = list(wind_data['Date/Time UTC'])
             # nearshore
@@ -105,26 +104,34 @@ def import_report(path, mode):
             else:
                 input_times = list(ports[i][ports[i]['location'] == 'offshore']['Date/Time UTC'])
             for ii in range(len(input_times)):
-                min_timedelta = timedelta(hours=time_tolerance)
+                min_timedelta = timedelta(hours=WIND_TIME_TOL)
                 min_timedelta_index = -1
                 for jj in range(len(target_times)):
                     delta = abs(input_times[ii] - target_times[jj])
-                    if delta <= timedelta(hours=time_tolerance):
+                    if delta <= timedelta(hours=WIND_TIME_TOL):
                         if min_timedelta > delta:
                             min_timedelta = delta
                             min_timedelta_index = jj
                     else:
                         continue
-                if min_timedelta < timedelta(hours=time_tolerance) and min_timedelta_index != -1:
+                if min_timedelta < timedelta(hours=WIND_TIME_TOL) and min_timedelta_index != -1:
                     for k in final_winds:
                         final_winds[k].append(wind_data[k].iloc[min_timedelta_index])
                 else:
                     for k in final_winds:
                         final_winds[k].append(float("NaN"))
 
-        for k in final_winds:
-            ports[i][k] = final_winds[k] #chain version
-            # ports[i].loc[:, k] = final_winds[k] # loc version (might be broken)
+            # print(len(final_winds["WDIR degT"]))
+            for k in final_winds:
+                # ports[i][k] = final_winds[k] #chain version
+                if j % 2:
+                    # print("FUCK!")
+                    ports[i].loc[ports[i].location == "nearshore", k] = final_winds[k]
+                else:
+                    ports[i].loc[ports[i].location == "offshore", k] = final_winds[k]
+                    # print("GREAT success)
+                    # print(ports[i].columns)
+                # ports[i].loc[:, k] = final_winds[k] # loc version (might be broken)
 
         ports[i] = ports[i][(ports[i].COURSE >= course_ranges[i][0][0]) &
                             (ports[i].COURSE <= course_ranges[i][0][1]) |
