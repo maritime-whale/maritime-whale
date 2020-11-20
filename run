@@ -12,9 +12,9 @@ for arg in "$@"; do
     fi
 done
 if [ $debug_mode == 0 ]; then
-    pip-upgrade --skip-virtualenv-check 2>> logs/depend_err.log 1>> logs/depend_out.log
+    pip-upgrade --skip-virtualenv-check -p all 2>> logs/depend_err.log 1>> logs/depend_out.log
 else
-    pip-upgrade --skip-virtualenv-check
+    pip-upgrade --skip-virtualenv-check -p all
 fi
 LOGS=logs
 if [ ! -d "$LOGS" ]; then
