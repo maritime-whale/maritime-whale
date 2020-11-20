@@ -69,6 +69,7 @@ ch.columns
 
 dat = ch.sort_values('Date/Time UTC').reset_index().dropna()
 dat['SPEED mph'] = dat['SPEED'] * 1.151
+dat['WDIR degT'] = dat['WDIR degT'].astype(int)
 sns.scatterplot(data = dat, y = 'SPEED', x = 'WSPD mph')
 
 dat['Date/Time UTC'].plot()
@@ -77,10 +78,11 @@ dat['Date/Time UTC'].plot()
 f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')
 sns.set_style("whitegrid")
-dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
+dat['GST mph'].plot(legend=True, linewidth=3, fontsize=30)
 dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
-plt.title('Vessel Speed and Wind Speed Lineplots', fontsize=35)
+plt.title('Vessel Speed and Gust Speed Lineplots', fontsize=35)
 plt.legend(loc=2, prop={'size': 30})
+plt.show()
 #plt.savefig('VSPD&WSDP_lineplot.png')
 
 corr_mat = dat[['SPEED mph', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
