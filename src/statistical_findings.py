@@ -80,12 +80,18 @@ dat['Date/Time UTC'].plot()
 f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')
 sns.set_style("whitegrid")
-dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
+dat['GST mph'].plot(legend=True, linewidth=3, fontsize=30)
 dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
+<<<<<<< HEAD
 plt.title('Vessel Speed and Wind Speed Lineplots \n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
             fontsize=35)
 plt.legend(loc=2, prop={'size': 30})
 
+=======
+plt.title('Vessel Speed and Gust Speed Lineplots', fontsize=35)
+plt.legend(loc=2, prop={'size': 30})
+plt.show()
+>>>>>>> 8f751bd65a9168e3d062990f7e90b18d0d608707
 #plt.savefig('VSPD&WSDP_lineplot.png')
 f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')
