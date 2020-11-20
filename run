@@ -1,16 +1,21 @@
 #!/bin/sh
 
-dev_mode=0
+debug_mode=0
 for arg in "$@"; do
-    if [ "$arg" == "dev" ]; then
-        echo "Running in dev mode..."
-        dev_mode=1
+    if [ "$arg" == "debug" ]; then
+        echo "Running in debug mode..."
+        debug_mode=1
     else
         echo "./run: illegal option -- $arg"
-        echo "Usage: ./run [dev]"
+        echo "Usage: ./run [debug]"
         exit 1
     fi
 done
+if [ $debug_mode == 0 ]; then
+    pip-upgrade --skip-virtualenv-check 2>> logs/depend_err.log 1>> logs/depend_out.log
+else
+    pip-upgrade --skip-virtualenv-check
+fi
 LOGS=logs
 if [ ! -d "$LOGS" ]; then
     mkdir $LOGS
@@ -19,7 +24,7 @@ rm logs/sync_*.log > /dev/null 2>&1
 rm logs/vmr_*.log > /dev/null 2>&1
 rm logs/wind_*.log > /dev/null 2>&1
 rm logs/report_*.log > /dev/null 2>&1
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
     find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
     rm -rf temp/* > /dev/null 2>&1
 fi
@@ -78,7 +83,7 @@ fi
 yes | cp -rf blacklist.txt ../../cache/blacklist.txt
 cd ../../src
 MAIN_RET_VAL=1
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
     MAIN_RET_VAL=$?
     # echo $MAIN_RET_VAL
@@ -87,7 +92,7 @@ else
     python3 main.py
 fi
 cd ../html/riwhale.github.io
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
     PLOT=../level_one.html
     if [ ! -f "$PLOT" ]; then
         echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
