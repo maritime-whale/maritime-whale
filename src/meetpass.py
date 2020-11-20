@@ -106,7 +106,7 @@ def meetpass(df):
             multiindex = cur_val.delete(0)
             cur_val = multiindex
             i += 1
-    return print(len(true_encs))
+    return true_encs
 
 # use '2020-10-06.csv' path for testing
 # path = "../tests/2020-10-06.csv"

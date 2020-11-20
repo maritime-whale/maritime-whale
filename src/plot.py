@@ -23,7 +23,8 @@ def generate_plots(map_data):
     hover_dict = {"MMSI": False, "Date/Time UTC": True, "Max speed kn": True,
                   "Mean speed kn": True, "LOA m": True, "LOA ft": True,
                   "Latitude": False, "Longitude": False, "COURSE": False,
-                  "Coordinates": True}
+                  "Coordinates": True, "WSPD mph" : True, "GST mph" : True,
+                  "WDIR degT" : True}
 
     # level 1 coastline
     lvl1_first_dict = {"Latitude": 31.4, "Longitude": -81.3}

@@ -30,7 +30,7 @@ def main():
             if not sync_required:
                 sync_required = True
             input_filename = day.strftime("%Y-%m-%d.csv")
-            data_frames.append(import_report("../temp/" + input_filename, STATS))
+            data_frames.append(import_report("../temp/" + input_filename, LVL_PLTS))
             log(logfile, "Importing data from " + input_filename + "...")
             os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
             map_data = [[], []] # [charleston, savannah]

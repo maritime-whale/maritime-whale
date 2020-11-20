@@ -26,16 +26,43 @@ for filename in glob.glob(path):
 ch = pd.concat(ch_agg)
 sv = pd.concat(sv_agg)
 
-# this will take a long time to run...
 # for some reason the dates are out of order, i suspect might contribute to long
 # and inefficient run times... look into this and fix ?
 # count number of post-panamax meetpass instances along with total number of instances
 # calculate percentage of transits that are meeting and passing
-# graph.... 
-meetpass(ch)
+# graph....
+ch_meetpass = meetpass(ch)
+ch_meetpass
 
-# 15 meetpass instances from Oct6-Oct19 and Nov11-Nov18 sans a few days
-# 7 out of 15 were both post-panamax ships..
+for item in ch_meetpass.items():
+    print(item)
+
+mp = ch[(ch['MMSI'] == 255805942) | (ch['MMSI'] == 440176000) &
+   (ch['Date/Time UTC'] >= '2020-11-18 14:40:00') &
+   (ch['Date/Time UTC'] <= '2020-11-18 15:30:00')]
+mp['WDIR degT'] = mp['WDIR degT'].astype(int)
+mp.shape
+mp.columns
+
+hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False, 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True}
+mp_plot = px.scatter(mp, x="Longitude", y="Latitude", hover_data=hover_dict,
+                  hover_name="Name", color="course behavior")
+mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13,
+                   font_family="sans-serif"))
+
+
+px.scatter(mp, x='Date/Time UTC', y='Name', color="course behavior")
+round(mp.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)
+round(mp.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)
+round(mp.dropna()[['SPEED', 'WDIR degT']].corr().iloc[0][1], 2)
+
+px.line(mp, x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name")
+px.line(mp, x='Date/Time UTC', y='WSPD mph', color="course behavior", hover_name="Name")
+px.line(mp, x='Date/Time UTC', y='GST mph', color="course behavior", hover_name="Name")
+px.line(mp, x='Date/Time UTC', y='WDIR degT', color="course behavior", hover_name="Name")
+
+
+
 ch.shape
 ch[ch.isnull().any(axis=1)].shape
 ch.columns

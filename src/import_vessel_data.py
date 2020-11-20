@@ -157,7 +157,8 @@ def import_report(path, mode):
             merged_speeds = maxes.merge(mean, on=["Name", "MMSI"])
             d = merged_speeds["Max speed kn"].to_dict()
             columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[],
-                       "LOA m":[], "LOA ft":[], "COURSE":[], "AIS TYPE":[]}
+                       "LOA m":[], "LOA ft":[], "COURSE":[], "AIS TYPE":[],
+                       "WSPD mph":[], "GST mph":[], "WDIR degT":[]}
             for key, value in d.items():
                 for k in columns.keys():
                     columns[k].append(ports[i][(ports[i].Name == key[0]) &
@@ -219,7 +220,7 @@ def import_report(path, mode):
             res.sort_values("Max speed kn", ascending=False, inplace=True)
             res = res[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
                        "Mean speed kn", "LOA m", "LOA ft", "Latitude",
-                       "Longitude", "COURSE"]]
+                       "Longitude", "COURSE", "WDIR degT", "WSPD mph", "GST mph"]]
         elif mode == STATS:
             res = res[["Name", "MMSI", "Date/Time UTC", "SPEED", "LOA m",
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
