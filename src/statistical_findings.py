@@ -69,7 +69,10 @@ ch.columns
 
 dat = ch.sort_values('Date/Time UTC').reset_index().dropna()
 dat['SPEED mph'] = dat['SPEED'] * 1.151
+dat['WDIR degT'] = dat['WDIR degT'].astype(int)
 sns.scatterplot(data = dat, y = 'SPEED', x = 'WSPD mph')
+sns.scatterplot(data = dat, y = 'SPEED', x = 'GST mph')
+sns.scatterplot(data = dat, y = 'SPEED', x = 'WDIR degT')
 
 dat['Date/Time UTC'].plot()
 
@@ -79,9 +82,22 @@ plt.style.use('seaborn-white')
 sns.set_style("whitegrid")
 dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
 dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
-plt.title('Vessel Speed and Wind Speed Lineplots', fontsize=35)
+plt.title('Vessel Speed and Wind Speed Lineplots \n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
+            fontsize=35)
 plt.legend(loc=2, prop={'size': 30})
+
 #plt.savefig('VSPD&WSDP_lineplot.png')
+f, axes = plt.subplots(figsize=(40,15), sharex=True)
+plt.style.use('seaborn-white')
+sns.set_style("whitegrid")
+dat['GST mph'].plot(legend=True, linewidth=3, fontsize=30)
+dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
+plt.title('Vessel Speed and Gust Speed Lineplots\n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
+            fontsize=35)
+plt.legend(loc=2, prop={'size': 30})
+
+
+
 
 corr_mat = dat[['SPEED mph', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
 corr_mat['WDIR degT'] = corr_mat['WDIR degT'].astype(int)
@@ -110,6 +126,32 @@ sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
 # Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
 # Note: no need to split stats up into Panamax and Post-Panamax (not really important).
 # Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
+
+###### YAW ANALAYSIS
+ch_compliant = ch[ch.SPEED <= 10]
+ch_compliant['Yaw'] = abs(ch_compliant.COURSE - ch_compliant.HEADING)
+ch_compliant.sort_values('Yaw').reset_index().Yaw.plot()
+ch_compliant.Yaw.value_counts().plot(kind='barh')
+
+
+ch_compliant[['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
+
+ch_compliant[ch_compliant.Yaw > 5][['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch_compliant[['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+
+ch_compliant[ch_compliant.Yaw > 5][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch_compliant[['SPEED', 'Yaw']].corr()
+
+
+
+
+
+sv_compliant = sv[sv.SPEED <= 10]
+sv_compliant['Yaw'] = abs(sv_compliant.COURSE - sv_compliant.HEADING)
+sv_compliant.Yaw.value_counts().plot(kind='barh')
+sv_compliant[['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
+sv_compliant[['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+sv_compliant[['SPEED', 'Yaw']].corr()
 
 # CHARLESTON
 ch_dat = {'Proportion of Transits':[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + '%',
