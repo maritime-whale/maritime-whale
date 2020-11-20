@@ -9,7 +9,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     brew install jq
     brew install python
     sudo easy_install pip
-    pip3 install pip-upgrader
+    pip3 install pip-upgrader # https://github.com/simion/pip-upgrader
     pip-upgrade --skip-virtualenv-check -p all
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     # POSIX compatibility layer and Linux environment emulation for Windows
