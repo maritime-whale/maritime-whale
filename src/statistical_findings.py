@@ -1,6 +1,7 @@
 
 from import_vessel_data import *
 from datetime import timedelta
+from meetpass import *
 from util import *
 
 import plotly.figure_factory as ff
@@ -25,11 +26,22 @@ for filename in glob.glob(path):
 ch = pd.concat(ch_agg)
 sv = pd.concat(sv_agg)
 
+# this will take a long time to run...
+# for some reason the dates are out of order, i suspect might contribute to long
+# and inefficient run times... look into this and fix ?
+# count number of post-panamax meetpass instances along with total number of instances
+# calculate percentage of transits that are meeting and passing
+# graph.... 
+meetpass(ch)
+
+# 15 meetpass instances from Oct6-Oct19 and Nov11-Nov18 sans a few days
+# 7 out of 15 were both post-panamax ships..
 ch.shape
 ch[ch.isnull().any(axis=1)].shape
 ch.columns
 
 dat = ch.sort_values('Date/Time UTC').reset_index().dropna()
+dat['SPEED mph'] = dat['SPEED'] * 1.151
 sns.scatterplot(data = dat, y = 'SPEED', x = 'WSPD mph')
 
 dat['Date/Time UTC'].plot()
@@ -39,12 +51,12 @@ f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')
 sns.set_style("whitegrid")
 dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
-dat['SPEED'].plot(legend=True, linewidth=3, fontsize=30)
+dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
 plt.title('Vessel Speed and Wind Speed Lineplots', fontsize=35)
 plt.legend(loc=2, prop={'size': 30})
 #plt.savefig('VSPD&WSDP_lineplot.png')
 
-corr_mat = dat[['SPEED', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
+corr_mat = dat[['SPEED mph', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
 corr_mat['WDIR degT'] = corr_mat['WDIR degT'].astype(int)
 correlation = corr_mat.corr()
 sns.heatmap(correlation, center=0.6)
@@ -97,9 +109,13 @@ ch_dat = {'Proportion of Transits':[str(round(ch_panamax.shape[0]/ch.shape[0]*10
                                    str(round(ch_post_panamax[ch_post_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
                                    str(round(ch[ch['course behavior'] == 'Outbound']['SPEED'].median(),2))],
 
-          'WSPD-VSPD correlation':[str(round(ch_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
+          'VSPD-WSPD correlation':[str(round(ch_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
                                    str(round(ch_post_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
-                                   str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2))]
+                                   str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2))],
+
+          'VSPD-GST correlation':[str(round(ch_panamax.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
+                                   str(round(ch_post_panamax.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
+                                   str(round(ch.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2))]
          }
 
 ch_index = ['Panamax', 'Post Panamax', 'Combined']
@@ -129,9 +145,14 @@ sv_dat = {'Proportion of Transits':[str(round(sv_panamax.shape[0]/sv.shape[0]*10
                         str(round(sv_post_panamax[sv_post_panamax['course behavior'] == 'Outbound']['SPEED'].median(),2)),
                         str(round(sv[sv['course behavior'] == 'Outbound']['SPEED'].median(),2))],
 
-          'WSPD-VSPD correlation':[str(round(sv_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
+          'VSPD-WSPD correlation':[str(round(sv_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
                                  str(round(sv_post_panamax.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
-                                 str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2))]}
+                                 str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2))],
+
+          'VSPD-GST correlation':[str(round(sv_panamax.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
+                                  str(round(sv_post_panamax.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
+                                  str(round(sv.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2))]
+                                 }
 
 sv_index = ['Panamax', 'Post Panamax', 'Combined']
 

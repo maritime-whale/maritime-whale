@@ -106,16 +106,16 @@ def meetpass(df):
             multiindex = cur_val.delete(0)
             cur_val = multiindex
             i += 1
-    return true_encs
+    return print(len(true_encs))
 
 # use '2020-10-06.csv' path for testing
-path = "../tests/2020-10-06.csv"
-out = import_report(path, STATS)
-ch = out[0]
-sv = out[1]
+# path = "../tests/2020-10-06.csv"
+# out = import_report(path, STATS)
+# ch = out[0]
+# sv = out[1]
 
 # show edge case to jon at 12:23 where there's nearshore and offshore meetpass instance
 # ch[(ch['MMSI'] == 232013520) | (ch['MMSI'] == 255806004)]
 
-print(meetpass(ch))
-print(len(meetpass(ch)))
+# print(meetpass(ch))
+# print(len(meetpass(ch)))
