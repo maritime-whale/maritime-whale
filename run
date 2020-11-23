@@ -11,11 +11,6 @@ for arg in "$@"; do
         exit 1
     fi
 done
-if [ $debug_mode == 0 ]; then
-    pip-upgrade --skip-virtualenv-check -p all 2>> logs/depend_err.log 1>> logs/depend_out.log
-else
-    pip-upgrade --skip-virtualenv-check -p all
-fi
 LOGS=logs
 if [ ! -d "$LOGS" ]; then
     mkdir $LOGS
@@ -23,7 +18,13 @@ fi
 rm logs/sync_*.log > /dev/null 2>&1
 rm logs/vmr_*.log > /dev/null 2>&1
 rm logs/wind_*.log > /dev/null 2>&1
+rm logs/depend_*.log > /dev/null 2>&1
 rm logs/report_*.log > /dev/null 2>&1
+if [ $debug_mode == 0 ]; then
+    pip-upgrade --skip-virtualenv-check -p all 2>> logs/depend_err.log 1>> logs/depend_out.log
+else
+    pip-upgrade --skip-virtualenv-check -p all
+fi
 if [ $debug_mode == 0 ]; then
     find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
     rm -rf temp/* > /dev/null 2>&1
