@@ -2,6 +2,7 @@ from datetime import *
 from util import *
 
 import pandas as pd
+import math
 # import timedelta
 import sys
 
@@ -25,10 +26,11 @@ def import_report(path, mode):
     df["LOA ft"] = df["LOA m"] * 3.28
     df["LOA ft"] = df["LOA ft"].round(0)
     df["Beam m"] = df["C"] + df["D"]
-    df["Beam ft"] = df["LBeam m"] * 3.28
+    df["Beam ft"] = df["Beam m"] * 3.28
     df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
+    # df['Yaw'] = abs(df.COURSE - df.HEADING)
     sub_panamax = None
     # if mode == "sub-panamax":
     #     sub_panamax = df[df["LOA m"] < 200]
@@ -36,7 +38,8 @@ def import_report(path, mode):
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
     df = df[["Date/Time UTC", "Name", "MMSI", "LOA m", "LOA ft", "Latitude",
-             "Longitude", "COURSE", "AIS TYPE", "HEADING", "SPEED"]]
+             "Longitude", "COURSE", "AIS TYPE", "HEADING", "SPEED",
+             "Beam m", "Beam ft"]]
 
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340))
@@ -183,6 +186,8 @@ def import_report(path, mode):
             # ports[i]['vessel class'] = vessel_class # chain method
             ports[i].loc[:, 'vessel class'] = vessel_class
 
+            ports[i]['Yaw'] = abs(ports[i]['COURSE'] - ports[i]['HEADING'])
+
             ### location specification
             # nearshore_index = ports[i][ports[i]['Longitude'] <= channel_midpoint[i]].index
             # offshore_index = ports[i][ports[i]['Longitude'] > channel_midpoint[i]].index
@@ -229,7 +234,8 @@ def import_report(path, mode):
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
-                       "Beam ft", "Beam m", "WDIR degT", "WSPD mph", "GST mph"]]
+                       "Beam ft", "Beam m", "Yaw",
+                       "WDIR degT", "WSPD mph", "GST mph"]]
 
         ports[i] = res
 

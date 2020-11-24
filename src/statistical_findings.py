@@ -28,16 +28,18 @@ sv = pd.concat(sv_agg)
 
 # line plot for every ship in the channel... speed vs time
 for ship in ch.MMSI.unique():
+    trace = go.Scatter()
     plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name")
     plt.show()
 
-plt.figure(figsize=(30,15))
-sns.set(font_scale=2.5)
-sns.set_style("whitegrid")
-g = sns.swarmplot(x='MMSI', y='SPEED', data=ch, size=7, color='m')
+fig = plt.figure()
+g = sns.swarmplot(x='MMSI', y='SPEED', data=ch, size=3, color='m')
 g.set(xticklabels=[])
 g.set_xlabel('Vessels')
 g.set_ylabel('VSPD kn')
+plt.figure(figsize=(30,15))
+sns.set(font_scale=2.5)
+sns.set_style("whitegrid")
 plt.title("Array of Vessel Speeds")
 
 # for some reason the dates are out of order, i suspect might contribute to long
@@ -89,28 +91,14 @@ sns.scatterplot(data = dat, y = 'SPEED', x = 'GST mph')
 sns.scatterplot(data = dat, y = 'SPEED', x = 'WDIR degT')
 
 dat['Date/Time UTC'].plot()
-
-# the x-axis here represents time from Oct4-Nov17 2020
-f, axes = plt.subplots(figsize=(40,15), sharex=True)
-plt.style.use('seaborn-white')
-sns.set_style("whitegrid")
-dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
-dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
-plt.title('Vessel Speed and Wind Speed Lineplots \n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
-            fontsize=35)
-plt.legend(loc=2, prop={'size': 30})
-
-#plt.savefig('VSPD&WSDP_lineplot.png')
-f, axes = plt.subplots(figsize=(40,15), sharex=True)
-plt.style.use('seaborn-white')
-sns.set_style("whitegrid")
-dat['GST mph'].plot(legend=True, linewidth=3, fontsize=30)
-dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
-plt.title('Vessel Speed and Gust Speed Lineplots\n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)),
-            fontsize=35)
-plt.legend(loc=2, prop={'size': 30})
-
-
+########################################################################
+trace1 = go.Scatter(x=dat.index, y=dat['WSPD mph'], mode='lines', name='WSPD mph')
+trace2 = go.Scatter(x=dat.index, y=dat['SPEED mph'], mode='lines', name='VSPD mph')
+trace3 = go.Scatter(x=dat.index, y=dat['GST mph'], mode='lines', name='GST mph')
+data = [trace1, trace2, trace3]
+fig = go.Figure(data=data)#, layout=layout)
+fig.show()
+#######################################################
 
 
 corr_mat = dat[['SPEED mph', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
@@ -142,6 +130,19 @@ sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
 # Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
 
 ###### YAW ANALAYSIS
+ch[ch.SPEED < 15][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch[ch.SPEED >= 15][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+
+
+
+
+def effective_beam(yaw, beam, loa):
+    import math
+    return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
+
+effective_beam(10, 40, 318)
+effective_beam(10, 160, 1000)
+
 ch_compliant = ch[ch.SPEED <= 10]
 ch_compliant['Yaw'] = abs(ch_compliant.COURSE - ch_compliant.HEADING)
 ch_compliant.sort_values('Yaw').reset_index().Yaw.plot()
