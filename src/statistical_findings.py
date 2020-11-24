@@ -26,6 +26,20 @@ for filename in glob.glob(path):
 ch = pd.concat(ch_agg)
 sv = pd.concat(sv_agg)
 
+# line plot for every ship in the channel... speed vs time
+for ship in ch.MMSI.unique():
+    plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name")
+    plt.show()
+
+plt.figure(figsize=(30,15))
+sns.set(font_scale=2.5)
+sns.set_style("whitegrid")
+g = sns.swarmplot(x='MMSI', y='SPEED', data=ch, size=7, color='m')
+g.set(xticklabels=[])
+g.set_xlabel('Vessels')
+g.set_ylabel('VSPD kn')
+plt.title("Array of Vessel Speeds")
+
 # for some reason the dates are out of order, i suspect might contribute to long
 # and inefficient run times... look into this and fix ?
 # count number of post-panamax meetpass instances along with total number of instances
@@ -80,18 +94,12 @@ dat['Date/Time UTC'].plot()
 f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')
 sns.set_style("whitegrid")
-dat['GST mph'].plot(legend=True, linewidth=3, fontsize=30)
+dat['WSPD mph'].plot(legend=True, linewidth=3, fontsize=30)
 dat['SPEED mph'].plot(legend=True, linewidth=3, fontsize=30)
-<<<<<<< HEAD
 plt.title('Vessel Speed and Wind Speed Lineplots \n' + 'correlation: ' + str(round(dat.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)),
             fontsize=35)
 plt.legend(loc=2, prop={'size': 30})
 
-=======
-plt.title('Vessel Speed and Gust Speed Lineplots', fontsize=35)
-plt.legend(loc=2, prop={'size': 30})
-plt.show()
->>>>>>> 8f751bd65a9168e3d062990f7e90b18d0d608707
 #plt.savefig('VSPD&WSDP_lineplot.png')
 f, axes = plt.subplots(figsize=(40,15), sharex=True)
 plt.style.use('seaborn-white')

@@ -24,6 +24,9 @@ def import_report(path, mode):
     df["LOA m"] = df["A"] + df["B"]
     df["LOA ft"] = df["LOA m"] * 3.28
     df["LOA ft"] = df["LOA ft"].round(0)
+    df["Beam m"] = df["C"] + df["D"]
+    df["Beam ft"] = df["LBeam m"] * 3.28
+    df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
     sub_panamax = None
@@ -226,7 +229,7 @@ def import_report(path, mode):
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
-                       "WDIR degT", "WSPD mph", "GST mph"]]
+                       "Beam ft", "Beam m", "WDIR degT", "WSPD mph", "GST mph"]]
 
         ports[i] = res
 
