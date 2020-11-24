@@ -60,22 +60,21 @@ mp['WDIR degT'] = mp['WDIR degT'].astype(int)
 mp.shape
 mp.columns
 
-hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False, 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True}
-mp_plot = px.scatter(mp, x="Longitude", y="Latitude", hover_data=hover_dict,
-                  hover_name="Name", color="course behavior")
-mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13,
-                   font_family="sans-serif"))
-
-
-px.scatter(mp, x='Date/Time UTC', y='Name', color="course behavior")
+hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False,
+                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True,
+                'Beam m':True, 'effective beam m':True}
 round(mp.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)
 round(mp.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)
 round(mp.dropna()[['SPEED', 'WDIR degT']].corr().iloc[0][1], 2)
+round(mp.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)
 
-px.line(mp, x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name")
-px.line(mp, x='Date/Time UTC', y='WSPD mph', color="course behavior", hover_name="Name")
+
+mp_plot = px.line(mp, x='Date/Time UTC', y='SPEED', color='course behavior', hover_data=hover_dict)
+mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13, font_family="sans-serif"))
+
+px.line(mp, x='Date/Time UTC', y='Yaw', color="course behavior", hover_name="Name")
 px.line(mp, x='Date/Time UTC', y='GST mph', color="course behavior", hover_name="Name")
-px.line(mp, x='Date/Time UTC', y='WDIR degT', color="course behavior", hover_name="Name")
+px.line(mp, x='Date/Time UTC', y='WSPD mph', color="course behavior", hover_name="Name")
 
 
 

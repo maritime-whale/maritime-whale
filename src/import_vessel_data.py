@@ -188,6 +188,16 @@ def import_report(path, mode):
 
             ports[i]['Yaw'] = abs(ports[i]['COURSE'] - ports[i]['HEADING'])
 
+            EB = []
+            loa = ports[i]['LOA m'].values
+            beam = ports[i]['Beam m'].values
+            yaw = ports[i]['Yaw'].values
+            for l in range(ports[i].shape[0]):
+                    EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
+
+            ports[i].loc[:, 'effective beam m'] = EB
+            ports[i].loc[:, 'effective beam ft'] = ports[i].loc[:, 'effective beam m'] * 3.28
+            ports[i].loc[:, 'effective beam ft'] = ports[i].loc[:, 'effective beam ft'].round(0)
             ### location specification
             # nearshore_index = ports[i][ports[i]['Longitude'] <= channel_midpoint[i]].index
             # offshore_index = ports[i][ports[i]['Longitude'] > channel_midpoint[i]].index
@@ -234,7 +244,7 @@ def import_report(path, mode):
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
-                       "Beam ft", "Beam m", "Yaw",
+                       "Beam ft", "Beam m", "Yaw", "effective beam m", "effective beam ft",
                        "WDIR degT", "WSPD mph", "GST mph"]]
 
         ports[i] = res
