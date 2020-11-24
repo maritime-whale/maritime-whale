@@ -27,20 +27,16 @@ ch = pd.concat(ch_agg)
 sv = pd.concat(sv_agg)
 
 # line plot for every ship in the channel... speed vs time
+hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False,
+                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True,
+                'Beam m':True, 'effective beam m':True}
 for ship in ch.MMSI.unique():
     trace = go.Scatter()
-    plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name")
+    plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name", hover_data=hover_dict)
     plt.show()
 
-fig = plt.figure()
-g = sns.swarmplot(x='MMSI', y='SPEED', data=ch, size=3, color='m')
-g.set(xticklabels=[])
-g.set_xlabel('Vessels')
-g.set_ylabel('VSPD kn')
-plt.figure(figsize=(30,15))
-sns.set(font_scale=2.5)
-sns.set_style("whitegrid")
-plt.title("Array of Vessel Speeds")
+px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict, color='course behavior')
+
 
 # for some reason the dates are out of order, i suspect might contribute to long
 # and inefficient run times... look into this and fix ?
@@ -85,16 +81,13 @@ ch.columns
 dat = ch.sort_values('Date/Time UTC').reset_index().dropna()
 dat['SPEED mph'] = dat['SPEED'] * 1.151
 dat['WDIR degT'] = dat['WDIR degT'].astype(int)
-sns.scatterplot(data = dat, y = 'SPEED', x = 'WSPD mph')
-sns.scatterplot(data = dat, y = 'SPEED', x = 'GST mph')
-sns.scatterplot(data = dat, y = 'SPEED', x = 'WDIR degT')
-
 dat['Date/Time UTC'].plot()
 ########################################################################
 trace1 = go.Scatter(x=dat.index, y=dat['WSPD mph'], mode='lines', name='WSPD mph')
 trace2 = go.Scatter(x=dat.index, y=dat['SPEED mph'], mode='lines', name='VSPD mph')
 trace3 = go.Scatter(x=dat.index, y=dat['GST mph'], mode='lines', name='GST mph')
-data = [trace1, trace2, trace3]
+trace4 = go.Scatter(x=dat.index, y=dat['Yaw'], mode='lines', name='Yaw')
+data = [trace1, trace2, trace3, trace4]
 fig = go.Figure(data=data)#, layout=layout)
 fig.show()
 #######################################################
