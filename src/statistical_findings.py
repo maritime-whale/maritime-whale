@@ -24,9 +24,11 @@ for filename in glob.glob(path):
     sv_agg.append(report[1])
 
 ch = pd.concat(ch_agg)
+ch = ch[ch.Longitude <= -79.7]
 sv = pd.concat(sv_agg)
 
 ch['rounded date'] = [ch['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(ch['Date/Time UTC']))]
+
 
 def effective_beam(yaw, beam, loa):
     import math
@@ -39,8 +41,8 @@ compliant = ch[ch.SPEED <= 10]
 non_compliant = ch[ch.SPEED > 10]
 
 hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False,
-                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True,
-                'Beam m':True, 'effective beam m':True}
+                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True, 'LOA ft':True,
+                'Beam ft':True, 'effective beam ft':True}
 ##################FOCUS ON CHARELSTON ONLY FOR NOW###############################
 ch_panamax = ch[ch['vessel class'] == 'Panamax']
 ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
@@ -57,16 +59,16 @@ for ship in ch.MMSI.unique():
 
 
 # COMPLIANT
-px.scatter(compliant, x='SPEED', y='GST mph', size='Yaw')
-px.scatter(compliant, y='effective beam m', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
-comp_corr_mat = compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam m']]
+px.scatter(compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+# px.scatter(compliant, y='effective beam ft', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
+comp_corr_mat = compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
 comp_correlation = comp_corr_mat.corr()
 px.imshow(comp_correlation)
 
 # NON_COMPLIANT
-px.scatter(non_compliant, x='SPEED', y='GST mph', size='Yaw')
-px.scatter(non_compliant, y='effective beam m', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
-non_comp_corr_mat = non_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam m']]
+px.scatter(non_compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+# px.scatter(non_compliant, y='effective beam ft', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
+non_comp_corr_mat = non_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
 non_comp_correlation = non_comp_corr_mat.corr()
 px.imshow(non_comp_correlation)
 
@@ -92,9 +94,6 @@ fig.show()
 #######################################################
 
 ###### YAW ANALAYSIS
-ch[['Yaw', 'effective beam m']].corr().iloc[0][1]
-ch[['SPEED', 'effective beam m']].corr().iloc[0][1]
-ch[['SPEED', 'effective beam m']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
 # ch.groupby(['Name', 'MMSI', 'vessel class', 'effective beam m'])[['SPEED', 'Yaw', 'WSPD mph', 'GST mph']].count()
 
 # ch.groupby(['Name', 'MMSI', 'vessel class', 'Beam m'])[['Yaw', 'effective beam m']].max()
@@ -121,7 +120,7 @@ for ship in inbound.MMSI.unique():
                 x = 'Longitude',
                 y = 'Latitude',
                 hover_data=hover_dict,
-                color='Yaw',
+                size='Yaw',
                 range_color=[inbound.Yaw.min(),inbound.Yaw.max()])
     plt.show()
 
@@ -229,6 +228,7 @@ pd.DataFrame(sv_dat, sv_index)
 
 
 ###### meeting/passing
+ch_meetpass = meetpass(ch)
 for item in ch_meetpass.items():
     print(item)
 
@@ -241,11 +241,11 @@ for i in range(len(ch_meetpass)):
     mmsi.append(list(ch_meetpass)[i][0])
     mmsi.append(list(ch_meetpass)[i][1])
     times.append(list(ch_meetpass.values())[i][0])
+#
+# for i in range(len(ch_meetpass)):
+#     mp = pc.concat([ch[(ch.MMSI == mmsi[i]) & (ch['rounded date'] == times[0])]])
 
-for i in range(len(ch_meetpass)):
-    mp = pc.concat([ch[(ch.MMSI == mmsi[i]) & (ch['rounded date'] == times[0])]])
-
-pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])],
+mp = pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])],
            ch[(ch.MMSI == mmsi[1]) & (ch['rounded date'] == times[0])],
            ch[(ch.MMSI == mmsi[2]) & (ch['rounded date'] == times[1])],
            ch[(ch.MMSI == mmsi[3]) & (ch['rounded date'] == times[1])],
@@ -258,19 +258,14 @@ pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])],
            ch[(ch.MMSI == mmsi[10]) & (ch['rounded date'] == times[5])],
            ch[(ch.MMSI == mmsi[11]) & (ch['rounded date'] == times[5])]
            ])
-12 / ch.shape[0]
-ch.shape
-len(ch.MMSI.unique())
+
 
 # for some reason the dates are out of order, i suspect might contribute to long
 # and inefficient run times... look into this and fix ?
 # count number of post-panamax meetpass instances along with total number of instances
 # calculate percentage of transits that are meeting and passing
 # graph....
-ch_meetpass = meetpass(ch)
-ch_meetpass.keys()
-for item in ch_meetpass.items():
-    print(item)
+
 mp = ch[(ch['MMSI'] == 255805942) | (ch['MMSI'] == 440176000) &
    (ch['Date/Time UTC'] >= '2020-11-18 14:40:00') &
    (ch['Date/Time UTC'] <= '2020-11-18 15:30:00')]

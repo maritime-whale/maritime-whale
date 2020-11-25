@@ -22,11 +22,11 @@ def import_report(path, mode):
     df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude"}, axis=1,
                inplace=True)
-    df["LOA m"] = df["A"] + df["B"]
-    df["LOA ft"] = df["LOA m"] * 3.28
+    # df["LOA m"] = df["A"] + df["B"]
+    df["LOA ft"] = (df["A"] + df["B"]) * 3.28
     df["LOA ft"] = df["LOA ft"].round(0)
-    df["Beam m"] = df["C"] + df["D"]
-    df["Beam ft"] = df["Beam m"] * 3.28
+    # df["Beam m"] = df["C"] + df["D"]
+    df["Beam ft"] = (df["C"] + df["D"]) * 3.28
     df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
@@ -34,12 +34,12 @@ def import_report(path, mode):
     sub_panamax = None
     # if mode == "sub-panamax":
     #     sub_panamax = df[df["LOA m"] < 200]
-    df = df[df["LOA m"] >= 200]
+    # df = df[df["LOA m"] >= 200]
+    df = df[df["LOA ft"] >= 656]
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
-    df = df[["Date/Time UTC", "Name", "MMSI", "LOA m", "LOA ft", "Latitude",
-             "Longitude", "COURSE", "AIS TYPE", "HEADING", "SPEED",
-             "Beam m", "Beam ft"]]
+    df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
+             "Longitude", "COURSE", "AIS TYPE", "HEADING", "SPEED", "Beam ft"]]
 
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340))
@@ -163,7 +163,7 @@ def import_report(path, mode):
             merged_speeds = maxes.merge(mean, on=["Name", "MMSI"])
             d = merged_speeds["Max speed kn"].to_dict()
             columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[],
-                       "LOA m":[], "LOA ft":[], "COURSE":[], "AIS TYPE":[],
+                       "LOA ft":[], "COURSE":[], "AIS TYPE":[],
                        "WSPD mph":[], "GST mph":[], "WDIR degT":[]}
             for key, value in d.items():
                 for k in columns.keys():
@@ -189,14 +189,14 @@ def import_report(path, mode):
             ports[i]['Yaw'] = abs(ports[i]['COURSE'] - ports[i]['HEADING'])
 
             EB = []
-            loa = ports[i]['LOA m'].values
-            beam = ports[i]['Beam m'].values
+            loa = ports[i]['LOA ft'].values
+            beam = ports[i]['Beam ft'].values
             yaw = ports[i]['Yaw'].values
             for l in range(ports[i].shape[0]):
                     EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
 
-            ports[i].loc[:, 'effective beam m'] = EB
-            ports[i].loc[:, 'effective beam ft'] = ports[i].loc[:, 'effective beam m'] * 3.28
+            ports[i].loc[:, 'effective beam ft'] = EB
+            # ports[i].loc[:, 'effective beam ft'] = ports[i].loc[:, 'effective beam m'] * 3.28
             ports[i].loc[:, 'effective beam ft'] = ports[i].loc[:, 'effective beam ft'].round(0)
             ### location specification
             # nearshore_index = ports[i][ports[i]['Longitude'] <= channel_midpoint[i]].index
@@ -237,14 +237,14 @@ def import_report(path, mode):
         if mode == LVL_PLTS:
             res.sort_values("Max speed kn", ascending=False, inplace=True)
             res = res[["Date/Time UTC", "Name", "MMSI", "Max speed kn",
-                       "Mean speed kn", "LOA m", "LOA ft", "Latitude",
+                       "Mean speed kn", "LOA ft", "Latitude",
                        "Longitude", "COURSE", "WDIR degT", "WSPD mph", "GST mph"]]
         elif mode == STATS:
-            res = res[["Name", "MMSI", "Date/Time UTC", "SPEED", "LOA m",
+            res = res[["Name", "MMSI", "Date/Time UTC", "SPEED",
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
-                       "Beam ft", "Beam m", "Yaw", "effective beam m", "effective beam ft",
+                       "Beam ft", "Yaw", "effective beam ft",
                        "WDIR degT", "WSPD mph", "GST mph"]]
 
         ports[i] = res
