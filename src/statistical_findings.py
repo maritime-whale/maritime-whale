@@ -26,51 +26,50 @@ for filename in glob.glob(path):
 ch = pd.concat(ch_agg)
 sv = pd.concat(sv_agg)
 
-# line plot for every ship in the channel... speed vs time
+def effective_beam(yaw, beam, loa):
+    import math
+    return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
+
+effective_beam(10, 160, 1000)
+effective_beam(10, 160, 1201)
+
+compliant = ch[ch.SPEED <= 10]
+compliant = compliant.drop(175) # removes row with yaw of 16 degrees..
+non_compliant = ch[ch.SPEED > 10]
+non_compliant = non_compliant.drop(1236) # removes row with yaw of 13 degrees...
+
 hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False,
                 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True,
                 'Beam m':True, 'effective beam m':True}
+##################FOCUS ON CHARELSTON ONLY FOR NOW###############################
+ch_panamax = ch[ch['vessel class'] == 'Panamax']
+ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+
+# Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
+# Note: no need to split stats up into Panamax and Post-Panamax (not really important).
+# Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
+px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict)
+# line plot for every ship in the channel... speed vs time
 for ship in ch.MMSI.unique():
     trace = go.Scatter()
     plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name", hover_data=hover_dict)
     plt.show()
 
-px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict, color='course behavior')
 
+# COMPLIANT
+px.scatter(compliant, x='SPEED', y='GST mph', size='Yaw')
+px.scatter(compliant, y='effective beam m', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
+comp_corr_mat = compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam m']]
+comp_correlation = comp_corr_mat.corr()
+px.imshow(comp_correlation)
 
-# for some reason the dates are out of order, i suspect might contribute to long
-# and inefficient run times... look into this and fix ?
-# count number of post-panamax meetpass instances along with total number of instances
-# calculate percentage of transits that are meeting and passing
-# graph....
-ch_meetpass = meetpass(ch)
-ch_meetpass
+# NON_COMPLIANT
+px.scatter(non_compliant, x='SPEED', y='GST mph', size='Yaw')
+px.scatter(non_compliant, y='effective beam m', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
+non_comp_corr_mat = non_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam m']]
+non_comp_correlation = non_comp_corr_mat.corr()
+px.imshow(non_comp_correlation)
 
-for item in ch_meetpass.items():
-    print(item)
-
-mp = ch[(ch['MMSI'] == 255805942) | (ch['MMSI'] == 440176000) &
-   (ch['Date/Time UTC'] >= '2020-11-18 14:40:00') &
-   (ch['Date/Time UTC'] <= '2020-11-18 15:30:00')]
-mp['WDIR degT'] = mp['WDIR degT'].astype(int)
-mp.shape
-mp.columns
-
-hover_dict = {'Date/Time UTC':True, 'SPEED':True, 'course behavior':False,
-                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True,
-                'Beam m':True, 'effective beam m':True}
-round(mp.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)
-round(mp.dropna()[['SPEED', 'GST mph']].corr().iloc[0][1], 2)
-round(mp.dropna()[['SPEED', 'WDIR degT']].corr().iloc[0][1], 2)
-round(mp.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)
-
-
-mp_plot = px.line(mp, x='Date/Time UTC', y='SPEED', color='course behavior', hover_data=hover_dict)
-mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13, font_family="sans-serif"))
-
-px.line(mp, x='Date/Time UTC', y='Yaw', color="course behavior", hover_name="Name")
-px.line(mp, x='Date/Time UTC', y='GST mph', color="course behavior", hover_name="Name")
-px.line(mp, x='Date/Time UTC', y='WSPD mph', color="course behavior", hover_name="Name")
 
 
 
@@ -92,48 +91,61 @@ fig = go.Figure(data=data)#, layout=layout)
 fig.show()
 #######################################################
 
-
-corr_mat = dat[['SPEED mph', 'WSPD mph', 'GST mph', 'WDIR degT', 'COURSE', 'LOA m']]
-corr_mat['WDIR degT'] = corr_mat['WDIR degT'].astype(int)
-correlation = corr_mat.corr()
-sns.heatmap(correlation, center=0.6)
-plt.title('Correlation Heatmap')
-
-
-round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1], 2)
-
-
-# running one day of data at a time
-# use '2020-10-06.csv' path for testing
-# path = "../tests/2020-10-06.csv"
-# out = import_report(path, STATS)
-# ch = out[0]
-# sv = out[1]
-
-
-ch_panamax = ch[ch['vessel class'] == 'Panamax']
-ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
-
-sv_panamax = sv[sv['vessel class'] == 'Panamax']
-sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
-
-# Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
-# Note: no need to split stats up into Panamax and Post-Panamax (not really important).
-# Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
-
 ###### YAW ANALAYSIS
-ch[ch.SPEED < 15][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
-ch[ch.SPEED >= 15][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch[['Yaw', 'effective beam m']].corr().iloc[0][1]
+ch[['SPEED', 'effective beam m']].corr().iloc[0][1]
+ch[['SPEED', 'effective beam m']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch.groupby(['Name', 'MMSI', 'vessel class', 'effective beam m'])[['SPEED', 'Yaw', 'WSPD mph', 'GST mph']].count()
+
+ch.groupby(['Name', 'MMSI', 'vessel class', 'Beam m'])[['Yaw', 'effective beam m']].max()
+
+ch.shape
+compliant.shape
+non_compliant.shape
+ch[ch.SPEED <= 10][['Yaw', 'SPEED', 'GST mph']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+ch[ch.SPEED > 10][['Yaw', 'SPEED', 'GST mph']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
+
+high_yaw = ch[ch.MMSI.isin(ch[ch.Yaw > 7].MMSI.unique())]
+d = high_yaw.groupby(['MMSI'])['Yaw'].max().to_dict()
+date = []
+gust = []
+wspd = []
+vspd = []
+for key, value in d.items():
+    date.append(high_yaw[(high_yaw['MMSI'] == key) & (high_yaw['Yaw'] == value)]['Date/Time UTC'].values)
+    gust.append(high_yaw[(high_yaw['MMSI'] == key) & (high_yaw['Yaw'] == value)]['GST mph'].values)
+    wspd.append(high_yaw[(high_yaw['MMSI'] == key) & (high_yaw['Yaw'] == value)]['WSPD mph'].values)
+    vspd.append(high_yaw[(high_yaw['MMSI'] == key) & (high_yaw['Yaw'] == value)]['SPEED'].values)
+dates = []
+wind = []
+gst = []
+speed = []
+for i in range(len(date)):
+    dates.append(date[i][0])
+    wind.append(wspd[i][0])
+    gst.append(gust[i][0])
+    speed.append(vspd[i][0])
+df = high_yaw.groupby(['Name', 'MMSI', 'vessel class', 'Beam m'])[['Yaw', 'effective beam m']].max()
+df['Date/Time UTC'] = dates
+df['GST mph'] = gst
+df['WSPD mph'] = wind
+df['SPEED'] = speed
+df.sort_values('Date/Time UTC')
 
 
+for ship in ch[ch.Yaw > 7].MMSI.unique():
+    t1 = go.Scatter(x=high_yaw[high_yaw.MMSI == ship].reset_index().index, y=high_yaw[high_yaw.MMSI == ship]['SPEED'], mode='lines', name='VSPD kn')
+    t2 = go.Scatter(x=high_yaw[high_yaw.MMSI == ship].reset_index().index, y=high_yaw[high_yaw.MMSI == ship]['Yaw'], mode='lines', name='Yaw')
+    t3 = go.Scatter(x=high_yaw[high_yaw.MMSI == ship].reset_index().index, y=high_yaw[high_yaw.MMSI == ship]['GST mph'], mode='lines', name='Gust mph')
+    fig = go.Figure(data=[t1, t2, t3])#, layout=layout)
+    fig.show()
+    # plt = px.line(ch[ch.MMSI == ship], x='Date/Time UTC', y='SPEED', color="course behavior", hover_name="Name", hover_data=hover_dict)
+    # plt.show()
 
+ch[ch.Yaw > 7]['Date/Time UTC'].describe()
+ch[ch.Yaw > 7].groupby(['Name', 'MMSI'])[['Yaw']].max()
+ch[ch.Yaw > 7][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
 
-def effective_beam(yaw, beam, loa):
-    import math
-    return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
-
-effective_beam(10, 40, 318)
-effective_beam(10, 160, 1000)
 
 ch_compliant = ch[ch.SPEED <= 10]
 ch_compliant['Yaw'] = abs(ch_compliant.COURSE - ch_compliant.HEADING)
@@ -141,24 +153,12 @@ ch_compliant.sort_values('Yaw').reset_index().Yaw.plot()
 ch_compliant.Yaw.value_counts().plot(kind='barh')
 
 
-ch_compliant[['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
 
-ch_compliant[ch_compliant.Yaw > 5][['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
 ch_compliant[['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
 
-ch_compliant[ch_compliant.Yaw > 5][['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
 ch_compliant[['SPEED', 'Yaw']].corr()
 
 
-
-
-
-sv_compliant = sv[sv.SPEED <= 10]
-sv_compliant['Yaw'] = abs(sv_compliant.COURSE - sv_compliant.HEADING)
-sv_compliant.Yaw.value_counts().plot(kind='barh')
-sv_compliant[['COURSE', 'HEADING', 'Yaw']].sort_values('COURSE').reset_index().drop('index', axis=1).plot(figsize=(15,6))
-sv_compliant[['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
-sv_compliant[['SPEED', 'Yaw']].corr()
 
 # CHARLESTON
 ch_dat = {'Proportion of Transits':[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + '%',
@@ -238,3 +238,24 @@ pd.DataFrame(ch_dat, ch_index)
 
 pd.DataFrame(sv_dat, sv_index)
 # pd.DataFrame(sv_dat, sv_index)
+
+
+###### meeting/passing
+test = meetpass(ch_post_panamax)
+test
+# for some reason the dates are out of order, i suspect might contribute to long
+# and inefficient run times... look into this and fix ?
+# count number of post-panamax meetpass instances along with total number of instances
+# calculate percentage of transits that are meeting and passing
+# graph....
+ch_meetpass = meetpass(ch)
+ch_meetpass.keys()
+for item in ch_meetpass.items():
+    print(item)
+mp = ch[(ch['MMSI'] == 255805942) | (ch['MMSI'] == 440176000) &
+   (ch['Date/Time UTC'] >= '2020-11-18 14:40:00') &
+   (ch['Date/Time UTC'] <= '2020-11-18 15:30:00')]
+# mp_plot = px.line(mp, x='Date/Time UTC', y='SPEED', color='course behavior', hover_data=hover_dict)
+# mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13, font_family="sans-serif"))
+# px.line(mp, x='Date/Time UTC', y='Yaw', color="course behavior", hover_name="Name")
+# px.line(mp, x='Date/Time UTC', y='GST mph', color="course behavior", hover_name="Name")
