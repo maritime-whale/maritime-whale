@@ -14,7 +14,7 @@ import os
 
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
-    data_frames = []
+    data_frames = [] # DELETE THIS LINE?
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     days = fetch_latest_reports(logfile)
     if not days:
