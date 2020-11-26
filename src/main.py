@@ -85,11 +85,14 @@ def main():
         create_csv_cache(map_data[1] + temp_sv, "master-sv")
         for i in range(len(map_data)):
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
-        lvl1, lvl2_CH, lvl2_SV = generate_plots(map_data)
+        plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
+        zooms = [10, 10, 8.5]
+        for i, level in enumerate(figs.keys()):
+            plots[level] = generate_plots(map_data[i], zooms[i])
         # output plots in an interactive HTML format
-        pio.write_html(lvl1, file="../html/level_one.html", auto_open=False)
-        pio.write_html(lvl2_CH, file="../html/level_two_charleston.html", auto_open=False)
-        pio.write_html(lvl2_SV, file="../html/level_two_savannah.html", auto_open=False)
+        pio.write_html(plots["lvl1"], file="../html/level_one.html", auto_open=False)
+        pio.write_html(plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
+        pio.write_html(plots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")
     else:
