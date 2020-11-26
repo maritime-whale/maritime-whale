@@ -62,6 +62,12 @@ TEMP=temp
 if [ ! -d "$TEMP" ]; then
     mkdir $TEMP
 fi
+
+# LINKS
+# https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
+# https://www.ndbc.noaa.gov/data/realtime2/
+# https://www.ndbc.noaa.gov/wstat.shtml
+
 # USEFUL SENSOR INFO (DO NOT DELETE):
 # 41004 ch off 32.501 /  -79.099
 # 41008 sv off 31.400 / -80.866
