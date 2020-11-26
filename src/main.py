@@ -1,4 +1,4 @@
-from import_vessel_data import *
+from import_maritime_data import *
 from fetch_vessel_data import *
 from cache import *
 from plot import *
