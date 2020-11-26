@@ -87,7 +87,7 @@ def main():
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
         plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = [10, 10, 8.5]
-        for i, level in enumerate(figs.keys()):
+        for i, level in enumerate(plots.keys()):
             plots[level] = generate_plots(map_data[i], zooms[i])
         # output plots in an interactive HTML format
         pio.write_html(plots["lvl1"], file="../html/level_one.html", auto_open=False)
