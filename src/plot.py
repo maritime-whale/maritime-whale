@@ -1,3 +1,6 @@
+# https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer
+# https://plotly.com/python/mapbox-layers/
+
 from import_vessel_data import *
 
 import plotly.express as px
@@ -34,5 +37,4 @@ def generate_plots(map_data):
               ],
               showlegend=False)
         figs[view].update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        # figs[view].show()
     return figs["agg"], figs["charleston"], figs["savannah"]
