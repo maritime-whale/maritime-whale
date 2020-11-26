@@ -1,5 +1,11 @@
+# NOTES:
 # https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer
 # https://plotly.com/python/mapbox-layers/
+
+# NOAA leads:
+# https://tileservice.charts.noaa.gov/tiles/tileservice.xml
+# https://tileservice.charts.noaa.gov/tileset.html#50000_1-mapbox
+# https://geo.weather.gc.ca/geomet/ (<-- in mapbox-layers example; see link)
 
 from import_vessel_data import *
 
