@@ -6,6 +6,7 @@ from util import *
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
+import plotly.io as pio
 import matplotlib.pyplot as plt
 import plotly.express as px
 import seaborn as sns
@@ -46,6 +47,37 @@ hover_dict = {'Date/Time UTC':True, 'MMSI':True, 'SPEED':True, 'course behavior'
 ##################FOCUS ON CHARELSTON ONLY FOR NOW###############################
 ch_panamax = ch[ch['vessel class'] == 'Panamax']
 ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+
+fig1 = px.histogram(ch, x='SPEED', nbins=20, color_discrete_sequence=['darkorchid'])
+fig1.update_layout(xaxis_title_text='VSPD kn', shapes=[
+    dict(
+      type= 'line',
+      yref= 'paper', y0= 0, y1= 1,
+      xref= 'x', x0= 10, x1= 10
+    )
+])
+fig2 = px.histogram(sv, x='SPEED', nbins=20, color_discrete_sequence=['darkorchid'])
+fig2.update_layout(shapes=[
+    dict(
+      type= 'line',
+      yref= 'paper', y0= 0, y1= 1,
+      xref= 'x', x0= 10, x1= 10
+    )
+])
+# pio.write_html(fig2, file="sv_VSPD_hist.html", auto_open=False)
+# pio.write_html(fig1, file="ch_VSPD_hist.html", auto_open=False)
+
+fig3 = go.Figure()
+fig3.add_trace(go.Histogram(x=ch['WSPD mph'], name='WSPD mph'))
+fig3.add_trace(go.Histogram(x=ch['GST mph'], name='GST mph'))
+# fig.update_layout(barmode='stack')
+fig3.update_layout(
+    title_text='Windspeed and Gust', # title of plot
+    xaxis_title_text='mph', # xaxis label
+    yaxis_title_text='Count', # yaxis label
+    bargap=0.2, # gap between bars of adjacent location coordinates
+    bargroupgap=0.1 # gap between bars of the same location coordinates
+)
 
 # Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
 # Note: no need to split stats up into Panamax and Post-Panamax (not really important).
@@ -146,6 +178,12 @@ ch_compliant['Yaw'] = abs(ch_compliant.COURSE - ch_compliant.HEADING)
 ch_compliant.sort_values('Yaw').reset_index().Yaw.plot()
 ch_compliant.Yaw.value_counts().plot(kind='barh')
 
+tab = ch[['Yaw', 'SPEED']].sort_values('SPEED').reset_index().drop('index', axis=1)
+t1 = go.Scatter(x=tab.index, y=tab['SPEED'], mode='lines', name='VSPD kn')
+t2 = go.Scatter(x=tab.index, y=tab['Yaw'], mode='lines', name='Yaw deg')
+data = [t1, t2]
+fig = go.Figure(data=data)#, layout=layout)
+fig.show()
 
 
 ch_compliant[['Yaw', 'SPEED']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
@@ -270,8 +308,10 @@ len(ch.MMSI.unique())
 
 one_way = ch[~ch.index.isin(two_way.index)]
 one_way.shape
+px.scatter(one_way, x='SPEED', y='GST mph', size='Yaw', hover_data=hover_dict, color='vessel class')
 
-px.scatter(one_way, x='SPEED', y='GST mph', size='Yaw', hover_data=hover_dict)
+
+
 px.scatter(one_way, x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict)
 px.scatter(ch[ch.MMSI == 255805914], x='Longitude', y='Latitude', size='Yaw', color='course behavior', hover_data=hover_dict)
 ch[(ch.MMSI == 255805914) & (ch['Date/Time UTC'] == '2020-11-14 06:55:39')]
@@ -281,7 +321,7 @@ one_way[one_way.Yaw == 11]
 
 
 
-px.scatter(two_way, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+px.scatter(two_way, x='SPEED', y='WSPD mph', size='Yaw', color='vessel class', hover_data=hover_dict)
 
 
 
