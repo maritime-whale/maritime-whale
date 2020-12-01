@@ -86,13 +86,15 @@ def main():
         for i in range(len(map_data)):
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
         plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
-        zooms = [10, 10, 8.5]
+        zooms = [10.5, 10.5, 8.5]
+        heat = [False, False, True]
+        token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(plots.keys()):
-            plots[level] = generate_plots(map_data[i], zooms[i])
+            plots[level] = generate_plots(map_data[i], zooms[i], heat[i], token)
         # output plots in an interactive HTML format
-        pio.write_html(plots["lvl1"], file="../html/level_one.html", auto_open=False)
-        pio.write_html(plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
-        pio.write_html(plots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
+        pio.write_html(plots["lvl1"], file="../html/geo_level_one.html", auto_open=False)
+        pio.write_html(plots["lvl2_CH"], file="../html/geo_level_two_charleston.html", auto_open=False)
+        pio.write_html(plots["lvl2_SV"], file="../html/geo_level_two_savannah.html", auto_open=False)
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")
     else:
