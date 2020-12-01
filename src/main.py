@@ -87,10 +87,11 @@ def main():
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
         plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = [10.5, 10.5, 8.5]
-        heat = [False, False, True]
+        # heat = [False, False, True]
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(plots.keys()):
-            plots[level] = generate_plots(map_data[i], zooms[i], heat[i], token)
+            # plots[level] = generate_plots(map_data[i], zooms[i], heat[i], token)
+            plots[level] = generate_plots(map_data[i], zooms[i], token)
         # output plots in an interactive HTML format
         pio.write_html(plots["lvl1"], file="../html/geo_level_one.html", auto_open=False)
         pio.write_html(plots["lvl2_CH"], file="../html/geo_level_two_charleston.html", auto_open=False)
