@@ -91,9 +91,9 @@ def main():
         for i, level in enumerate(geoplots.keys()):
             geoplots[level] = generate_geoplots(map_data[i], zooms[i], sizes[i], token)
         # output geoplots in an interactive HTML format
-        pio.write_html(geoplots["lvl1"], file="../html/geo_level_one.html", auto_open=False)
-        pio.write_html(geoplots["lvl2_CH"], file="../html/geo_level_two_charleston.html", auto_open=False)
-        pio.write_html(geoplots["lvl2_SV"], file="../html/geo_level_two_savannah.html", auto_open=False)
+        pio.write_html(geoplots["lvl1"], file="../html/level_one.html", auto_open=False)
+        pio.write_html(geoplots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
+        pio.write_html(geoplots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")
     else:
