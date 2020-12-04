@@ -27,74 +27,11 @@ for filename in glob.glob(path):
 ch = pd.concat(ch_agg)
 ch = ch[ch.Longitude < -79.692].reset_index()
 sv = pd.concat(sv_agg)
+sv = sv.reset_index()
 # sv = sv[sv.Longitude < -80.76].reset_index()
 
-px.violin(ch[ch.COURSE > 200][['COURSE', 'HEADING']])
-px.violin(ch[ch.COURSE < 200][['COURSE', 'HEADING']])
-
-px.histogram(sv[sv.COURSE > 200][['COURSE', 'HEADING']])
-px.histogram(sv[sv.COURSE < 200][['COURSE', 'HEADING']])
-
-for ship in sv[(sv.COURSE > 200) & (sv.Yaw >= 9)].MMSI.unique():
-    t1 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.HEADING > 200)].reset_index()['Date/Time UTC'],
-                    y=sv[(sv.MMSI == ship) & (sv.HEADING > 200)].HEADING, mode='lines+markers', name='Heading')
-    t2 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.COURSE > 200)].reset_index()['Date/Time UTC'],
-                    y=sv[(sv.MMSI == ship) & (sv.COURSE > 200)].COURSE, mode='lines+markers', name='COURSE')
-    data = [t1, t2]
-    fig = go.Figure(data=data)#, layout=layout)
-    fig.update_layout(title='Savannah ' + str(ship) + ' Inbound Course and Heading')
-    fig.show()
-
-for ship in sv[(sv.COURSE < 200) & (sv.Yaw >= 8)].MMSI.unique():
-    t1 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.HEADING < 200)].reset_index()['Date/Time UTC'],
-                    y=sv[(sv.MMSI == ship) & (sv.HEADING < 200)].HEADING, mode='lines+markers', name='Heading')
-    t2 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.COURSE < 200)].reset_index()['Date/Time UTC'],
-                    y=sv[(sv.MMSI == ship) & (sv.COURSE < 200)].COURSE, mode='lines+markers', name='COURSE')
-    data = [t1, t2]
-    fig = go.Figure(data=data)#, layout=layout)
-    fig.update_layout(title='Savannah ' + str(ship) + ' Outbound Course and Heading')
-    fig.show()
-
-
-# charleston outbound high yaw ships in pilot staging area
-df1 = ch[(ch.MMSI.isin(ch[(ch.COURSE < 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique())) &
-    (ch.COURSE < 200) &
-    (ch.Longitude >= -79.692)]
-# charleston inbound high yaw ships in pilot staging area
-df2 = ch[(ch.MMSI.isin(ch[(ch.COURSE > 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique())) &
-    (ch.COURSE > 200) &
-    (ch.Longitude >= -79.692)]
-
-for ship in ch[(ch.COURSE > 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique():
-    t1 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.HEADING > 200)].reset_index()['Date/Time UTC'],
-                    y=ch[(ch.MMSI == ship) & (ch.HEADING > 200)].HEADING, mode='lines+markers', name='Heading')
-    t2 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE > 200)].reset_index()['Date/Time UTC'],
-                    y=ch[(ch.MMSI == ship) & (ch.COURSE > 200)].COURSE, mode='lines+markers', name='COURSE')
-    data = [t1, t2]
-    fig = go.Figure(data=data)#, layout=layout)
-    fig.update_layout(title='Charleston ' + str(ship) + ' Inbound Course and Heading')
-    fig.show()
-
-for ship in ch[(ch.COURSE < 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique():
-    t1 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].reset_index()['Date/Time UTC'],
-                    y=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].HEADING, mode='lines+markers', name='Heading')
-    t2 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].reset_index()['Date/Time UTC'],
-                    y=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].COURSE, mode='lines+markers', name='COURSE')
-    data = [t1, t2]
-    fig = go.Figure(data=data)#, layout=layout)
-    fig.update_layout(title='Charleston ' + str(ship) + ': Outbound Course and Heading')
-    fig.show()
-
-px.scatter(ch, x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
-px.scatter(ch[ch.Yaw >= 8], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
-px.scatter(ch[ch.Longitude >= -79.692], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
-
-
-px.scatter(sv, x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
-px.scatter(sv[sv.Yaw >= 6], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
-
 ch['rounded date'] = [ch['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(ch['Date/Time UTC']))]
-
+sv['rounded date'] = [sv['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(sv['Date/Time UTC']))]
 
 def effective_beam(yaw, beam, loa):
     import math
@@ -103,18 +40,20 @@ def effective_beam(yaw, beam, loa):
 effective_beam(10, 160, 1000)
 effective_beam(10, 160, 1201)
 
-compliant = ch[ch.SPEED <= 10]
-non_compliant = ch[ch.SPEED > 10]
+ch_compliant = ch[ch.SPEED <= 10]
+sv_compliant = sv[sv.SPEED <= 10]
+ch_non_compliant = ch[ch.SPEED > 10]
+sv_non_compliant = sv[sv.SPEED > 10]
+
+ch_panamax = ch[ch['vessel class'] == 'Panamax']
+ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+sv_panamax = sv[sv['vessel class'] == 'Panamax']
+sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
 
 hover_dict = {'Date/Time UTC':True, 'MMSI':True, 'SPEED':True, 'course behavior':True,
                 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True, 'LOA ft':True,
                 'Beam ft':True, 'effective beam ft':True}
-##################FOCUS ON CHARELSTON ONLY FOR NOW###############################
-ch_panamax = ch[ch['vessel class'] == 'Panamax']
-ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
-
-# px.histogram(sv, x='SPEED', nbins=20, color_discrete_sequence=['darkgrey'])
-
+##################Stats findings graph for website###############################
 ch['VSPD kn'] = ch.SPEED.copy()
 fig1 = px.histogram(ch, x='VSPD kn', nbins=20, color_discrete_sequence=['teal'])
 fig1.update_layout(xaxis_title_text = 'Vessel speed',
@@ -126,6 +65,17 @@ fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':2}))
 fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':2.5}))
+sv['VSPD kn'] = sv.SPEED.copy()
+fig1 = px.histogram(sv, x='VSPD kn', nbins=20, color_discrete_sequence=['teal'])
+fig1.update_layout(xaxis_title_text = 'Vessel speed',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + "%",
+                   showlegend = True)
+fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':2}))
+fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=sv.SPEED.mean(), y0=0, x1=sv.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':2.5}))
 
 fig2 = px.histogram(ch['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
 fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
@@ -134,53 +84,64 @@ fig2.update_layout(title="Windspeed Histogram" '<br>'
                         "Adverse Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
                   xaxis_title_text='Windspeed', yaxis_title_text="Unique AIS Positions",
                   showlegend = True)
+fig2 = px.histogram(sv['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
+fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid'}, name='test'))
+fig2.update_layout(title="Windspeed Histogram" '<br>'
+                        "Adverse Conditions: " + str(round((sv[sv['WSPD mph'] >= 30].shape[0] / sv.shape[0]) * 100, 2)) + '% ',
+                  xaxis_title_text='Windspeed', yaxis_title_text="Unique AIS Positions",
+                  showlegend = True)
 
-fig3 = px.scatter(ch, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence=['forestgreen'])
+fig3 = px.scatter(ch, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
 fig3.update_layout(xaxis_title_text = "VSPD kn",
                  title = "WSPD vs. VSPD" '<br>'
                         "Correlation: " + str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
+fig3 = px.scatter(sv, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
+fig3.update_layout(xaxis_title_text = "VSPD kn",
+                 title = "WSPD vs. VSPD" '<br>'
+                        "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
 
-t1 = go.Scatter(x=ch.sort_values('Date/Time UTC').reset_index().index, y=ch.sort_values('Date/Time UTC').reset_index()['SPEED'], mode='lines', name='VSPD kn')
-t2 = go.Scatter(x=ch.sort_values('Date/Time UTC').reset_index().index, y=ch.sort_values('Date/Time UTC').reset_index()['Yaw'], mode='lines', name='Yaw deg')
+t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn')
+t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg')
 data = [t1, t2]
 fig4 = go.Figure(data=data)#, layout=layout)
 fig4.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
                          "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg')
 
-px.bar(ch[ch.SPEED <= 10].Yaw.value_counts())
-px.bar(ch[ch.SPEED > 10].Yaw.value_counts())
+t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn')
+t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg')
+data = [t1, t2]
+fig4 = go.Figure(data=data)#, layout=layout)
+fig4.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
+                         "Compliant Mean Yaw: " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
+                         "Non Compliant Mean Yaw:  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg')
 
 # fig5 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
 # fig6 - oneway vs twoway transit visualization. probably bar chart ?
 # effective beam visualization ? would need to use the width of channel for this to be effective..
 # maybe add that into twoway transit visualization to show that the pilots actually have a lot of space... maybe
 
+px.violin(non_compliant.Yaw)
+px.violin(compliant.Yaw)
+px.histogram(ch, x='effective beam ft', color='vessel class')
+
+# ch_ec = [1000, 800, 400]
+# sv_ec = [600, 300]
+# for i in len(ch):
+#     if ch.loc[i, 'vessel class'] == "Post Panamax":
+#         ch.loc[i, 'channel space'] = ch.loc[i, 'effective beam ft'] / ch_ec[1]
+#     elif
 
 
+ch_post_panamax['channel space'] = round(ch_post_panamax['effective beam ft'] / 800, 2)
+px.histogram(ch_post_panamax['channel space'])
 
 
-fig3 = go.Figure()
-fig3.add_trace(go.Histogram(y=ch['WSPD mph'], name='WSPD mph'))
-fig3.add_trace(go.Histogram(y=ch['GST mph'], name='GST mph'))
-# fig.update_layout(barmode='stack')
-fig3.update_layout(
-    title_text='Windspeed and Gust', # title of plot
-    xaxis_title_text='Count', # xaxis label
-    yaxis_title_text='mph', # yaxis label
-    bargap=0.2, # gap between bars of adjacent location coordinates
-    bargroupgap=0.1 # gap between bars of the same location coordinates
-)
 px.violin(ch[['WSPD mph', 'GST mph']])
-# px.violin(ch, 'GST mph', 'WSPD mph')
-fig = go.Figure()
-t1 = go.Violin(ch)
-# t2 = go.Violin(ch['GST mph'])
-fig.add_trace(t1)
-# Note: Nearshore/offshore speed deltas is more important than Inbound/outbound speed deltas (not important).
-# Note: no need to split stats up into Panamax and Post-Panamax (not really important).
-# Note: high ship speed and low/moderate wind speed is important, and should be emphasized.
-px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict)
+
+
+px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict) #array of vessel speed copy from last year..
 # line plot for every ship in the channel... speed vs time
 for ship in ch.MMSI.unique():
     trace = go.Scatter()
@@ -189,31 +150,27 @@ for ship in ch.MMSI.unique():
 
 
 # COMPLIANT
-px.scatter(compliant, x='SPEED', y='WSPD mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
-px.scatter(compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+px.scatter(ch_compliant, x='SPEED', y='WSPD mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+px.scatter(ch_compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
 # px.scatter(compliant, y='effective beam ft', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
-comp_corr_mat = compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
+comp_corr_mat = ch_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
 comp_correlation = comp_corr_mat.corr()
 px.imshow(comp_correlation)
 
 # NON_COMPLIANT
-px.scatter(non_compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
+px.scatter(ch_non_compliant, x='SPEED', y='GST mph', size='Yaw', color='effective beam ft', hover_data=hover_dict)
 # px.scatter(non_compliant, y='effective beam ft', x='GST mph', size='Yaw', color='SPEED', hover_data=hover_dict)
-non_comp_corr_mat = non_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
+non_comp_corr_mat = ch_non_compliant.dropna()[['SPEED', 'WSPD mph', 'GST mph', 'Yaw', 'effective beam ft']]
 non_comp_correlation = non_comp_corr_mat.corr()
 px.imshow(non_comp_correlation)
 
 
 
-
-ch.shape
-ch[ch.isnull().any(axis=1)].shape
-
+########################################################################
 dat = ch.sort_values('Date/Time UTC').reset_index().dropna()
 dat['SPEED mph'] = dat['SPEED'] * 1.151
 dat['WDIR degT'] = dat['WDIR degT'].astype(int)
 dat['Date/Time UTC'].plot()
-########################################################################
 trace1 = go.Scatter(x=dat.index, y=dat['WSPD mph'], mode='lines', name='WSPD mph')
 trace2 = go.Scatter(x=dat.index, y=dat['SPEED'], mode='lines', name='VSPD kn')
 trace3 = go.Scatter(x=dat.index, y=dat['GST mph'], mode='lines', name='GST mph')
@@ -224,16 +181,6 @@ fig.show()
 #######################################################
 
 ###### YAW ANALAYSIS
-# ch.groupby(['Name', 'MMSI', 'vessel class', 'effective beam m'])[['SPEED', 'Yaw', 'WSPD mph', 'GST mph']].count()
-
-# ch.groupby(['Name', 'MMSI', 'vessel class', 'Beam m'])[['Yaw', 'effective beam m']].max()
-
-ch.shape
-compliant.shape
-non_compliant.shape
-ch[ch.SPEED <= 10][['Yaw', 'SPEED', 'GST mph']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
-ch[ch.SPEED > 10][['Yaw', 'SPEED', 'GST mph']].reset_index().drop('index', axis=1).plot(figsize=(15,6))
-# ch[ch.Yaw >= 10].sort_values('Date/Time UTC').drop(64).drop(['LOA ft', 'Beam ft', 'effective beam ft'], axis=1)
 high_yaw = ch[ch.MMSI.isin(ch[ch.Yaw >= 10].MMSI.unique())]
 ch[ch.Yaw >= 9]
 for ship in ch[ch.Yaw >= 8].MMSI.unique():
@@ -270,22 +217,6 @@ for ship in outbound.MMSI.unique():
     plt.show()
 
 
-ch_compliant = ch[ch.SPEED <= 10]
-ch_compliant['Yaw'] = abs(ch_compliant.COURSE - ch_compliant.HEADING)
-ch_compliant.sort_values('Yaw').reset_index().Yaw.plot()
-ch_compliant.Yaw.value_counts().plot(kind='barh')
-
-tab = ch[['Yaw', 'SPEED']].sort_values('SPEED').reset_index().drop('index', axis=1)
-t1 = go.Scatter(x=ch.sort_values('Date/Time UTC').reset_index().index, y=ch.sort_values('Date/Time UTC').reset_index()['SPEED'], mode='lines', name='VSPD kn')
-t2 = go.Scatter(x=ch.sort_values('Date/Time UTC').reset_index().index, y=ch.sort_values('Date/Time UTC').reset_index()['Yaw'], mode='lines', name='Yaw deg')
-data = [t1, t2]
-fig = go.Figure(data=data)#, layout=layout)
-fig.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
-                         "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
-                         "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg')
-fig.show()
-compliant.Yaw.median()
-non_compliant.Yaw.median()
 
 t1 = go.Scatter(x=compliant.sort_values('Date/Time UTC').reset_index().index, y=compliant.sort_values('Date/Time UTC').reset_index()['SPEED'], mode='lines', name='VSPD kn')
 t2 = go.Scatter(x=compliant.sort_values('Date/Time UTC').reset_index().index, y=compliant.sort_values('Date/Time UTC').reset_index()['Yaw'], mode='lines', name='Yaw deg')
@@ -296,17 +227,13 @@ fig.show()
 
 
 
-px.scatter(ch.sort_values('Date/Time UTC').reset_index()[['SPEED', 'Yaw']])
-
-sv.sort_values('Date/Time UTC').reset_index()['Date/Time UTC'].plot()
-t1 = go.Scatter(x=sv.sort_values('Date/Time UTC').reset_index().index, y=sv.sort_values('Date/Time UTC').reset_index()['SPEED'], mode='lines', name='VSPD kn')
-t2 = go.Scatter(x=sv.sort_values('Date/Time UTC').reset_index().index, y=sv.sort_values('Date/Time UTC').reset_index()['Yaw'], mode='lines', name='Yaw deg')
-data = [t1, t2]
-fig = go.Figure(data=data)#, layout=layout)
-fig.show()
 
 ch_compliant[['SPEED', 'Yaw']].corr()
 non_compliant[['SPEED', 'Yaw']].corr()
+
+sv_compliant[['SPEED', 'Yaw']].corr()
+sv_non_compliant[['SPEED', 'Yaw']].corr()
+
 
 # CHARLESTON
 ch_dat = {'Proportion of Transits':[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + '%',
@@ -408,11 +335,11 @@ two_way = pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])]
            ch[(ch.MMSI == mmsi[2]) & (ch['rounded date'] == times[1])],
            ch[(ch.MMSI == mmsi[3]) & (ch['rounded date'] == times[1])],
            ch[(ch.MMSI == mmsi[4]) & (ch['rounded date'] == times[2])],
-           ch[(ch.MMSI == mmsi[5]) & (ch['rounded date'] == times[2])]])#,
-           # ch[(ch.MMSI == mmsi[6]) & (ch['rounded date'] == times[3])],
-           # ch[(ch.MMSI == mmsi[7]) & (ch['rounded date'] == times[3])],
-           # ch[(ch.MMSI == mmsi[8]) & (ch['rounded date'] == times[4])],
-           # ch[(ch.MMSI == mmsi[9]) & (ch['rounded date'] == times[4])],
+           ch[(ch.MMSI == mmsi[5]) & (ch['rounded date'] == times[2])],
+           ch[(ch.MMSI == mmsi[6]) & (ch['rounded date'] == times[3])],
+           ch[(ch.MMSI == mmsi[7]) & (ch['rounded date'] == times[3])],
+           ch[(ch.MMSI == mmsi[8]) & (ch['rounded date'] == times[4])],
+           ch[(ch.MMSI == mmsi[9]) & (ch['rounded date'] == times[4])]])#,
            # ch[(ch.MMSI == mmsi[10]) & (ch['rounded date'] == times[5])],
            # ch[(ch.MMSI == mmsi[11]) & (ch['rounded date'] == times[5])]
            ])
@@ -424,20 +351,13 @@ len(ch.MMSI.unique())
 
 one_way = ch[~ch.index.isin(two_way.index)]
 one_way.shape
-px.scatter(one_way, x='SPEED', y='GST mph', size='Yaw', hover_data=hover_dict, color='vessel class')
+px.scatter(one_way, x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict, color='vessel class')
 
 px.scatter(one_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
 
 px.scatter(one_way, x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
-px.scatter(ch[ch.MMSI == 255805914], x='Longitude', y='Latitude', size='Yaw', color='course behavior', hover_data=hover_dict)
-ch[(ch.MMSI == 255805914) & (ch['Date/Time UTC'] == '2020-11-14 06:55:39')]
 
-
-one_way[one_way.Yaw == 11]
-
-
-
-px.scatter(two_way, x='SPEED', y='WSPD mph', size='Yaw', color='vessel class', hover_data=hover_dict)
+px.scatter(two_way, x='SPEED', y='WSPD mph', color='vessel class', hover_data=hover_dict)
 
 
 
@@ -455,3 +375,69 @@ mp = ch[(ch['MMSI'] == 255805942) | (ch['MMSI'] == 440176000) &
 # mp_plot.update_layout(hoverlabel=dict(bgcolor="White", font_size=13, font_family="sans-serif"))
 # px.line(mp, x='Date/Time UTC', y='Yaw', color="course behavior", hover_name="Name")
 # px.line(mp, x='Date/Time UTC', y='GST mph', color="course behavior", hover_name="Name")
+
+
+####### Yaw algorithm...
+px.violin(ch[ch.COURSE > 200][['COURSE', 'HEADING']])
+px.violin(ch[ch.COURSE < 200][['COURSE', 'HEADING']])
+
+px.histogram(sv[sv.COURSE > 200][['COURSE', 'HEADING']])
+px.histogram(sv[sv.COURSE < 200][['COURSE', 'HEADING']])
+
+for ship in sv[(sv.COURSE > 200) & (sv.Yaw >= 9)].MMSI.unique():
+    t1 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.HEADING > 200)].reset_index()['Date/Time UTC'],
+                    y=sv[(sv.MMSI == ship) & (sv.HEADING > 200)].HEADING, mode='lines+markers', name='Heading')
+    t2 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.COURSE > 200)].reset_index()['Date/Time UTC'],
+                    y=sv[(sv.MMSI == ship) & (sv.COURSE > 200)].COURSE, mode='lines+markers', name='COURSE')
+    data = [t1, t2]
+    fig = go.Figure(data=data)#, layout=layout)
+    fig.update_layout(title='Savannah ' + str(ship) + ' Inbound Course and Heading')
+    fig.show()
+
+for ship in sv[(sv.COURSE < 200) & (sv.Yaw >= 8)].MMSI.unique():
+    t1 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.HEADING < 200)].reset_index()['Date/Time UTC'],
+                    y=sv[(sv.MMSI == ship) & (sv.HEADING < 200)].HEADING, mode='lines+markers', name='Heading')
+    t2 = go.Scatter(x=sv[(sv.MMSI == ship) & (sv.COURSE < 200)].reset_index()['Date/Time UTC'],
+                    y=sv[(sv.MMSI == ship) & (sv.COURSE < 200)].COURSE, mode='lines+markers', name='COURSE')
+    data = [t1, t2]
+    fig = go.Figure(data=data)#, layout=layout)
+    fig.update_layout(title='Savannah ' + str(ship) + ' Outbound Course and Heading')
+    fig.show()
+
+
+# charleston outbound high yaw ships in pilot staging area
+df1 = ch[(ch.MMSI.isin(ch[(ch.COURSE < 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique())) &
+    (ch.COURSE < 200) &
+    (ch.Longitude >= -79.692)]
+# charleston inbound high yaw ships in pilot staging area
+df2 = ch[(ch.MMSI.isin(ch[(ch.COURSE > 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique())) &
+    (ch.COURSE > 200) &
+    (ch.Longitude >= -79.692)]
+
+for ship in ch[(ch.COURSE > 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique():
+    t1 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.HEADING > 200)].reset_index()['Date/Time UTC'],
+                    y=ch[(ch.MMSI == ship) & (ch.HEADING > 200)].HEADING, mode='lines+markers', name='Heading')
+    t2 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE > 200)].reset_index()['Date/Time UTC'],
+                    y=ch[(ch.MMSI == ship) & (ch.COURSE > 200)].COURSE, mode='lines+markers', name='COURSE')
+    data = [t1, t2]
+    fig = go.Figure(data=data)#, layout=layout)
+    fig.update_layout(title='Charleston ' + str(ship) + ' Inbound Course and Heading')
+    fig.show()
+
+for ship in ch[(ch.COURSE < 200) & (ch.Longitude >= -79.692) & (ch.Yaw >= 6)].MMSI.unique():
+    t1 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].reset_index()['Date/Time UTC'],
+                    y=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].HEADING, mode='lines+markers', name='Heading')
+    t2 = go.Scatter(x=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].reset_index()['Date/Time UTC'],
+                    y=ch[(ch.MMSI == ship) & (ch.COURSE < 200)].COURSE, mode='lines+markers', name='COURSE')
+    data = [t1, t2]
+    fig = go.Figure(data=data)#, layout=layout)
+    fig.update_layout(title='Charleston ' + str(ship) + ': Outbound Course and Heading')
+    fig.show()
+
+px.scatter(ch, x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
+px.scatter(ch[ch.Yaw >= 8], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
+px.scatter(ch[ch.Longitude >= -79.692], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
+
+
+px.scatter(sv, x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
+px.scatter(sv[sv.Yaw >= 6], x='Longitude', y='Latitude', color='Yaw', hover_data=hover_dict)
