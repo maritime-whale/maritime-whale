@@ -3,6 +3,7 @@ from import_vessel_data import *
 from datetime import timedelta
 from meetpass import *
 from util import *
+import statsmodels.api as sm
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
@@ -25,10 +26,28 @@ for filename in glob.glob(path):
     sv_agg.append(report[1])
 
 ch = pd.concat(ch_agg)
-ch = ch[ch.Longitude < -79.692].reset_index()
+ch = ch[ch.Latitude >= 32.667473].reset_index()
 sv = pd.concat(sv_agg)
-sv = sv.reset_index()
-# sv = sv[sv.Longitude < -80.76].reset_index()
+sv = sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)].reset_index()
+
+fig = px.scatter(ch, 'Longitude', 'Latitude')
+fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
+fig.add_trace(go.Scatter(x=np.array(-79.691502), y=np.array(32.667473)))
+px.scatter(ch[ch.Latitude >= 32.667473], 'Longitude', 'Latitude')
+
+
+
+fig = px.scatter(sv, 'Longitude', 'Latitude')
+fig.add_trace(go.Scatter(x=np.array(-80.81597), y=np.array(32.02732)))
+fig.add_trace(go.Scatter(x=np.array(-80.81425), y=np.array(32.02838)))
+fig.add_trace(go.Scatter(x=np.array(-80.78055), y=np.array(31.99183)))
+fig.add_trace(go.Scatter(x=np.array(-80.77943), y=np.array(31.99346)))
+fig.add_trace(go.Scatter(x=np.array(-80.78879), y=np.array(31.99772)))
+fig.add_trace(go.Scatter(x=np.array(-80.78701), y=np.array(31.9985)))
+px.scatter(sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)], 'Longitude', 'Latitude')
+
+
+
 
 ch['rounded date'] = [ch['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(ch['Date/Time UTC']))]
 sv['rounded date'] = [sv['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(sv['Date/Time UTC']))]
@@ -62,9 +81,14 @@ fig1.update_layout(xaxis_title_text = 'Vessel speed',
                            "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
                    showlegend = True)
 fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':2}))
+                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
 fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':2.5}))
+                        x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1
+
+
 sv['VSPD kn'] = sv.SPEED.copy()
 fig1 = px.histogram(sv, x='VSPD kn', nbins=20, color_discrete_sequence=['teal'])
 fig1.update_layout(xaxis_title_text = 'Vessel speed',
@@ -73,33 +97,59 @@ fig1.update_layout(xaxis_title_text = 'Vessel speed',
                            "Compliance Rate: " + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + "%",
                    showlegend = True)
 fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':2}))
+                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
 fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=sv.SPEED.mean(), y0=0, x1=sv.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':2.5}))
+                        x0=sv.SPEED.mean(), y0=0, x1=sv.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1
 
 fig2 = px.histogram(ch['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
 fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid'}, name='test'))
+                        x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig2.update_layout(title="Windspeed Histogram" '<br>'
-                        "Adverse Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
+                        "Adverse Wind Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
                   xaxis_title_text='Windspeed', yaxis_title_text="Unique AIS Positions",
                   showlegend = True)
-fig2 = px.histogram(sv['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
-fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid'}, name='test'))
-fig2.update_layout(title="Windspeed Histogram" '<br>'
-                        "Adverse Conditions: " + str(round((sv[sv['WSPD mph'] >= 30].shape[0] / sv.shape[0]) * 100, 2)) + '% ',
-                  xaxis_title_text='Windspeed', yaxis_title_text="Unique AIS Positions",
-                  showlegend = True)
+fig2.data[0].marker.line.width = 0.75
+fig2.data[0].marker.line.color = "black"
+fig2
+                  
 
-fig3 = px.scatter(ch, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
-fig3.update_layout(xaxis_title_text = "VSPD kn",
-                 title = "WSPD vs. VSPD" '<br>'
-                        "Correlation: " + str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
-fig3 = px.scatter(sv, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
-fig3.update_layout(xaxis_title_text = "VSPD kn",
-                 title = "WSPD vs. VSPD" '<br>'
-                        "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
+# ch['AIS behavior'] ['Non Compliant', 'Compliant', 'Adverse Condition'] ['Red', 'Green', 'Yellow']
+# for i in range(len(ch)):
+#     if ch.loc[i, 'SPEED'] > 10 and ch.loc[i, 'WSPD mph'] < 30:
+#         ch.loc[i, 'AIS behavior'] == 'Non Compliant'
+#     elif ch.loc[i, 'SPEED'] > 10 and ch.loc[i, 'WSPD mph'] >= 30:
+#         ch.loc[i, 'AIS behavior'] == 'Adverse Condition'
+#     elif ch.loc[i, 'SPEED'] <= 10 and ch.loc[i, 'WSPD mph'] < 30:
+#         ch.loc[i, 'AIS behavior'] == 'Compliant'
+#     elif ch.loc[i, 'SPEED'] <= 10 and ch.loc[i, 'WSPD mph'] >= 30:
+#         ch.loc[i, 'AIS behavior'] == 'Adverse Condition'
+
+
+fig3 = px.density_contour(ch, x='SPEED', y='WSPD mph')
+fig3.update_traces(contours_coloring = 'fill', colorscale = 'blues')
+fig3.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
+                          "Correlation: " + str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
+
+
+# fig3 = px.scatter(sv, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
+# fig3.update_layout(xaxis_title_text = "VSPD kn",
+#                  title = "WSPD vs. VSPD" '<br>'
+#                         "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%" '<br>'
+#                         "Non Compliant: " + str(round(len(sv[sv.SPEED > 10])/len(sv) * 100, 2)) + '%')
+# fig3.add_shape(type="rect",
+#     xref="x", yref="y",
+#     x0=10, y0=0,
+#     x1=sv['SPEED'].max()+1, y1=30,
+#     line=dict(color="Red",
+#               width=2,
+#               dash='dash'))
+fig3 = px.density_contour(sv, x='SPEED', y='WSPD mph')
+fig3.update_traces(contours_coloring = 'fill', colorscale = 'blues')
+fig3.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
+                          "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
 
 t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn')
 t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg')
@@ -108,6 +158,7 @@ fig4 = go.Figure(data=data)#, layout=layout)
 fig4.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
                          "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg')
+
 
 t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn')
 t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg')
@@ -317,8 +368,12 @@ pd.DataFrame(sv_dat, sv_index)
 
 ###### meeting/passing
 ch_meetpass = meetpass(ch)
+sv_meetpass = meetpass(sv)
 for item in ch_meetpass.items():
     print(item)
+for item in sv_meetpass.items():
+    print(item)
+
 
 mmsi = []
 times = []
@@ -357,7 +412,7 @@ px.scatter(one_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
 
 px.scatter(one_way, x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
 
-px.scatter(two_way, x='SPEED', y='WSPD mph', color='vessel class', hover_data=hover_dict)
+px.scatter(two_way, x='SPEED', y='WSPD mph', color='effective beam ft', hover_data=hover_dict)
 
 
 
