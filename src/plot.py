@@ -13,6 +13,7 @@ def generate_geoplots(map_data, zoom, size, token):
                             "Max speed kn", "Mean speed kn", "LOA ft"],
                             color_discrete_sequence=["white"],
                             zoom=zoom, height=size[0], width=size[1])
+    fig.update_traces(marker_size=4)
     fig.update_layout(
         mapbox_accesstoken=token,
         mapbox_style="satellite-streets",
