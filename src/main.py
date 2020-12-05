@@ -87,9 +87,10 @@ def main():
         geoplots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = (10.5, 11.5, 7)
         sizes = ((431, 707), (431, 707), (320, 692))
+        heat = (False, False, True)
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geoplots.keys()):
-            geoplots[level] = generate_geoplots(map_data[i], zooms[i], sizes[i], token)
+            geoplots[level] = generate_geoplots(map_data[i], zooms[i], sizes[i], heat[i], token)
         # output geoplots in an interactive HTML format
         pio.write_html(geoplots["lvl1"], file="../html/level_one.html", auto_open=False)
         pio.write_html(geoplots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
