@@ -87,7 +87,7 @@ def main():
         geoplots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = (10.5, 11.5, 7)
         sizes = ((431, 707), (431, 707), (320, 692))
-        heat = (False, False, True)
+        heat = (False, False, False)
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geoplots.keys()):
             geoplots[level] = generate_geoplots(map_data[i], zooms[i], sizes[i], heat[i], token)
