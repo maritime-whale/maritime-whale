@@ -73,24 +73,44 @@ hover_dict = {'Date/Time UTC':True, 'MMSI':True, 'SPEED':True, 'course behavior'
                 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True, 'LOA ft':True,
                 'Beam ft':True, 'effective beam ft':True}
 ##################Stats findings graph for website###############################
-ch['VSPD kn'] = ch.SPEED.copy()
-fig1 = px.histogram(ch, x='VSPD kn', nbins=20, color_discrete_sequence=['teal'])
-fig1.update_layout(xaxis_title_text = 'Vessel speed',
+ch['VSPD kn'] = ch.SPEED
+plt = go.Figure(data=[go.Histogram(x=ch['VSPD kn'], nbinsx=20)])
+plt.data[0].marker.line.width = 0.75
+plt.data[0].marker.line.color = "black"
+plt.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
+plt.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+plt.update_layout(xaxis_title_text = 'Vessel speed',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = 'Vessel Speed Histogram' '<br>'
                            "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
                    showlegend = True)
-fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
-fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+
+
+fig1 = px.histogram(ch, x='VSPD kn', nbins=20)#, color_discrete_sequence=['teal'])
+fig1.update_layout(xaxis_title_text = 'VSPD kn',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
+                   showlegend = True)
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
 fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
-fig1
+fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=15, annotation_font_color='red')
+fig1.add_vline(x=ch['VSPD kn'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=15, annotation_font_color='black')
+# fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+#                         x0=10, y0=0, x1=10, y1=1, name='test', line={'dash': 'solid', 'color':'Red', 'width':1.5}))
+# fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper', name='test',
+#                         x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
 
 
-sv['VSPD kn'] = sv.SPEED.copy()
-fig1 = px.histogram(sv, x='VSPD kn', nbins=20, color_discrete_sequence=['teal'])
+sv['VSPD kn'] = sv.SPEED
+fig1 = px.histogram(sv, x='VSPD kn', nbins=20)#, color_discrete_sequence=['teal'])
 fig1.update_layout(xaxis_title_text = 'Vessel speed',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = 'Vessel Speed Histogram' '<br>'
@@ -109,12 +129,13 @@ fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig2.update_layout(title="Windspeed Histogram" '<br>'
                         "Adverse Wind Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
-                  xaxis_title_text='Windspeed', yaxis_title_text="Unique AIS Positions",
-                  showlegend = True)
+                  xaxis_title_text='WSPD mph', yaxis_title_text="Unique AIS Positions",
+                  showlegend = False)
+fig2.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
 fig2.data[0].marker.line.width = 0.75
 fig2.data[0].marker.line.color = "black"
 fig2
-                  
+
 
 # ch['AIS behavior'] ['Non Compliant', 'Compliant', 'Adverse Condition'] ['Red', 'Green', 'Yellow']
 # for i in range(len(ch)):
@@ -374,7 +395,6 @@ for item in ch_meetpass.items():
 for item in sv_meetpass.items():
     print(item)
 
-
 mmsi = []
 times = []
 for i in range(len(ch_meetpass)):
@@ -398,6 +418,14 @@ two_way = pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])]
            # ch[(ch.MMSI == mmsi[10]) & (ch['rounded date'] == times[5])],
            # ch[(ch.MMSI == mmsi[11]) & (ch['rounded date'] == times[5])]
            ])
+
+mmsi
+times
+px.scatter(ch[ch.MMSI == mmsi[0]], x='Date/Time UTC', y='SPEED')
+
+
+ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0])]
+
 
 ch.shape
 two_way.shape
