@@ -454,6 +454,7 @@ df = pd.DataFrame(np.random.randn(len(index)), index=index).drop(0, axis=1)
 df
 df.index.get_level_values(2)
 
+
 ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0]) & (ch['course behavior'] == courses[0])]
 
 
@@ -475,25 +476,60 @@ ch_two_way = ch_two_way[~ch_two_way.index.isin(drop.index)]
 
 ch_two_way.shape
 
-
-
 ch.shape
 print(str(round((ch_two_way.shape[0] / ch.shape[0]) * 100, 2)) + '%')
 len(ch.MMSI.unique())
+len(ch_two_way.MMSI.unique())
 
 one_way = ch[~ch.index.isin(ch_two_way.index)]
 one_way.shape
 
-
 px.scatter(one_way, x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict, color='vessel class')
 
 px.scatter(one_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
+px.scatter(ch_two_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
 
 px.scatter(one_way, x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
+fig = px.density_contour(one_way[one_way['WSPD mph'] < 30], x='SPEED', y='WSPD mph')
+fig.update_traces(contours_coloring = 'fill', colorscale = 'blues')
+one_way[one_way['WSPD mph'] < 30].SPEED.mean()
+ch_two_way.SPEED.mean()
+
+fig1 = px.histogram(one_way, x='SPEED', nbins=20)#, color_discrete_sequence=['teal'])
+fig1.update_layout(xaxis_title_text = 'VSPD kn',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'One Way Transits Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " +
+                           str(round(sum(one_way['SPEED'] <= 10) / one_way.shape[0] * 100, 2)) + "%")
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=one_way.SPEED.mean(), y0=0, x1=one_way.SPEED.mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+fig1.add_vline(x=one_way['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
 
 px.scatter(ch_two_way, x='SPEED', y='WSPD mph', hover_data=hover_dict)
+fig = px.density_contour(ch_two_way, x='SPEED', y='WSPD mph')
+fig.update_traces(contours_coloring = 'fill', colorscale = 'blues')
 
-
+fig1 = px.histogram(ch_two_way, x='SPEED', nbins=20)#, color_discrete_sequence=['teal'])
+fig1.update_layout(xaxis_title_text = 'VSPD kn',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'Two Way Transits Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " +
+                           str(round(sum(ch_two_way['SPEED'] <= 10) / ch_two_way.shape[0] * 100, 2)) + "%")
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=ch_two_way.SPEED.mean(), y0=0, x1=ch_two_way.SPEED.mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+fig1.add_vline(x=ch_two_way['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
 
 
 # for some reason the dates are out of order, i suspect might contribute to long
