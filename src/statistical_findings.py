@@ -27,8 +27,10 @@ for filename in glob.glob(path):
 
 ch = pd.concat(ch_agg)
 ch = ch[ch.Latitude >= 32.667473].reset_index()
+ch = ch.sort_values('Date/Time UTC').reset_index().drop(['level_0', 'index'], axis=1)
 sv = pd.concat(sv_agg)
 sv = sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)].reset_index()
+sv = sv.sort_values('Date/Time UTC').reset_index().drop(['level_0', 'index'], axis=1)
 
 fig = px.scatter(ch, 'Longitude', 'Latitude')
 fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
@@ -456,6 +458,12 @@ df.index.get_level_values(2)
 
 
 ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0]) & (ch['course behavior'] == courses[0])]
+ch.iloc[631,:]
+
+ch.iloc[632,:]
+ch.iloc[636,:]
+ch.iloc[639,:]
+
 
 
 for i in range(len(df)):
@@ -465,13 +473,39 @@ for i in range(len(df)):
         plt.show()
 
 
-
 ch_two_way = get_init_times(ch, ch_meetpass)
-ch_two_way = ch_two_way.reset_index()
+ch_two_way.shape
+# ch_two_way = ch_two_way.reset_index()
+# ch_two_way['index'].plot()
 
-# fixing the bug...
-drop = ch_two_way[(ch_two_way.MMSI == mmsi[0]) & (ch_two_way['course behavior'] == 'Inbound')]
-ch_two_way = ch_two_way[~ch_two_way.index.isin(drop.index)]
+ch_two_way.iloc[631 :]
+ch_two_way.iloc[632 :]
+ch_two_way.iloc[636 :]
+ch_two_way.iloc[639 :]
+
+# ch_two_way.iloc[[631, 632, 636, 639], :]
+
+
+ch['transits'] = 'one way'
+ch['transits'][ch.index.isin(ch_two_way.index)] = 'two way'
+
+ch[ch.transits == 'two way'].shape
+test = ch[ch.transits == 'two way']
+test = test.reset_index()
+test['index'].plot()
+
+np.array(sorted(ch_two_way['index'].values))
+np.array(sorted(test['index'].values))
+
+sorted(list(set(ch_two_way['index'].values) - set(test['index'].values)))
+
+
+
+for i in range(len(df)):
+    if i%2 == 0:
+        t = test[(test.MMSI == df.index.get_level_values(2)[i]) | (test.MMSI == df.index.get_level_values(2)[i+1])]
+        plt = px.scatter(t, x='Longitude', y='Latitude', color='Name', hover_data=hover_dict)
+        plt.show()
 
 
 ch_two_way.shape
