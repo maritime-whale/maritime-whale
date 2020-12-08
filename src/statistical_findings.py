@@ -154,6 +154,7 @@ fig3.update_traces(contours_coloring = 'fill', colorscale = 'blues')
 fig3.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
                           "Correlation: " + str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
 
+127 / len(ch)
 
 # fig3 = px.scatter(sv, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
 # fig3.update_layout(xaxis_title_text = "VSPD kn",
@@ -456,97 +457,115 @@ df = pd.DataFrame(np.random.randn(len(index)), index=index).drop(0, axis=1)
 df
 df.index.get_level_values(2)
 
-
 ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0]) & (ch['course behavior'] == courses[0])]
-ch.iloc[631,:]
 
-ch.iloc[632,:]
-ch.iloc[636,:]
-ch.iloc[639,:]
-
-
-
-for i in range(len(df)):
-    if i%2 == 0:
-        test = ch_two_way[(ch_two_way.MMSI == df.index.get_level_values(2)[i]) | (ch_two_way.MMSI == df.index.get_level_values(2)[i+1])]
-        plt = px.scatter(test, x='Longitude', y='Latitude', color='Name', hover_data=hover_dict)
-        plt.show()
-
-
+# add this into import_report for STATS mode
+# ch_meetpass = meetpass(ch)
 ch_two_way = get_init_times(ch, ch_meetpass)
-ch_two_way.shape
-# ch_two_way = ch_two_way.reset_index()
-# ch_two_way['index'].plot()
+ch['transit'] = 'one way transit'
+ch['transit'][ch.index.isin(ch_two_way.index)] = 'two way transit'
+ch_high_wind = ch[ch['WSPD mph'] >= 30]
+ch['adverse wind'] = 'no adverse wind conditions'
+ch['adverse wind'][ch.index.isin(ch_high_wind.index)] = 'adverse wind conditions'
 
-ch_two_way.iloc[631 :]
-ch_two_way.iloc[632 :]
-ch_two_way.iloc[636 :]
-ch_two_way.iloc[639 :]
-
-# ch_two_way.iloc[[631, 632, 636, 639], :]
-
-
-ch['transits'] = 'one way'
-ch['transits'][ch.index.isin(ch_two_way.index)] = 'two way'
-
-ch[ch.transits == 'two way'].shape
-test = ch[ch.transits == 'two way']
-test = test.reset_index()
-test['index'].plot()
-
-np.array(sorted(ch_two_way['index'].values))
-np.array(sorted(test['index'].values))
-
-sorted(list(set(ch_two_way['index'].values) - set(test['index'].values)))
-
+sv_two_way = get_init_times(sv, sv_meetpass)
+sv['transit'] = 'one way transit'
+sv['transit'][sv.index.isin(sv_two_way.index)] = 'two way transit'
+sv_high_wind = sv[sv['WSPD mph'] >= 30]
+sv['adverse wind'] = 'no adverse wind conditions'
+sv['adverse wind'][sv.index.isin(sv_high_wind.index)] = 'adverse wind conditions'
 
 
 for i in range(len(df)):
     if i%2 == 0:
-        t = test[(test.MMSI == df.index.get_level_values(2)[i]) | (test.MMSI == df.index.get_level_values(2)[i+1])]
+        t = ch_two_way[(ch_two_way.MMSI == df.index.get_level_values(2)[i]) | (ch_two_way.MMSI == df.index.get_level_values(2)[i+1])]
         plt = px.scatter(t, x='Longitude', y='Latitude', color='Name', hover_data=hover_dict)
         plt.show()
 
+ch[ch.transit == 'two way transit'].shape
+ch[ch.transit == 'one way transit'].shape
 
-ch_two_way.shape
+print(str(round((ch[ch.transit == 'two way transit'].shape[0] / ch.shape[0]) * 100, 2)) + '%')
 
-ch.shape
-print(str(round((ch_two_way.shape[0] / ch.shape[0]) * 100, 2)) + '%')
-len(ch.MMSI.unique())
-len(ch_two_way.MMSI.unique())
+
+fig1 = px.histogram(ch, x='SPEED', color='transit', nbins=20, color_discrete_sequence=['darkslateblue', 'salmon'])#, color_discrete_sequence=['teal'])
+fig1.update_layout(barmode='overlay',
+                   xaxis_title_text = 'VSPD kn',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
+                   showlegend = True)
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1
+# fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+# fig1.add_vline(x=ch['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='blue')
+
+fig1 = px.histogram(sv, x='SPEED', color='transit', nbins=20, color_discrete_sequence=['darkslateblue', 'salmon'])#, color_discrete_sequence=['teal'])
+fig1.update_layout(barmode='overlay',
+                   xaxis_title_text = 'VSPD kn',
+                   yaxis_title_text = 'Unique AIS Positions',
+                   title = 'Vessel Speed Histogram' '<br>'
+                           "Compliance Rate: " + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + "%",
+                   showlegend = True)
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=sv.SPEED.mean(), y0=0, x1=sv.SPEED.mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
+fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.color = "black"
+fig1
+# fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+# fig1.add_vline(x=sv['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='blue')
+
+
+
+
+# fig = px.histogram(ch, x='SPEED', color='transit')
+# fig.update_layout(barmode='overlay')
+px.pie(ch, 'transit')
+px.scatter(ch, x='SPEED', y='WSPD mph', color='transit', hover_data=hover_dict )
+fig = px.histogram(ch, x='SPEED', color='adverse wind')
+fig.update_layout(barmode='overlay')
+px.pie(ch, 'adverse wind')
 
 one_way = ch[~ch.index.isin(ch_two_way.index)]
 one_way.shape
 
-px.scatter(one_way, x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict, color='vessel class')
+px.scatter(ch[ch.transit == 'one way transit'], x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict, color='vessel class')
 
-px.scatter(one_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
-px.scatter(ch_two_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
+px.scatter(ch[ch.transit == 'one way transit'], x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
+px.scatter(ch[ch.transit == 'two way transit'], x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
 
-px.scatter(one_way, x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
-fig = px.density_contour(one_way[one_way['WSPD mph'] < 30], x='SPEED', y='WSPD mph')
+px.scatter(ch[ch.transit == 'one way transit'], x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
+fig = px.density_contour(ch[ch.transit == 'one way transit'][ch[ch.transit == 'one way transit']['WSPD mph'] < 30], x='SPEED', y='WSPD mph')
 fig.update_traces(contours_coloring = 'fill', colorscale = 'blues')
-one_way[one_way['WSPD mph'] < 30].SPEED.mean()
-ch_two_way.SPEED.mean()
 
-fig1 = px.histogram(one_way, x='SPEED', nbins=20)#, color_discrete_sequence=['teal'])
+
+fig1 = px.histogram(ch[ch.transit == 'one way transit'], x='SPEED', nbins=20)#, color_discrete_sequence=['teal'])
 fig1.update_layout(xaxis_title_text = 'VSPD kn',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = 'One Way Transits Vessel Speed Histogram' '<br>'
                            "Compliance Rate: " +
-                           str(round(sum(one_way['SPEED'] <= 10) / one_way.shape[0] * 100, 2)) + "%")
+                           str(round(sum(ch[ch.transit == 'one way transit']['SPEED'] <= 10) / ch[ch.transit == 'one way transit'].shape[0] * 100, 2)) + "%")
 fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
                 line=dict(color='Red', dash='solid', width=1.5), name='test')
-fig1.add_shape(type='line', x0=one_way.SPEED.mean(), y0=0, x1=one_way.SPEED.mean(), y1=1,
+fig1.add_shape(type='line', x0=ch[ch.transit == 'one way transit'].SPEED.mean(), y0=0, x1=ch[ch.transit == 'one way transit'].SPEED.mean(), y1=1,
                xref='x', yref='paper',
                line=dict(color='black', dash='solid', width=1.5), name='test')
 fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
 fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
-fig1.add_vline(x=one_way['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
+fig1.add_vline(x=ch[ch.transit == 'one way transit']['SPEED'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
 
-px.scatter(ch_two_way, x='SPEED', y='WSPD mph', hover_data=hover_dict)
-fig = px.density_contour(ch_two_way, x='SPEED', y='WSPD mph')
+px.scatter(ch[ch.transit == 'two way transit'], x='SPEED', y='WSPD mph', hover_data=hover_dict)
+fig = px.density_contour(ch[ch.transit == 'two way transit'], x='SPEED', y='WSPD mph')
 fig.update_traces(contours_coloring = 'fill', colorscale = 'blues')
 
 fig1 = px.histogram(ch_two_way, x='SPEED', nbins=20)#, color_discrete_sequence=['teal'])

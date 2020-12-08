@@ -1,4 +1,5 @@
 from datetime import *
+from meetpass import *
 from util import *
 
 import pandas as pd
@@ -241,12 +242,22 @@ def import_report(path, mode):
                        "Longitude", "COURSE", "WDIR degT", "WSPD mph", "GST mph"]]
         elif mode == STATS:
             res.loc[:, 'rounded date'] = [res.loc[:, 'Date/Time UTC'].iloc[i].floor('Min') for i in range(len(res.loc[:, 'Date/Time UTC']))]
+
+            # mp = meetpass(res)
+            # two_way = get_init_times(res, mp)
+            # res['transit'] = 'one way transit'
+            # res['transit'][res.index.isin(two_way.index)] = 'two way transit'
+            # high_wind = res[res['WSPD mph'] >= 30]
+            # res['adverse wind'] = 'no adverse wind conditions'
+            # res['adverse wind'][res.index.isin(high_wind.index)] = 'adverse wind conditions'
+
             res = res[["Name", "MMSI", "Date/Time UTC", "SPEED",
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
                        "Beam ft", "Yaw", "effective beam ft",
                        "WDIR degT", "WSPD mph", "GST mph", "rounded date"]]
+                       #"transit", "adverse wind"]]
 
         ports[i] = res
 
