@@ -1,5 +1,5 @@
 
-from import_vessel_data import *
+from import_maritime_data import *
 from datetime import timedelta
 from meetpass import *
 from util import *
@@ -36,7 +36,6 @@ fig.add_trace(go.Scatter(x=np.array(-79.691502), y=np.array(32.667473)))
 px.scatter(ch[ch.Latitude >= 32.667473], 'Longitude', 'Latitude')
 
 
-
 fig = px.scatter(sv, 'Longitude', 'Latitude')
 fig.add_trace(go.Scatter(x=np.array(-80.81597), y=np.array(32.02732)))
 fig.add_trace(go.Scatter(x=np.array(-80.81425), y=np.array(32.02838)))
@@ -45,7 +44,6 @@ fig.add_trace(go.Scatter(x=np.array(-80.77943), y=np.array(31.99346)))
 fig.add_trace(go.Scatter(x=np.array(-80.78879), y=np.array(31.99772)))
 fig.add_trace(go.Scatter(x=np.array(-80.78701), y=np.array(31.9985)))
 px.scatter(sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)], 'Longitude', 'Latitude')
-
 
 
 
@@ -101,8 +99,8 @@ fig1.add_shape(type='line', x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1,
                line=dict(color='black', dash='solid', width=1.5), name='test')
 fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
-fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=15, annotation_font_color='red')
-fig1.add_vline(x=ch['VSPD kn'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=15, annotation_font_color='black')
+fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+fig1.add_vline(x=ch['VSPD kn'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
 # fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
 #                         x0=10, y0=0, x1=10, y1=1, name='test', line={'dash': 'solid', 'color':'Red', 'width':1.5}))
 # fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper', name='test',
@@ -395,52 +393,105 @@ for item in ch_meetpass.items():
 for item in sv_meetpass.items():
     print(item)
 
+for key in ch_meetpass:
+    this_mmsi = key[0]
+    that_mmsi = key[1]
+    this_class = key[2]
+    that_class = key[3]
+    mp_time = ch_meetpass[key][0]
+    print(this_mmsi)
+    print(this_class)
+    print(that_mmsi)
+    print(that_class)
+    print(mp_time)
+
+
+ch['rounded date'] = [ch['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(ch['Date/Time UTC']))]
+sv['rounded date'] = [sv['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(sv['Date/Time UTC']))]
+
+dat = []
+for key in ch_meetpass:
+    this_mmsi = key[0]
+    that_mmsi = key[1]
+    this_class = key[2]
+    that_class = key[3]
+    this_course = key[4]
+    that_course = key[5]
+    enc_time = ch_meetpass[key][0]
+    dat.append(pd.DataFrame({'mmsi':[this_mmsi, that_mmsi],
+                            'vessel class':[this_class, that_class],
+                            'course':[this_course, that_course]}))
+df = pd.concat(dat).reset_index().drop('index', axis=1)
+################################################################################
 mmsi = []
 times = []
+courses = []
+vessel_class = []
+dist = []
 for i in range(len(ch_meetpass)):
     mmsi.append(list(ch_meetpass)[i][0])
     mmsi.append(list(ch_meetpass)[i][1])
+    vessel_class.append(list(ch_meetpass)[i][2])
+    vessel_class.append(list(ch_meetpass)[i][3])
+    courses.append(list(ch_meetpass)[i][4])
+    courses.append(list(ch_meetpass)[i][5])
     times.append(list(ch_meetpass.values())[i][0])
-#
-# for i in range(len(ch_meetpass)):
-#     mp = pc.concat([ch[(ch.MMSI == mmsi[i]) & (ch['rounded date'] == times[0])]])
+    dist.append(list(ch_meetpass.values())[i][1])
 
-two_way = pd.concat([ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] == times[0])],
-           ch[(ch.MMSI == mmsi[1]) & (ch['rounded date'] == times[0])],
-           ch[(ch.MMSI == mmsi[2]) & (ch['rounded date'] == times[1])],
-           ch[(ch.MMSI == mmsi[3]) & (ch['rounded date'] == times[1])],
-           ch[(ch.MMSI == mmsi[4]) & (ch['rounded date'] == times[2])],
-           ch[(ch.MMSI == mmsi[5]) & (ch['rounded date'] == times[2])],
-           ch[(ch.MMSI == mmsi[6]) & (ch['rounded date'] == times[3])],
-           ch[(ch.MMSI == mmsi[7]) & (ch['rounded date'] == times[3])],
-           ch[(ch.MMSI == mmsi[8]) & (ch['rounded date'] == times[4])],
-           ch[(ch.MMSI == mmsi[9]) & (ch['rounded date'] == times[4])]])#,
-           # ch[(ch.MMSI == mmsi[10]) & (ch['rounded date'] == times[5])],
-           # ch[(ch.MMSI == mmsi[11]) & (ch['rounded date'] == times[5])]
-           ])
+timess = []
+dists = []
+for time in times:
+    timess.append(time)
+    timess.append(time)
+for d in dist:
+    dists.append(d)
+    dists.append(d)
 
-mmsi
-times
-px.scatter(ch[ch.MMSI == mmsi[0]], x='Date/Time UTC', y='SPEED')
+arrays = [timess, dists, mmsi, vessel_class, courses ]
+tuples = list(zip(*arrays))
+index = pd.MultiIndex.from_tuples(tuples, names=['rounded_mp_time', 'min_deg_dist', 'mmsi', 'vessel class', 'course behavior'])
+df = pd.DataFrame(np.random.randn(len(index)), index=index).drop(0, axis=1)
+df
+df.index.get_level_values(2)
+
+ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0]) & (ch['course behavior'] == courses[0])]
 
 
-ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0])]
+for i in range(len(df)):
+    if i%2 == 0:
+        test = ch_two_way[(ch_two_way.MMSI == df.index.get_level_values(2)[i]) | (ch_two_way.MMSI == df.index.get_level_values(2)[i+1])]
+        plt = px.scatter(test, x='Longitude', y='Latitude', color='Name', hover_data=hover_dict)
+        plt.show()
+
+
+
+ch_two_way = get_init_times(ch, ch_meetpass)
+ch_two_way = ch_two_way.reset_index()
+
+# fixing the bug...
+drop = ch_two_way[(ch_two_way.MMSI == mmsi[0]) & (ch_two_way['course behavior'] == 'Inbound')]
+ch_two_way = ch_two_way[~ch_two_way.index.isin(drop.index)]
+
+
+ch_two_way.shape
+
 
 
 ch.shape
-two_way.shape
-print(str(round((two_way.shape[0] / ch.shape[0])*100, 2)) + '%')
+print(str(round((ch_two_way.shape[0] / ch.shape[0]) * 100, 2)) + '%')
 len(ch.MMSI.unique())
 
-one_way = ch[~ch.index.isin(two_way.index)]
+one_way = ch[~ch.index.isin(ch_two_way.index)]
 one_way.shape
+
+
 px.scatter(one_way, x='SPEED', y='WSPD mph', size='Yaw', hover_data=hover_dict, color='vessel class')
 
 px.scatter(one_way, x='WSPD mph', y='Yaw', hover_data=hover_dict, color='SPEED')
 
 px.scatter(one_way, x='SPEED', y='WSPD mph', color='Yaw', hover_data=hover_dict)
 
-px.scatter(two_way, x='SPEED', y='WSPD mph', color='effective beam ft', hover_data=hover_dict)
+px.scatter(ch_two_way, x='SPEED', y='WSPD mph', hover_data=hover_dict)
 
 
 

@@ -240,12 +240,13 @@ def import_report(path, mode):
                        "Mean speed kn", "LOA ft", "Latitude",
                        "Longitude", "COURSE", "WDIR degT", "WSPD mph", "GST mph"]]
         elif mode == STATS:
+            res.loc[:, 'rounded date'] = [res.loc[:, 'Date/Time UTC'].iloc[i].floor('Min') for i in range(len(res.loc[:, 'Date/Time UTC']))]
             res = res[["Name", "MMSI", "Date/Time UTC", "SPEED",
                        "LOA ft", "Latitude", "Longitude", "AIS TYPE", "COURSE",
                        "course behavior", "HEADING", "location", "vessel class",
                        # "Yaw"
                        "Beam ft", "Yaw", "effective beam ft",
-                       "WDIR degT", "WSPD mph", "GST mph"]]
+                       "WDIR degT", "WSPD mph", "GST mph", "rounded date"]]
 
         ports[i] = res
 

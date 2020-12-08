@@ -1,4 +1,4 @@
-from import_vessel_data import *
+from import_maritime_data import *
 from datetime import timedelta
 from util import *
 
@@ -23,6 +23,9 @@ def meetpass_helper(df, time_tolerance):
     """    df: cleaned VMR from import_report
     This function takes in a cleaned up entry channel dataframe plus desired time_tolerance (int),
        and returns potential meeting/passing positions from the entry channel"""
+
+    # THE LINE BELOW MAY BE UNNECESSARY -- CONSIDER REMOVING...
+
     #sorts the time stamp such that entry channel data is in chronological order
     times = df.sort_values("Date/Time UTC")
 
@@ -93,7 +96,12 @@ def meetpass(df):
                         dist = calc_naut_dist(this_lat, this_long, that_lat, that_long)
                         # check if true encounter (within minimum distance)
                         if min_dist >= dist:
-                            key = tuple(sorted([cur_key, inner_key]) + [this_class, that_class])
+                            fragments = sorted([cur_key, inner_key])
+                            if cur_key == fragments[0]:
+                                fragments += [this_class, that_class, this_course, that_course]
+                            else:
+                                fragments += [that_class, this_class, that_course, this_course]
+                            key = tuple(fragments)
                             if key not in true_encs:
                                 # create new entry
                                 true_encs[key] = (this_time, dist, this_wdir, this_wspd, this_gst)
@@ -108,6 +116,24 @@ def meetpass(df):
             i += 1
     return true_encs
 
+
+def get_init_times(df, true_encs):
+    two_way = []
+    for key in true_encs:
+        this_mmsi = key[0]
+        that_mmsi = key[1]
+        this_course = key[4]
+        that_course = key[5]
+        enc_time = true_encs[key][0]
+        two_way.append(pd.concat([get_init_time(df, this_mmsi, this_course, enc_time),
+                                  get_init_time(df, that_mmsi, that_course, enc_time)]))
+    return pd.concat(two_way)
+
+
+def get_init_time(df, mmsi, course, enc_time):
+    res = df[(df.MMSI == mmsi) & (df['course behavior'] == course) &
+             (df['rounded date'] <= enc_time)]
+    return res
 # use '2020-10-06.csv' path for testing
 # path = "../tests/2020-10-06.csv"
 # out = import_report(path, STATS)
