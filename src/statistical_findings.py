@@ -123,6 +123,14 @@ fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
 fig2.update_layout(xaxis_title_text = '',
                   yaxis_title_text = 'VSPD kn')
 
+ch_transit_speeders = []
+for mmsi in ch.MMSI.unique():
+    ship = ch[ch.MMSI == mmsi]
+    compl = len(ship[ship.SPEED <= 10])
+    ch_transit_speeders.append(round(compl / len(ship), 2))
+
+np.array(ch_transit_speeders).mean()
+
 fig2 = px.strip(sv, x='Name', y='SPEED',
                 color='transit', hover_data=hover_dict, stripmode='overlay',
                 color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
@@ -131,6 +139,13 @@ fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
 fig2.update_layout(xaxis_title_text = '',
                   yaxis_title_text = 'VSPD kn')
 
+sv_transit_speeders = []
+for mmsi in sv.MMSI.unique():
+    ship = sv[sv.MMSI == mmsi]
+    compl = len(ship[ship.SPEED <= 10])
+    sv_transit_speeders.append(round(compl / len(ship), 2))
+
+np.array(sv_transit_speeders).mean()
 ########################################################################
 fig3 = px.histogram(ch['WSPD mph'], color_discrete_sequence=['darkseagreen'])
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
