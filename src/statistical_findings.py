@@ -55,9 +55,9 @@ sv_two_way = twoway(sv, sv_meetpass)
 sv['transit'] = 'one way transit'
 sv['transit'][sv.index.isin(sv_two_way.index)] = 'two way transit'
 
-hover_dict = {'Date/Time UTC':True, 'MMSI':True, 'SPEED':True, 'course behavior':True,
-                'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True, 'LOA ft':True,
-                'Beam ft':True, 'effective beam ft':True}
+hover_dict = {'Date/Time UTC':True, 'MMSI':False, 'VSPD kn':True, 'WSPD mph':True, 'course behavior':True,
+              'Yaw':True, 'LOA ft':False, 'Beam ft':False, 'effective beam ft':True,
+              'location':False, 'Name':False, 'SPEED':False}
 
 # fig = px.scatter(ch, 'Longitude', 'Latitude')
 # fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
@@ -121,36 +121,30 @@ fig1.data[0].marker.line.color = "black"
 fig1
 ########################################################################
 fig2 = px.strip(ch, x='Name', y='SPEED',
-                color='transit', hover_data=hover_dict, stripmode='overlay',
-                color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
+                color='transit', hover_data=hover_dict, hover_name='Name', stripmode='overlay',
+                color_discrete_sequence=['darkslateblue', 'salmon'], width=850, height=550,
+                title='Array of Vessel Speeds') #array of vessel speed copy from last year..
 fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
                 line=dict(color='Red', dash='solid', width=1.5), name='test')
 fig2.update_layout(xaxis_title_text = '',
-                  yaxis_title_text = 'VSPD kn')
+                  yaxis_title_text = 'VSPD kn',
+                  hoverlabel=dict(bgcolor="white",
+                                    font_size=13))
+fig2.update_traces(marker_size=5.5)
 
-ch_transit_speeders = []
-for mmsi in ch.MMSI.unique():
-    ship = ch[ch.MMSI == mmsi]
-    compl = len(ship[ship.SPEED <= 10])
-    ch_transit_speeders.append(round(compl / len(ship), 2))
-
-np.array(ch_transit_speeders).mean()
 
 fig2 = px.strip(sv, x='Name', y='SPEED',
-                color='transit', hover_data=hover_dict, stripmode='overlay',
-                color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
+                color='transit', hover_data=hover_dict, hover_name='Name', stripmode='overlay',
+                color_discrete_sequence=['darkslateblue', 'salmon'], width=850, height=550,
+                title='Array of Vessel Speeds') #array of vessel speed copy from last year..
 fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
                 line=dict(color='Red', dash='solid', width=1.5), name='test')
 fig2.update_layout(xaxis_title_text = '',
-                  yaxis_title_text = 'VSPD kn')
+                  yaxis_title_text = 'VSPD kn', 
+                  hoverlabel=dict(bgcolor="white",
+                                    font_size=13))
+fig2.update_traces(marker_size=5.5)
 
-sv_transit_speeders = []
-for mmsi in sv.MMSI.unique():
-    ship = sv[sv.MMSI == mmsi]
-    compl = len(ship[ship.SPEED <= 10])
-    sv_transit_speeders.append(round(compl / len(ship), 2))
-
-np.array(sv_transit_speeders).mean()
 ########################################################################
 fig3 = px.histogram(ch['WSPD mph'], color_discrete_sequence=['darkseagreen'])
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
@@ -187,27 +181,46 @@ fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
 fig4.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
                           "Correlation: " + str(round(sv.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
 ########################################################################
-t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn')
-t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg')
+t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn', line=dict(width=1.5), hoverinfo='skip')
+t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg', line=dict(width=1.5), hoverinfo='skip')
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
                          "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg',
-                   width=900)
+                  xaxis_title_text='Unique AIS Positions',
+                  width=800)
 
-t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn')
-t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg')
+
+t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn', line=dict(width=1.5), hoverinfo='skip')
+t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg', line=dict(width=1.5), hoverinfo='skip')
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
                          "Non Compliant Mean Yaw:  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg',
+                   xaxis_title_text='Unique AIS Positions',
                    width=900)
 ########################################################################
 # fig6 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
 # effective beam visualization ? would need to use the width of channel for this to be effective..
 # maybe add that into twoway transit visualization to show that the pilots actually have a lot of space... maybe
+
+ch_transit_speeders = []
+for mmsi in ch.MMSI.unique():
+    ship = ch[ch.MMSI == mmsi]
+    compl = len(ship[ship.SPEED <= 10])
+    ch_transit_speeders.append(round(compl / len(ship), 2))
+
+np.array(ch_transit_speeders).mean()
+
+sv_transit_speeders = []
+for mmsi in sv.MMSI.unique():
+    ship = sv[sv.MMSI == mmsi]
+    compl = len(ship[ship.SPEED <= 10])
+    sv_transit_speeders.append(round(compl / len(ship), 2))
+
+np.array(sv_transit_speeders).mean()
 ########################################################################
 # px.violin(non_compliant.Yaw)
 # px.violin(compliant.Yaw)
