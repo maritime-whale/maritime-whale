@@ -32,28 +32,8 @@ sv = pd.concat(sv_agg)
 sv = sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)].reset_index()
 sv = sv.sort_values('Date/Time UTC').reset_index().drop(['level_0', 'index'], axis=1)
 
-fig = px.scatter(ch, 'Longitude', 'Latitude')
-fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
-fig.add_trace(go.Scatter(x=np.array(-79.691502), y=np.array(32.667473)))
-px.scatter(ch[ch.Latitude >= 32.667473], 'Longitude', 'Latitude')
-
-
-fig = px.scatter(sv, 'Longitude', 'Latitude')
-fig.add_trace(go.Scatter(x=np.array(-80.81597), y=np.array(32.02732)))
-fig.add_trace(go.Scatter(x=np.array(-80.81425), y=np.array(32.02838)))
-fig.add_trace(go.Scatter(x=np.array(-80.78055), y=np.array(31.99183)))
-fig.add_trace(go.Scatter(x=np.array(-80.77943), y=np.array(31.99346)))
-fig.add_trace(go.Scatter(x=np.array(-80.78879), y=np.array(31.99772)))
-fig.add_trace(go.Scatter(x=np.array(-80.78701), y=np.array(31.9985)))
-px.scatter(sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)], 'Longitude', 'Latitude')
-
-
-def effective_beam(yaw, beam, loa):
-    import math
-    return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
-
-effective_beam(10, 160, 1000)
-effective_beam(10, 160, 1201)
+ch['VSPD kn'] = ch.SPEED
+sv['VSPD kn'] = sv.SPEED
 
 ch_compliant = ch[ch.SPEED <= 10]
 sv_compliant = sv[sv.SPEED <= 10]
@@ -65,132 +45,150 @@ ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
 sv_panamax = sv[sv['vessel class'] == 'Panamax']
 sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
 
+ch_meetpass = meetpass(ch)
+ch_two_way = twoway(ch, ch_meetpass)
+ch['transit'] = 'one way transit'
+ch['transit'][ch.index.isin(ch_two_way.index)] = 'two way transit'
+
+sv_meetpass = meetpass(sv)
+sv_two_way = twoway(sv, sv_meetpass)
+sv['transit'] = 'one way transit'
+sv['transit'][sv.index.isin(sv_two_way.index)] = 'two way transit'
+
 hover_dict = {'Date/Time UTC':True, 'MMSI':True, 'SPEED':True, 'course behavior':True,
                 'WDIR degT':True, 'WSPD mph':True, 'GST mph':True,'Yaw':True, 'LOA ft':True,
                 'Beam ft':True, 'effective beam ft':True}
+
+# fig = px.scatter(ch, 'Longitude', 'Latitude')
+# fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
+# fig.add_trace(go.Scatter(x=np.array(-79.691502), y=np.array(32.667473)))
+# px.scatter(ch[ch.Latitude >= 32.667473], 'Longitude', 'Latitude')
+#
+#
+# fig = px.scatter(sv, 'Longitude', 'Latitude')
+# fig.add_trace(go.Scatter(x=np.array(-80.81597), y=np.array(32.02732)))
+# fig.add_trace(go.Scatter(x=np.array(-80.81425), y=np.array(32.02838)))
+# fig.add_trace(go.Scatter(x=np.array(-80.78055), y=np.array(31.99183)))
+# fig.add_trace(go.Scatter(x=np.array(-80.77943), y=np.array(31.99346)))
+# fig.add_trace(go.Scatter(x=np.array(-80.78879), y=np.array(31.99772)))
+# fig.add_trace(go.Scatter(x=np.array(-80.78701), y=np.array(31.9985)))
+# px.scatter(sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)], 'Longitude', 'Latitude')
+
+
+def effective_beam(yaw, beam, loa):
+    import math
+    return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
+
+effective_beam(10, 160, 1000)
+effective_beam(10, 160, 1201)
 ##################Stats findings graph for website###############################
-ch['VSPD kn'] = ch.SPEED
-plt = go.Figure(data=[go.Histogram(x=ch['VSPD kn'], nbinsx=20)])
-plt.data[0].marker.line.width = 0.75
-plt.data[0].marker.line.color = "black"
-plt.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
-plt.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
-plt.update_layout(xaxis_title_text = 'Vessel speed',
+fig1 = px.histogram(ch, x='VSPD kn', color='transit', nbins=20, color_discrete_sequence=['darkslateblue', 'salmon'])#, color_discrete_sequence=['teal'])
+fig1.update_layout(barmode='overlay',
+                   xaxis_title_text = 'VSPD kn',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = 'Vessel Speed Histogram' '<br>'
-                           "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
-                   showlegend = True)
-
-
-fig1 = px.histogram(ch, x='VSPD kn', nbins=20)#, color_discrete_sequence=['teal'])
-fig1.update_layout(xaxis_title_text = 'VSPD kn',
-                   yaxis_title_text = 'Unique AIS Positions',
-                   title = 'Vessel Speed Histogram' '<br>'
-                           "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
+                           "Compliance Rate: " + str(round(sum(ch['VSPD kn'] <= 10) / ch.shape[0] * 100, 2)) + "%",
                    showlegend = True)
 fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
                 line=dict(color='Red', dash='solid', width=1.5), name='test')
-fig1.add_shape(type='line', x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1,
+fig1.add_shape(type='line', x0=ch['VSPD kn'].mean(), y0=0, x1=ch['VSPD kn'].mean(), y1=1,
                xref='x', yref='paper',
                line=dict(color='black', dash='solid', width=1.5), name='test')
 fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
-fig1.add_vline(x=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
-fig1.add_vline(x=ch['VSPD kn'].mean(), annotation_text='Mean Vessel Speed', annotation_font_size=10, annotation_font_color='black')
-# fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-#                         x0=10, y0=0, x1=10, y1=1, name='test', line={'dash': 'solid', 'color':'Red', 'width':1.5}))
-# fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper', name='test',
-#                         x0=ch.SPEED.mean(), y0=0, x1=ch.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+fig1
 
 
-sv['VSPD kn'] = sv.SPEED
-fig1 = px.histogram(sv, x='VSPD kn', nbins=20)#, color_discrete_sequence=['teal'])
-fig1.update_layout(xaxis_title_text = 'Vessel speed',
+fig1 = px.histogram(sv, x='VSPD kn', color='transit', nbins=20, color_discrete_sequence=['darkslateblue', 'salmon'])#, color_discrete_sequence=['teal'])
+fig1.update_layout(barmode='overlay',
+                   xaxis_title_text = 'VSPD kn',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = 'Vessel Speed Histogram' '<br>'
-                           "Compliance Rate: " + str(round(sum(sv['SPEED'] <= 10) / sv.shape[0] * 100, 2)) + "%",
+                           "Compliance Rate: " + str(round(sum(sv['VSPD kn'] <= 10) / sv.shape[0] * 100, 2)) + "%",
                    showlegend = True)
-fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=10, y0=0, x1=10, y1=1, line={'dash': 'solid', 'color':'Red', 'width':1.5}))
-fig1.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
-                        x0=sv.SPEED.mean(), y0=0, x1=sv.SPEED.mean(), y1=1, line={'dash': 'dash', 'color':'Black', 'width':1.5}))
+fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig1.add_shape(type='line', x0=sv['VSPD kn'].mean(), y0=0, x1=sv['VSPD kn'].mean(), y1=1,
+               xref='x', yref='paper',
+               line=dict(color='black', dash='solid', width=1.5), name='test')
 fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
 fig1
+########################################################################
+fig2 = px.strip(ch, x='Name', y='SPEED',
+                color='transit', hover_data=hover_dict, stripmode='overlay',
+                color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
+fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig2.update_layout(xaxis_title_text = '',
+                  yaxis_title_text = 'VSPD kn')
 
-fig2 = px.histogram(ch['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
-fig2.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+fig2 = px.strip(sv, x='Name', y='SPEED',
+                color='transit', hover_data=hover_dict, stripmode='overlay',
+                color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
+fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig2.update_layout(xaxis_title_text = '',
+                  yaxis_title_text = 'VSPD kn')
+
+########################################################################
+fig3 = px.histogram(ch['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
+fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
-fig2.update_layout(title="Windspeed Histogram" '<br>'
+fig3.update_layout(title="Windspeed Histogram" '<br>'
                         "Adverse Wind Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
                   xaxis_title_text='WSPD mph', yaxis_title_text="Unique AIS Positions",
                   showlegend = False)
-fig2.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
-fig2.data[0].marker.line.width = 0.75
-fig2.data[0].marker.line.color = "black"
-fig2
+# fig3.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
+fig3.data[0].marker.line.width = 0.75
+fig3.data[0].marker.line.color = "black"
+fig3
 
 
-# ch['AIS behavior'] ['Non Compliant', 'Compliant', 'Adverse Condition'] ['Red', 'Green', 'Yellow']
-# for i in range(len(ch)):
-#     if ch.loc[i, 'SPEED'] > 10 and ch.loc[i, 'WSPD mph'] < 30:
-#         ch.loc[i, 'AIS behavior'] == 'Non Compliant'
-#     elif ch.loc[i, 'SPEED'] > 10 and ch.loc[i, 'WSPD mph'] >= 30:
-#         ch.loc[i, 'AIS behavior'] == 'Adverse Condition'
-#     elif ch.loc[i, 'SPEED'] <= 10 and ch.loc[i, 'WSPD mph'] < 30:
-#         ch.loc[i, 'AIS behavior'] == 'Compliant'
-#     elif ch.loc[i, 'SPEED'] <= 10 and ch.loc[i, 'WSPD mph'] >= 30:
-#         ch.loc[i, 'AIS behavior'] == 'Adverse Condition'
-
-
-fig3 = px.density_contour(ch, x='SPEED', y='WSPD mph')
-fig3.update_traces(contours_coloring = 'fill', colorscale = 'blues')
-fig3.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
+fig3 = px.histogram(sv['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
+fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
+                        x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
+fig3.update_layout(title="Windspeed Histogram" '<br>'
+                        "Adverse Wind Conditions: " + str(round((sv[sv['WSPD mph'] >= 30].shape[0] / sv.shape[0]) * 100, 2)) + '% ',
+                  xaxis_title_text='WSPD mph', yaxis_title_text="Unique AIS Positions",
+                  showlegend = False)
+# fig3.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
+fig3.data[0].marker.line.width = 0.75
+fig3.data[0].marker.line.color = "black"
+fig3
+########################################################################
+fig4 = px.density_contour(ch, x='SPEED', y='WSPD mph')
+fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
+fig4.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
                           "Correlation: " + str(round(ch.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
 
-127 / len(ch)
-
-# fig3 = px.scatter(sv, x = 'SPEED', y = 'WSPD mph', hover_data = hover_dict, color_discrete_sequence = ['forestgreen'])
-# fig3.update_layout(xaxis_title_text = "VSPD kn",
-#                  title = "WSPD vs. VSPD" '<br>'
-#                         "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%" '<br>'
-#                         "Non Compliant: " + str(round(len(sv[sv.SPEED > 10])/len(sv) * 100, 2)) + '%')
-# fig3.add_shape(type="rect",
-#     xref="x", yref="y",
-#     x0=10, y0=0,
-#     x1=sv['SPEED'].max()+1, y1=30,
-#     line=dict(color="Red",
-#               width=2,
-#               dash='dash'))
-fig3 = px.density_contour(sv, x='SPEED', y='WSPD mph')
-fig3.update_traces(contours_coloring = 'fill', colorscale = 'blues')
-fig3.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
+fig4 = px.density_contour(sv, x='SPEED', y='WSPD mph')
+fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
+fig4.update_layout(xaxis_title_text = "VSPD kn", title='WSPD and VSPD Density Plot' '<br>'
                           "Correlation: " + str(round(sv.dropna()[['SPEED', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%")
-
+########################################################################
 t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn')
 t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg')
 data = [t1, t2]
-fig4 = go.Figure(data=data)#, layout=layout)
-fig4.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
+fig5 = go.Figure(data=data)#, layout=layout)
+fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
-                         "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg')
-
+                         "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg',
+                   width=900)
 
 t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn')
 t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg')
 data = [t1, t2]
-fig4 = go.Figure(data=data)#, layout=layout)
-fig4.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
+fig5 = go.Figure(data=data)#, layout=layout)
+fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
                          "Compliant Mean Yaw: " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
-                         "Non Compliant Mean Yaw:  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg')
-
-# fig5 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
-# fig6 - oneway vs twoway transit visualization. probably bar chart ?
+                         "Non Compliant Mean Yaw:  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg',
+                   width=900)
+########################################################################
+# fig6 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
 # effective beam visualization ? would need to use the width of channel for this to be effective..
 # maybe add that into twoway transit visualization to show that the pilots actually have a lot of space... maybe
-
+########################################################################
 px.violin(non_compliant.Yaw)
 px.violin(compliant.Yaw)
 px.histogram(ch, x='effective beam ft', color='vessel class')
@@ -209,8 +207,28 @@ px.histogram(ch_post_panamax['channel space'])
 
 px.violin(ch[['WSPD mph', 'GST mph']])
 
+len(ch[ch['Date/Time UTC'] < '2020-11-19'].Name.unique())
 
-px.strip(ch, x='Name', y='SPEED', hover_data=hover_dict) #array of vessel speed copy from last year..
+fig = px.strip(ch[ch['Date/Time UTC'] < '2020-11-19'], x='Name', y='SPEED',
+                color='adverse wind', hover_data=hover_dict, stripmode='overlay', color_discrete_sequence=['darkseagreen', 'seagreen']) #array of vessel speed copy from last year..
+fig.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig.update_layout(xaxis_title_text = '',
+                   yaxis_title_text = 'VSPD kn')
+fig = px.strip(ch[ch['Date/Time UTC'] < '2020-11-19'], x='Name', y='SPEED',
+                color='transit', hover_data=hover_dict, stripmode='overlay',
+                color_discrete_sequence=['darkslateblue', 'salmon'], width=800) #array of vessel speed copy from last year..
+fig.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
+                line=dict(color='Red', dash='solid', width=1.5), name='test')
+fig.update_layout(xaxis_title_text = '',
+                  yaxis_title_text = 'VSPD kn')
+
+# fig.add_hline(y=10, annotation_text='Regulatory Speed', annotation_font_size=10, annotation_font_color='red')
+
+                   # title = 'Vessel Speed Histogram' '<br>'
+                   #         "Compliance Rate: " + str(round(sum(ch['SPEED'] <= 10) / ch.shape[0] * 100, 2)) + "%",
+                   # showlegend = True)
+
 # line plot for every ship in the channel... speed vs time
 for ship in ch.MMSI.unique():
     trace = go.Scatter()
