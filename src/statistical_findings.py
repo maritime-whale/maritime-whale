@@ -48,10 +48,6 @@ fig.add_trace(go.Scatter(x=np.array(-80.78701), y=np.array(31.9985)))
 px.scatter(sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)], 'Longitude', 'Latitude')
 
 
-
-ch['rounded date'] = [ch['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(ch['Date/Time UTC']))]
-sv['rounded date'] = [sv['Date/Time UTC'].iloc[i].floor('Min') for i in range(len(sv['Date/Time UTC']))]
-
 def effective_beam(yaw, beam, loa):
     import math
     return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
@@ -459,21 +455,17 @@ df.index.get_level_values(2)
 
 ch[(ch.MMSI == mmsi[0]) & (ch['rounded date'] <= times[0]) & (ch['course behavior'] == courses[0])]
 
-# add this into import_report for STATS mode
-# ch_meetpass = meetpass(ch)
-ch_two_way = get_init_times(ch, ch_meetpass)
+# add this into MAIN for STATS mode
+ch_meetpass = meetpass(ch)
+ch_two_way = twoway(ch, ch_meetpass)
 ch['transit'] = 'one way transit'
 ch['transit'][ch.index.isin(ch_two_way.index)] = 'two way transit'
-ch_high_wind = ch[ch['WSPD mph'] >= 30]
-ch['adverse wind'] = 'no adverse wind conditions'
-ch['adverse wind'][ch.index.isin(ch_high_wind.index)] = 'adverse wind conditions'
 
-sv_two_way = get_init_times(sv, sv_meetpass)
+
+sv_two_way = twoway(sv, sv_meetpass)
 sv['transit'] = 'one way transit'
 sv['transit'][sv.index.isin(sv_two_way.index)] = 'two way transit'
-sv_high_wind = sv[sv['WSPD mph'] >= 30]
-sv['adverse wind'] = 'no adverse wind conditions'
-sv['adverse wind'][sv.index.isin(sv_high_wind.index)] = 'adverse wind conditions'
+
 
 
 for i in range(len(df)):

@@ -117,7 +117,7 @@ def meetpass(df):
     return true_encs
 
 
-def get_init_times(df, true_encs):
+def twoway(df, true_encs):
     two_way = []
     for key in true_encs:
         this_mmsi = key[0]
@@ -125,17 +125,19 @@ def get_init_times(df, true_encs):
         this_course = key[4]
         that_course = key[5]
         enc_time = true_encs[key][0]
-        two_way.append(pd.concat([get_init_time(df, this_mmsi, this_course, enc_time),
-                                  get_init_time(df, that_mmsi, that_course, enc_time)]))
+        two_way.append(twoway_helper(df, this_mmsi, this_course, enc_time))
+        two_way.append(twoway_helper(df, that_mmsi, that_course, enc_time))
+        # two_way.append(pd.concat([twoway_helper(df, this_mmsi, this_course, enc_time),
+        #                           twoway_helper(df, that_mmsi, that_course, enc_time)]))
     return pd.concat(two_way)
 
 
-def get_init_time(df, mmsi, course, enc_time):
+def twoway_helper(df, mmsi, course, enc_time):
     res = df[(df.MMSI == mmsi) & (df['course behavior'] == course) &
              (df['rounded date'] <= enc_time)]
     return res
 # use '2020-10-06.csv' path for testing
-# path = "../tests/2020-10-06.csv"
+# path = "../tests/2020-11-16.csv"
 # out = import_report(path, STATS)
 # ch = out[0]
 # sv = out[1]
