@@ -132,7 +132,7 @@ fig2.update_layout(xaxis_title_text = '',
                   yaxis_title_text = 'VSPD kn')
 
 ########################################################################
-fig3 = px.histogram(ch['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
+fig3 = px.histogram(ch['WSPD mph'], color_discrete_sequence=['darkseagreen'])
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig3.update_layout(title="Windspeed Histogram" '<br>'
@@ -144,8 +144,7 @@ fig3.data[0].marker.line.width = 0.75
 fig3.data[0].marker.line.color = "black"
 fig3
 
-
-fig3 = px.histogram(sv['WSPD mph'], nbins=15, color_discrete_sequence=['darkseagreen'])
+fig3 = px.histogram(sv['WSPD mph'], color_discrete_sequence=['darkseagreen'])
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig3.update_layout(title="Windspeed Histogram" '<br>'
@@ -155,6 +154,7 @@ fig3.update_layout(title="Windspeed Histogram" '<br>'
 # fig3.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
 fig3.data[0].marker.line.width = 0.75
 fig3.data[0].marker.line.color = "black"
+fig3.update_xaxes(range=[0, sv['WSPD mph'].max()+2])
 fig3
 ########################################################################
 fig4 = px.density_contour(ch, x='SPEED', y='WSPD mph')
