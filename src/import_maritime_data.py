@@ -72,10 +72,15 @@ def import_report(path, mode):
             except FileNotFoundError:
                 sys.stderr.write("Error: Wind data not found for buoy with ID: " + buoy + "...\n")
                 continue
+            except:
+                sys.stderr.write("Error: Could not load wind data for buoy with ID: " + buoy + "...\n")
+                continue
         for j, buoy in enumerate(buoys[i].items()):
             final_winds = {"WDIR degT":[], "WSPD mph":[], "GST mph":[]} # {wind_dir, wind_speed, gust}
             id = buoy[0]
             data = buoy[1]
+            if isinstance(data, type(None)):
+                continue
             data = data[(data['#YY'] == year) &
                         (data['MM'] == month) &
                         (data['DD'] == day)]
