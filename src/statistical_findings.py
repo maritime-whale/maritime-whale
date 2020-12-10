@@ -82,12 +82,6 @@ def effective_beam(yaw, beam, loa):
 effective_beam(10, 160, 1000)
 effective_beam(10, 160, 1201)
 ##################Stats findings graph for website###############################
-print(str(round((ch[ch.transit == 'Two Way Transit'].shape[0] / ch.shape[0]) * 100, 2)) + '%')
-print(str(round((ch[ch.transit == 'One Way Transit'].shape[0] / ch.shape[0]) * 100, 2)) + '%')
-
-print(str(round((sv[sv.transit == 'Two Way Transit'].shape[0] / sv.shape[0]) * 100, 2)) + '%')
-print(str(round((sv[sv.transit == 'One Way Transit'].shape[0] / sv.shape[0]) * 100, 2)) + '%')
-
 fig1 = px.histogram(ch, x='VSPD kn', color='transit', nbins=20, color_discrete_sequence=['darkslateblue', 'salmon'])
 fig1.update_layout(barmode='overlay',
                    xaxis_title_text = 'VSPD kn',
@@ -95,7 +89,8 @@ fig1.update_layout(barmode='overlay',
                    title = "Compliance Rate: " + str(round(sum(ch['VSPD kn'] <= 10) / ch.shape[0] * 100, 2)) + "%" '<br>'
                            "Mean VSPD: " + str(round(ch['VSPD kn'].mean(), 2)) + ' kn',
                    showlegend = True, hoverlabel=dict(bgcolor="white",
-                                     font_size=13))
+                                     font_size=13),
+                   legend_title_text='')
 fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
                 line=dict(color='Red', dash='solid', width=1.5), name='test')
 fig1.add_shape(type='line', x0=ch['VSPD kn'].mean(), y0=0, x1=ch['VSPD kn'].mean(), y1=1,
@@ -112,6 +107,7 @@ fig1.data[0].marker.line.width = 0.75
 fig1.data[0].marker.line.color = "black"
 fig1.data[1].marker.line.width = 0.75
 fig1.data[1].marker.line.color = "black"
+pio.write_html(fig1, file="../tests/VSPD_hist.html", auto_open=False)
 fig1
 
 # TITLE:
@@ -122,7 +118,8 @@ fig1.update_layout(barmode='overlay',
                    yaxis_title_text = 'Unique AIS Positions',
                    title = "Compliance Rate: " + str(round(sum(sv['VSPD kn'] <= 10) / sv.shape[0] * 100, 2)) + "%" '<br>'
                            "Mean VSPD: " + str(round(sv['VSPD kn'].mean(), 2)) + ' kn',
-                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13))
+                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
+                   legend_title_text='')
 fig1.add_shape(type='line', x0=10, y0=0, x1=10, y1=1, xref='x', yref='paper',
                 line=dict(color='Red', dash='solid', width=1.5), name='test', templateitemname='test', visible=True)
 fig1.add_shape(type='line', x0=sv['VSPD kn'].mean(), y0=0, x1=sv['VSPD kn'].mean(), y1=1,
@@ -149,8 +146,11 @@ fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
 fig2.update_layout(xaxis_title_text = '',
                   yaxis_title_text = 'VSPD kn',
                   hoverlabel=dict(bgcolor="white",
-                                    font_size=13))
+                                    font_size=13),
+                  legend_title_text='')
 fig2.update_traces(marker_size=5.5)
+pio.write_html(fig2, file="../tests/VSPD_array.html", auto_open=False)
+
 
 fig2 = px.strip(sv, x='Name', y='SPEED',
                 color='transit', hover_data=hover_dict, hover_name='Name', stripmode='overlay',
@@ -162,7 +162,8 @@ fig2.add_shape(type='line', x0=0, y0=10, x1=1, y1=10, xref='paper', yref='y',
 fig2.update_layout(xaxis_title_text = '',
                   yaxis_title_text = 'VSPD kn',
                   hoverlabel=dict(bgcolor="white",
-                                    font_size=13))
+                                    font_size=13),
+                  legend_title_text='')
 fig2.update_traces(marker_size=5.5)
 
 ########################################################################
@@ -179,6 +180,8 @@ fig3.add_annotation(text="Adverse Condition Threshold", showarrow=False, textang
                     xref='x', x=30.4, yref='paper', y=1)
 fig3.data[0].marker.line.width = 0.75
 fig3.data[0].marker.line.color = "black"
+pio.write_html(fig3, file="../tests/WSPD_hist.html", auto_open=False)
+
 fig3
 
 fig3 = px.histogram(sv['WSPD mph'], color_discrete_sequence=['darkseagreen'])
@@ -203,6 +206,8 @@ fig4 = px.density_contour(ch, x='VSPD kn', y='WSPD mph')
 fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
 fig4.update_layout(xaxis_title_text = "VSPD kn", title="Correlation: " + str(round(ch.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%",
                    hoverlabel=dict(bgcolor="white", font_size=13))
+pio.write_html(fig4, file="../tests/density_plot.html", auto_open=False)
+
 
 fig4 = px.density_contour(sv, x='VSPD kn', y='WSPD mph')
 fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
@@ -218,6 +223,8 @@ fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEE
                          "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg',
                   xaxis_title_text='Unique AIS Positions',
                   width=900)
+pio.write_html(fig5, file="../tests/line_plot.html", auto_open=False)
+
 
 
 t1 = go.Scatter(x=sv.index, y=sv['SPEED'], mode='lines', name='VSPD kn', line=dict(width=1.5), hoverinfo='skip')
