@@ -40,20 +40,30 @@ sv_compliant = sv[sv.SPEED <= 10]
 ch_non_compliant = ch[ch.SPEED > 10]
 sv_non_compliant = sv[sv.SPEED > 10]
 
+ch['compliance'] = "Non Compliant"
+ch['compliance'][ch.index.isin(ch_compliant.index)] = "Compliant"
+sv['compliance'] = "Non Compliant"
+sv['compliance'][sv.index.isin(sv_compliant.index)] = "Compliant"
+
 ch_panamax = ch[ch['vessel class'] == 'Panamax']
 ch_post_panamax = ch[ch['vessel class'] == 'Post Panamax']
+
 sv_panamax = sv[sv['vessel class'] == 'Panamax']
 sv_post_panamax = sv[sv['vessel class'] == 'Post Panamax']
+
 
 ch_meetpass = meetpass(ch)
 ch_two_way = twoway(ch, ch_meetpass)
 ch['transit'] = 'One Way Transit'
 ch['transit'][ch.index.isin(ch_two_way.index)] = 'Two Way Transit'
 
+
 sv_meetpass = meetpass(sv)
 sv_two_way = twoway(sv, sv_meetpass)
 sv['transit'] = 'One Way Transit'
 sv['transit'][sv.index.isin(sv_two_way.index)] = 'Two Way Transit'
+
+
 
 hover_dict = {'Date/Time UTC':True, 'MMSI':False, 'VSPD kn':True, 'WSPD mph':True, 'course behavior':True,
               'Yaw':True, 'LOA ft':False, 'Beam ft':False, 'effective beam ft':True,
@@ -152,6 +162,8 @@ fig2.update_traces(marker_size=5.5)
 pio.write_html(fig2, file="../tests/VSPD_array.html", auto_open=False)
 
 
+# px.strip(ch, x='Name', y='Longitude', hover_data=hover_dict, width=950, height=550, color='compliance', stripmode='overlay')
+
 fig2 = px.strip(sv, x='Name', y='SPEED',
                 color='transit', hover_data=hover_dict, hover_name='Name', stripmode='overlay',
                 color_discrete_sequence=['darkslateblue', 'salmon'], width=850, height=550,
@@ -167,16 +179,18 @@ fig2.update_layout(xaxis_title_text = '',
 fig2.update_traces(marker_size=5.5)
 
 ########################################################################
+ch.columns
+ch
 # TITLE:
 # Windspeed Histogram
-fig3 = px.histogram(ch['WSPD mph'], color_discrete_sequence=['darkseagreen'])
+fig3 = px.histogram(ch['WSPD mph'], color_discrete_sequence=['darkseagreen'], nbins=15)
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig3.update_layout(title="Adverse Wind Conditions: " + str(round((ch[ch['WSPD mph'] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + '% ',
                   xaxis_title_text='WSPD mph', yaxis_title_text="Unique AIS Positions",
                   showlegend = False, hoverlabel=dict(bgcolor="white",
                                     font_size=13))
-fig3.add_annotation(text="Adverse Condition Threshold", showarrow=False, textangle=90, font=dict(color='black'),
+fig3.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color='black'),
                     xref='x', x=30.4, yref='paper', y=1)
 fig3.data[0].marker.line.width = 0.75
 fig3.data[0].marker.line.color = "black"
@@ -184,14 +198,14 @@ pio.write_html(fig3, file="../tests/WSPD_hist.html", auto_open=False)
 
 fig3
 
-fig3 = px.histogram(sv['WSPD mph'], color_discrete_sequence=['darkseagreen'])
+fig3 = px.histogram(sv['WSPD mph'], color_discrete_sequence=['darkseagreen'], nbins=15)
 fig3.add_shape(go.layout.Shape(type='line', xref='x', yref='paper',
                         x0=30, y0=0, x1=30, y1=1, line={'dash': 'solid', 'width':1.5}, name='test'))
 fig3.update_layout(title="Adverse Wind Conditions: " + str(round((sv[sv['WSPD mph'] >= 30].shape[0] / sv.shape[0]) * 100, 2)) + '% ',
                   xaxis_title_text='WSPD mph', yaxis_title_text="Unique AIS Positions",
                   showlegend = False, hoverlabel=dict(bgcolor="white",
                                     font_size=13))
-fig3.add_annotation(text="Adverse Condition Threshold", showarrow=False, textangle=90, font=dict(color='black'),
+fig3.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color='black'),
                     xref='x', x=30.4, yref='paper', y=1)
 # fig3.add_vline(x=30, annotation_text='Adverse Condition Threshold', annotation_font_size=13, annotation_font_color='black')
 fig3.data[0].marker.line.width = 0.75
@@ -204,14 +218,14 @@ fig3
 # WSPD and VSPD Density Plot
 fig4 = px.density_contour(ch, x='VSPD kn', y='WSPD mph')
 fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
-fig4.update_layout(xaxis_title_text = "VSPD kn", title="Correlation: " + str(round(ch.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%",
+fig4.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: " + str(round(ch.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%",
                    hoverlabel=dict(bgcolor="white", font_size=13))
 pio.write_html(fig4, file="../tests/density_plot.html", auto_open=False)
 
 
 fig4 = px.density_contour(sv, x='VSPD kn', y='WSPD mph')
 fig4.update_traces(contours_coloring = 'fill', colorscale = 'blues')
-fig4.update_layout(xaxis_title_text = "VSPD kn", title="Correlation: " + str(round(sv.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%",
+fig4.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: " + str(round(sv.dropna()[['VSPD kn', 'WSPD mph']].corr().iloc[0][1] * 100, 2)) + "%",
                    hoverlabel=dict(bgcolor="white", font_size=13))
 ########################################################################
 t1 = go.Scatter(x=ch.index, y=ch['SPEED'], mode='lines', name='VSPD kn', line=dict(width=1.5), hoverinfo='skip')
@@ -219,8 +233,8 @@ t2 = go.Scatter(x=ch.index, y=ch['Yaw'], mode='lines', name='Yaw deg', line=dict
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
-                         "Compliant Mean Yaw: " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
-                         "Non Compliant Mean Yaw:  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg',
+                         "Compliant Yaw (Mean): " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
+                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + ' deg',
                   xaxis_title_text='Unique AIS Positions',
                   width=900)
 pio.write_html(fig5, file="../tests/line_plot.html", auto_open=False)
@@ -232,11 +246,12 @@ t2 = go.Scatter(x=sv.index, y=sv['Yaw'], mode='lines', name='Yaw deg', line=dict
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[['SPEED', 'Yaw']].corr().iloc[0][1], 2)) + '<br>'
-                         "Compliant Mean Yaw: " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
-                         "Non Compliant Mean Yaw:  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg',
+                         "Compliant Yaw (Mean): " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + ' deg' + '<br>'
+                         "Non Compliant Yaw (Mean):  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + ' deg',
                    xaxis_title_text='Unique AIS Positions',
                    width=900)
 ########################################################################
+
 # fig6 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
 # effective beam visualization ? would need to use the width of channel for this to be effective..
 # maybe add that into twoway transit visualization to show that the pilots actually have a lot of space... maybe
