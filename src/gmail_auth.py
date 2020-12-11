@@ -1,3 +1,6 @@
+# NOTES:
+# https://developers.google.com/gmail/api/quickstart/python?authuser=2
+
 from func_timeout import func_timeout, FunctionTimedOut
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request

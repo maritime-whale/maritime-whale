@@ -9,11 +9,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     brew install jq
     brew install python
     sudo easy_install pip
-    pip3 install pandas
-    pip3 install plotly
-    pip3 install openpyxl
-    pip3 install func-timeout
-    pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    pip3 install pip-upgrader # https://github.com/simion/pip-upgrader
+    pip-upgrade --skip-virtualenv-check -p all
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     # POSIX compatibility layer and Linux environment emulation for Windows
     echo "(cygwin) OS not supported"

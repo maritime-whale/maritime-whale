@@ -15,7 +15,6 @@ import os
 
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
-    data_frames = []
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     days = fetch_latest_reports(logfile)
     if not days:
@@ -82,13 +81,21 @@ def main():
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
         create_xlsx_cache(map_data[0] + temp_ch, "master-ch")
         create_xlsx_cache(map_data[1] + temp_sv, "master-sv")
+        create_csv_cache(map_data[0] + temp_ch, "master-ch")
+        create_csv_cache(map_data[1] + temp_sv, "master-sv")
         for i in range(len(map_data)):
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
-        lvl1, lvl2_CH, lvl2_SV = generate_plots(map_data)
-        # output plots in an interactive HTML format
-        pio.write_html(lvl1, file="../html/level_one.html", auto_open=False)
-        pio.write_html(lvl2_CH, file="../html/level_two_charleston.html", auto_open=False)
-        pio.write_html(lvl2_SV, file="../html/level_two_savannah.html", auto_open=False)
+        geoplots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
+        zooms = (10.5, 11.5, 8)
+        sizes = ((431, 707), (431, 707), (431, 707))
+        heat = (False, False, False)
+        token = open("../conf/.mapbox_token").read()
+        for i, level in enumerate(geoplots.keys()):
+            geoplots[level] = generate_geoplots(map_data[i], zooms[i], sizes[i], heat[i], token)
+        # output geoplots in an interactive HTML format
+        pio.write_html(geoplots["lvl1"], file="../html/level_one.html", auto_open=False)
+        pio.write_html(geoplots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
+        pio.write_html(geoplots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")
     else:

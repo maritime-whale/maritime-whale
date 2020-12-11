@@ -1,14 +1,13 @@
 #!/bin/sh
 
-dev_mode=0
-for arg in "$@"
-do
-    if [ "$arg" == "dev" ]; then
-        echo "Running in dev mode..."
-        dev_mode=1
+debug_mode=0
+for arg in "$@"; do
+    if [ "$arg" == "debug" ]; then
+        echo "Running in debug mode..."
+        debug_mode=1
     else
         echo "./run: illegal option -- $arg"
-        echo "Usage: ./run [dev]"
+        echo "Usage: ./run [debug]"
         exit 1
     fi
 done
@@ -19,8 +18,14 @@ fi
 rm logs/sync_*.log > /dev/null 2>&1
 rm logs/vmr_*.log > /dev/null 2>&1
 rm logs/wind_*.log > /dev/null 2>&1
+rm logs/depend_*.log > /dev/null 2>&1
 rm logs/report_*.log > /dev/null 2>&1
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
+    pip-upgrade --skip-virtualenv-check -p all 2>> logs/depend_err.log 1>> logs/depend_out.log
+else
+    pip-upgrade --skip-virtualenv-check -p all
+fi
+if [ $debug_mode == 0 ]; then
     find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
     rm -rf temp/* > /dev/null 2>&1
 fi
@@ -57,6 +62,12 @@ TEMP=temp
 if [ ! -d "$TEMP" ]; then
     mkdir $TEMP
 fi
+
+# LINKS
+# https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
+# https://www.ndbc.noaa.gov/data/realtime2/
+# https://www.ndbc.noaa.gov/wstat.shtml
+
 # USEFUL SENSOR INFO (DO NOT DELETE):
 # 41004 ch off 32.501 /  -79.099
 # 41008 sv off 31.400 / -80.866
@@ -64,7 +75,7 @@ fi
 # 41033 sv near 32.279 / -80.406
 BUOYS="41004 41029 41033"
 for BUOY in $BUOYS; do
-  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
+    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
 ADV_BUOYS="41008"
 for BUOY in $ADV_BUOYS; do
@@ -79,7 +90,7 @@ fi
 yes | cp -rf blacklist.txt ../../cache/blacklist.txt
 cd ../../src
 MAIN_RET_VAL=1
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
     MAIN_RET_VAL=$?
     # echo $MAIN_RET_VAL
@@ -88,19 +99,19 @@ else
     python3 main.py
 fi
 cd ../html/riwhale.github.io
-if [ $dev_mode == 0 ]; then
+if [ $debug_mode == 0 ]; then
     PLOT=../level_one.html
     if [ ! -f "$PLOT" ]; then
         echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
     else
         echo "Initiating upload..." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "wipe plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../../cache/master-*.xlsx . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "wipe plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../../cache/master-*.* . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../../cache/blacklist.txt . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../*.html . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.xlsx blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "upload plots, master XLSXs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "upload plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         cd ../../src
         if [ $MAIN_RET_VAL == 0 ]; then
@@ -108,7 +119,7 @@ if [ $dev_mode == 0 ]; then
             # cat ../logs/report_*.log # can remove in final script
         else
             # WORST ERROR CASE
-            echo "SILENT -- FATAL (RIWHALE) ERROR CASE" 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            echo "FATAL ERROR -- SILENT (NON-COMM) CASE" 2>> ../logs/report_err.log 1>> ../logs/report_out.log
             # HAIL MARY
             python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
         fi
