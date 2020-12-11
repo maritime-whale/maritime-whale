@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import scipy
 
-# # use '2020-10-06.csv' path for testing
+# # use "2020-10-06.csv" path for testing
 # path = "../tests/2020-10-06.csv"
 # out = import_report(path, STATS)
 # ch = out[0]
@@ -54,10 +54,10 @@ def meetpass(df):
     df: cleaned VMR from import_report
     """
     rounded_df = df.copy()
-    rounded_df['Date/Time UTC'] = df["Date/Time UTC"].values.astype('<M8[m]')
+    rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
     flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
-            ['MMSI', 'course behavior', pd.Grouper(
-                key='Date/Time UTC', freq='min')])[['Date/Time UTC']].size()
+            ["MMSI", "course behavior", pd.Grouper(
+                key="Date/Time UTC", freq="min")])[["Date/Time UTC"]].size()
 
     # sub should contain all the flagged times
     sub = {}
@@ -76,22 +76,22 @@ def meetpass(df):
         while not cur_val.empty:
             this_course = cur_val.get_level_values(0)[0]
             this_time = cur_val.get_level_values(1)[0]
-            this_lat = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Latitude.values[0].round(5)
-            this_long = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)].Longitude.values[0].round(5)
-            this_class = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['vessel class'].values[0]
-            this_wdir = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['WDIR degT'].values[0]
-            this_wspd = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['WSPD mph'].values[0]
-            this_gst = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df['Date/Time UTC'] == this_time)]['GST mph'].values[0]
+            this_lat = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)].Latitude.values[0].round(5)
+            this_long = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)].Longitude.values[0].round(5)
+            this_class = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["vessel class"].values[0]
+            this_wdir = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["WDIR degT"].values[0]
+            this_wspd = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["WSPD mph"].values[0]
+            this_gst = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["GST mph"].values[0]
             for inner_key, inner_val in sub.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
                     that_time = that[1]
-                    that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Latitude.values[0].round(5)
-                    that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)].Longitude.values[0].round(5)
-                    that_class = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['vessel class'].values[0]
-                    that_wdir = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['WDIR degT'].values[0]
-                    that_wspd = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['WSPD mph'].values[0]
-                    that_gst = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df['Date/Time UTC'] == that_time)]['GST mph'].values[0]
+                    that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)].Latitude.values[0].round(5)
+                    that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)].Longitude.values[0].round(5)
+                    that_class = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["vessel class"].values[0]
+                    that_wdir = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["WDIR degT"].values[0]
+                    that_wspd = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["WSPD mph"].values[0]
+                    that_gst = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["GST mph"].values[0]
                     if (this_time == that_time) and (this_course != that_course):
                         dist = calc_naut_dist(this_lat, this_long, that_lat, that_long)
                         # check if true encounter (within minimum distance)
@@ -133,17 +133,17 @@ def twoway(df, true_encs):
 
 
 def twoway_helper(df, mmsi, course, enc_time):
-    res = df[(df.MMSI == mmsi) & (df['course behavior'] == course) &
-             (df['rounded date'] <= enc_time)]
+    res = df[(df.MMSI == mmsi) & (df["course behavior"] == course) &
+             (df["rounded date"] <= enc_time)]
     return res
-# use '2020-10-06.csv' path for testing
+# use "2020-10-06.csv" path for testing
 # path = "../tests/2020-11-16.csv"
 # out = import_report(path, STATS)
 # ch = out[0]
 # sv = out[1]
 
 # show edge case to jon at 12:23 where there's nearshore and offshore meetpass instance
-# ch[(ch['MMSI'] == 232013520) | (ch['MMSI'] == 255806004)]
+# ch[(ch["MMSI"] == 232013520) | (ch["MMSI"] == 255806004)]
 
 # print(meetpass(ch))
 # print(len(meetpass(ch)))
