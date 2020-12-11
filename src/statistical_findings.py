@@ -93,7 +93,8 @@ fig1.update_layout(barmode="overlay",
                            "Mean VSPD: " + str(round(ch["VSPD kn"].mean(), 2)) + " kn",
                    showlegend = True, hoverlabel=dict(bgcolor="white",
                                      font_size=13),
-                   legend_title_text="")
+                   legend_title_text="",
+                   plot_bgcolor="#F1F1F1")
 fig1.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                 line=dict(color="Red", dash="solid", width=1.5), name="test")
 fig1.add_shape(type="line", x0=ch["VSPD kn"].mean(), y0=0, x1=ch["VSPD kn"].mean(), y1=1,
@@ -106,23 +107,24 @@ fig1.add_annotation(text="Mean", showarrow=False, textangle=90, font=dict(color=
                     hovertext=str(ch["VSPD kn"].mean()))
 # fig1.add_trace(go.Scatter(x=[10,10], y=[0, 400], mode="lines", line=dict(color="Red", dash="solid", width=1.5), hoverinfo="skip", name="Regulatory Speed Limit"))
 # fig1.add_trace(go.Scatter(x=[ch["VSPD kn"].mean(), ch["VSPD kn"].mean()], y=[0, 400], mode="lines", hoverinfo="skip", line=dict(color="Black", dash="solid", width=1.5), name="Mean VSPD kn: " + str(round(ch["VSPD kn"].mean(), 2))))
-fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.width = 0.5
 fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.75
+fig1.data[1].marker.line.width = 0.5
 fig1.data[1].marker.line.color = "black"
 pio.write_html(fig1, file="../tests/VSPD_hist.html", auto_open=False)
 fig1
 
 # TITLE:
 # Vessel Speed Histogram
-fig1 = px.histogram(sv, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["teal", "salmon"]) #width=800, height=600)#, color_discrete_sequence=["teal"])
+fig1 = px.histogram(sv, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["plum", "hotpink"]) #width=800, height=600)#, color_discrete_sequence=["teal"])
 fig1.update_layout(barmode="overlay",
                    xaxis_title_text = "VSPD kn",
                    yaxis_title_text = "Unique AIS Positions",
                    title = "Compliance Rate: " + str(round(sum(sv["VSPD kn"] <= 10) / sv.shape[0] * 100, 2)) + "%" "<br>"
                            "Mean VSPD: " + str(round(sv["VSPD kn"].mean(), 2)) + " kn",
                    showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
-                   legend_title_text="")
+                   legend_title_text="",
+                   plot_bgcolor="#F1F1F1")
 fig1.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                 line=dict(color="Red", dash="solid", width=1.5), name="test", templateitemname="test", visible=True)
 fig1.add_shape(type="line", x0=sv["VSPD kn"].mean(), y0=0, x1=sv["VSPD kn"].mean(), y1=1,
@@ -132,16 +134,16 @@ fig1.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict
                     xref="x", x=10.15, yref="paper", y=1)
 fig1.add_annotation(text="Mean", showarrow=False, textangle=90, font=dict(color="black"),
                     xref="x", x=sv["VSPD kn"].mean()+0.15, yref="paper", y=1)
-fig1.data[0].marker.line.width = 0.75
+fig1.data[0].marker.line.width = 0.5
 fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.75
+fig1.data[1].marker.line.width = 0.5
 fig1.data[1].marker.line.color = "black"
 fig1
 ########################################################################
 # "One-Minute Time Resolution Vessel Speed Plot"
 fig2 = px.strip(ch, x="Name", y="VSPD kn",
                 color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
-                color_discrete_sequence=["darkslateblue", "salmon"], width=850, height=550,
+                color_discrete_sequence=["darkslateblue", "salmon"], width=775, height=500,
                 title= "One Way Transits: " + str(round((ch[ch.Transit == "One Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%" "<br>"
                        "Two Way Transits: " + str(round((ch[ch.Transit == "Two Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%")
 fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
@@ -149,7 +151,9 @@ fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
 fig2.update_layout(xaxis_title_text = "",
                   hoverlabel=dict(bgcolor="white",
                                     font_size=13),
-                  legend_title_text="")
+                  legend_title_text="",
+                  font=dict(size=11),
+                  plot_bgcolor="#F1F1F1")
 fig2.update_traces(marker_size=5.5)
 pio.write_html(fig2, file="../tests/VSPD_array.html", auto_open=False)
 
@@ -158,7 +162,7 @@ pio.write_html(fig2, file="../tests/VSPD_array.html", auto_open=False)
 
 fig2 = px.strip(sv, x="Name", y="VSPD kn",
                 color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
-                color_discrete_sequence=["darkslateblue", "salmon"], width=850, height=550,
+                color_discrete_sequence=["plum", "hotpink"], width=800, height=550,
                 title="One Way Transits: " + str(round((sv[sv.Transit == "One Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%" "<br>"
                        "Two Way Transits: " + str(round((sv[sv.Transit == "Two Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%") #array of vessel speed copy from last year..
 fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
@@ -166,7 +170,8 @@ fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
 fig2.update_layout(xaxis_title_text = "",
                   hoverlabel=dict(bgcolor="white",
                                     font_size=13),
-                  legend_title_text="")
+                  legend_title_text="",
+                  plot_bgcolor="#F1F1F1")
 fig2.update_traces(marker_size=5.5)
 
 ########################################################################
@@ -179,7 +184,8 @@ fig3.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
 fig3.update_layout(title="Adverse Wind Conditions: " + str(round((ch[ch["WSPD mph"] >= 30].shape[0] / ch.shape[0]) * 100, 2)) + "% ",
                   xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
                   showlegend = False, hoverlabel=dict(bgcolor="white",
-                                    font_size=13))
+                                    font_size=13),
+                                    plot_bgcolor="#F1F1F1")
 fig3.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
                     xref="x", x=30.4, yref="paper", y=1)
 fig3.data[0].marker.line.width = 0.75
@@ -194,7 +200,8 @@ fig3.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
 fig3.update_layout(title="Adverse Wind Conditions: " + str(round((sv[sv["WSPD mph"] >= 30].shape[0] / sv.shape[0]) * 100, 2)) + "% ",
                   xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
                   showlegend = False, hoverlabel=dict(bgcolor="white",
-                                    font_size=13))
+                                    font_size=13),
+                                    plot_bgcolor="#F1F1F1")
 fig3.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
                     xref="x", x=30.4, yref="paper", y=1)
 # fig3.add_vline(x=30, annotation_text="Adverse Condition Threshold", annotation_font_size=13, annotation_font_color="black")
@@ -226,7 +233,8 @@ fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD
                          "Compliant Yaw (Mean): " + str(round(ch[ch["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
                          "Non Compliant Yaw (Mean):  " + str(round(ch[ch["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                   xaxis_title_text="Unique AIS Positions",
-                  width=900)
+                  width=900,
+                  plot_bgcolor="#F1F1F1")
 pio.write_html(fig5, file="../tests/line_plot.html", auto_open=False)
 
 
@@ -239,7 +247,8 @@ fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["VSPD
                          "Compliant Yaw (Mean): " + str(round(sv[sv["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
                          "Non Compliant Yaw (Mean):  " + str(round(sv[sv["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                    xaxis_title_text="Unique AIS Positions",
-                   width=900)
+                   width=900,
+                   plot_bgcolor="#F1F1F1")
 ########################################################################
 
 # fig6 - another yaw visualization. try breaking apart the compliant vs non-compliant yaw values into a graph_
