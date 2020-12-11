@@ -185,6 +185,12 @@ def import_report(path):
             ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two Way Transit"
 
         stats_res = ports[i]
+        ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
+        if i % 2:
+            stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]
+        else:
+            stats_res = stats_res[stats_res.Latitude >= 32.667473]
+        ######ABOVE WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
 
         mean = pd.DataFrame(
             ports[i].groupby(["Name", "MMSI"])["VSPD kn"].mean()).rename(

@@ -3,7 +3,6 @@ from import_maritime_data import *
 from datetime import timedelta
 from meetpass import *
 from util import *
-import statsmodels.api as sm
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
@@ -26,16 +25,14 @@ for filename in glob.glob(path):
     sv_agg.append(report[1][1])
 
 ch = pd.concat(ch_agg)
-ch = ch[ch.Latitude >= 32.667473].reset_index()
-ch = ch.sort_values("Date/Time UTC").reset_index().drop(["level_0", "index"], axis=1)
+ch = ch.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 sv = pd.concat(sv_agg)
-sv = sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)].reset_index()
-sv = sv.sort_values("Date/Time UTC").reset_index().drop(["level_0", "index"], axis=1)
+sv = sv.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 
-ch_compliant = ch[ch['VSPD kn'] <= 10]
-sv_compliant = sv[sv['VSPD kn'] <= 10]
-ch_non_compliant = ch[ch['VSPD kn'] > 10]
-sv_non_compliant = sv[sv['VSPD kn'] > 10]
+ch_compliant = ch[ch["VSPD kn"] <= 10]
+sv_compliant = sv[sv["VSPD kn"] <= 10]
+ch_non_compliant = ch[ch["VSPD kn"] > 10]
+sv_non_compliant = sv[sv["VSPD kn"] > 10]
 
 ch["Compliance"] = "Non Compliant"
 ch["Compliance"][ch.index.isin(ch_compliant.index)] = "Compliant"
@@ -226,8 +223,8 @@ t2 = go.Scatter(x=ch.index, y=ch["Yaw"], mode="lines", name="Yaw deg", line=dict
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
-                         "Compliant Yaw (Mean): " + str(round(ch[ch['VSPD kn'] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
-                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch['VSPD kn'] > 10].Yaw.mean(), 2)) + " deg",
+                         "Compliant Yaw (Mean): " + str(round(ch[ch["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
+                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                   xaxis_title_text="Unique AIS Positions",
                   width=900)
 pio.write_html(fig5, file="../tests/line_plot.html", auto_open=False)
@@ -239,8 +236,8 @@ t2 = go.Scatter(x=sv.index, y=sv["Yaw"], mode="lines", name="Yaw deg", line=dict
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
-                         "Compliant Yaw (Mean): " + str(round(sv[sv['VSPD kn'] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
-                         "Non Compliant Yaw (Mean):  " + str(round(sv[sv['VSPD kn'] > 10].Yaw.mean(), 2)) + " deg",
+                         "Compliant Yaw (Mean): " + str(round(sv[sv["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
+                         "Non Compliant Yaw (Mean):  " + str(round(sv[sv["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                    xaxis_title_text="Unique AIS Positions",
                    width=900)
 ########################################################################
@@ -252,7 +249,7 @@ fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["VSPD
 ch_transit_speeders = []
 for mmsi in ch.MMSI.unique():
     ship = ch[ch.MMSI == mmsi]
-    compl = len(ship[ship['VSPD kn'] <= 10])
+    compl = len(ship[ship["VSPD kn"] <= 10])
     ch_transit_speeders.append(round(compl / len(ship), 2))
 
 np.array(ch_transit_speeders).mean()
@@ -260,7 +257,7 @@ np.array(ch_transit_speeders).mean()
 sv_transit_speeders = []
 for mmsi in sv.MMSI.unique():
     ship = sv[sv.MMSI == mmsi]
-    compl = len(ship[ship['VSPD kn'] <= 10])
+    compl = len(ship[ship["VSPD kn"] <= 10])
     sv_transit_speeders.append(round(compl / len(ship), 2))
 
 np.array(sv_transit_speeders).mean()
