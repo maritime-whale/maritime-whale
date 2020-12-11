@@ -32,47 +32,38 @@ sv = pd.concat(sv_agg)
 sv = sv[(sv.Latitude <= 32.02838) & (sv.Latitude >= 31.9985) | (sv.Latitude <= 31.99183)].reset_index()
 sv = sv.sort_values("Date/Time UTC").reset_index().drop(["level_0", "index"], axis=1)
 
-ch
-ch["test"] = "Panamax"
-ch["test"][ch.index.isin(ch[ch["LOA ft"] > 965].index)] = "Post-Panamax"
+ch_compliant = ch[ch['VSPD kn'] <= 10]
+sv_compliant = sv[sv['VSPD kn'] <= 10]
+ch_non_compliant = ch[ch['VSPD kn'] > 10]
+sv_non_compliant = sv[sv['VSPD kn'] > 10]
+
+ch["Compliance"] = "Non Compliant"
+ch["Compliance"][ch.index.isin(ch_compliant.index)] = "Compliant"
+sv["Compliance"] = "Non Compliant"
+sv["Compliance"][sv.index.isin(sv_compliant.index)] = "Compliant"
+
+ch_panamax = ch[ch["Vessel Class"] == "Panamax"]
+ch_post_panamax = ch[ch["Vessel Class"] == "Post-Panamax"]
+
+sv_panamax = sv[sv["Vessel Class"] == "Panamax"]
+sv_post_panamax = sv[sv["Vessel Class"] == "Post-Panamax"]
 
 
-ch["VSPD kn"] = ch.SPEED
-sv["VSPD kn"] = sv.SPEED
-
-ch_compliant = ch[ch.SPEED <= 10]
-sv_compliant = sv[sv.SPEED <= 10]
-ch_non_compliant = ch[ch.SPEED > 10]
-sv_non_compliant = sv[sv.SPEED > 10]
-
-ch["compliance"] = "Non Compliant"
-ch["compliance"][ch.index.isin(ch_compliant.index)] = "Compliant"
-sv["compliance"] = "Non Compliant"
-sv["compliance"][sv.index.isin(sv_compliant.index)] = "Compliant"
-
-ch_panamax = ch[ch["vessel class"] == "Panamax"]
-ch_post_panamax = ch[ch["vessel class"] == "Post Panamax"]
-
-sv_panamax = sv[sv["vessel class"] == "Panamax"]
-sv_post_panamax = sv[sv["vessel class"] == "Post Panamax"]
-
-
-ch_meetpass = meetpass(ch)
-ch_two_way = twoway(ch, ch_meetpass)
-ch["transit"] = "One Way Transit"
-ch["transit"][ch.index.isin(ch_two_way.index)] = "Two Way Transit"
-
-
-sv_meetpass = meetpass(sv)
-sv_two_way = twoway(sv, sv_meetpass)
-sv["transit"] = "One Way Transit"
-sv["transit"][sv.index.isin(sv_two_way.index)] = "Two Way Transit"
+# ch_meetpass = meetpass(ch)
+# ch_two_way = twoway(ch, ch_meetpass)
+# ch["Transit"] = "One Way Transit"
+# ch["Transit"][ch.index.isin(ch_two_way.index)] = "Two Way Transit"
+#
+# sv_meetpass = meetpass(sv)
+# sv_two_way = twoway(sv, sv_meetpass)
+# sv["transit"] = "One Way Transit"
+# sv["transit"][sv.index.isin(sv_two_way.index)] = "Two Way Transit"
 
 
 
-hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "course behavior":True,
-              "Yaw":True, "LOA ft":False, "Beam ft":False, "effective beam ft":True,
-              "location":False, "Name":False, "SPEED":False}
+hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
+              "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
+              "Location":False, "Name":False}
 
 # fig = px.scatter(ch, "Longitude", "Latitude")
 # fig.add_trace(go.Scatter(x=np.array(-79.693877), y=np.array(32.665187)))
@@ -97,7 +88,7 @@ def effective_beam(yaw, beam, loa):
 effective_beam(10, 160, 1000)
 effective_beam(10, 160, 1201)
 ##################Stats findings graph for website###############################
-fig1 = px.histogram(ch, x="VSPD kn", color="transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
+fig1 = px.histogram(ch, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
 fig1.update_layout(barmode="overlay",
                    xaxis_title_text = "VSPD kn",
                    yaxis_title_text = "Unique AIS Positions",
@@ -127,7 +118,7 @@ fig1
 
 # TITLE:
 # Vessel Speed Histogram
-fig1 = px.histogram(sv, x="VSPD kn", color="transit", nbins=20, color_discrete_sequence=["teal", "salmon"]) #width=800, height=600)#, color_discrete_sequence=["teal"])
+fig1 = px.histogram(sv, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["teal", "salmon"]) #width=800, height=600)#, color_discrete_sequence=["teal"])
 fig1.update_layout(barmode="overlay",
                    xaxis_title_text = "VSPD kn",
                    yaxis_title_text = "Unique AIS Positions",
@@ -151,15 +142,14 @@ fig1.data[1].marker.line.color = "black"
 fig1
 ########################################################################
 # "One-Minute Time Resolution Vessel Speed Plot"
-fig2 = px.strip(ch, x="Name", y="SPEED",
-                color="transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
+fig2 = px.strip(ch, x="Name", y="VSPD kn",
+                color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
                 color_discrete_sequence=["darkslateblue", "salmon"], width=850, height=550,
-                title= "One Way Transits: " + str(round((ch[ch.transit == "One Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%" "<br>"
-                       "Two Way Transits: " + str(round((ch[ch.transit == "Two Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%")
+                title= "One Way Transits: " + str(round((ch[ch.Transit == "One Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%" "<br>"
+                       "Two Way Transits: " + str(round((ch[ch.Transit == "Two Way Transit"].shape[0] / ch.shape[0]) * 100, 2)) + "%")
 fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
                 line=dict(color="Red", dash="solid", width=1.5), name="test")
 fig2.update_layout(xaxis_title_text = "",
-                  yaxis_title_text = "VSPD kn",
                   hoverlabel=dict(bgcolor="white",
                                     font_size=13),
                   legend_title_text="")
@@ -169,15 +159,14 @@ pio.write_html(fig2, file="../tests/VSPD_array.html", auto_open=False)
 
 # px.strip(ch, x="Name", y="Longitude", hover_data=hover_dict, width=950, height=550, color="compliance", stripmode="overlay")
 
-fig2 = px.strip(sv, x="Name", y="SPEED",
-                color="transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
+fig2 = px.strip(sv, x="Name", y="VSPD kn",
+                color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
                 color_discrete_sequence=["darkslateblue", "salmon"], width=850, height=550,
-                title="One Way Transits: " + str(round((sv[sv.transit == "One Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%" "<br>"
-                       "Two Way Transits: " + str(round((sv[sv.transit == "Two Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%") #array of vessel speed copy from last year..
+                title="One Way Transits: " + str(round((sv[sv.Transit == "One Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%" "<br>"
+                       "Two Way Transits: " + str(round((sv[sv.Transit == "Two Way Transit"].shape[0] / sv.shape[0]) * 100, 2)) + "%") #array of vessel speed copy from last year..
 fig2.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
                 line=dict(color="Red", dash="solid", width=1.5), name="test")
 fig2.update_layout(xaxis_title_text = "",
-                  yaxis_title_text = "VSPD kn",
                   hoverlabel=dict(bgcolor="white",
                                     font_size=13),
                   legend_title_text="")
@@ -232,26 +221,26 @@ fig4.update_traces(contours_coloring = "fill", colorscale = "blues")
 fig4.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: " + str(round(sv.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
                    hoverlabel=dict(bgcolor="white", font_size=13))
 ########################################################################
-t1 = go.Scatter(x=ch.index, y=ch["SPEED"], mode="lines", name="VSPD kn", line=dict(width=1.5), hoverinfo="skip")
+t1 = go.Scatter(x=ch.index, y=ch["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5), hoverinfo="skip")
 t2 = go.Scatter(x=ch.index, y=ch["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5), hoverinfo="skip")
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
-fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["SPEED", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
-                         "Compliant Yaw (Mean): " + str(round(ch[ch.SPEED <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
-                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch.SPEED > 10].Yaw.mean(), 2)) + " deg",
+fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
+                         "Compliant Yaw (Mean): " + str(round(ch[ch['VSPD kn'] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
+                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch['VSPD kn'] > 10].Yaw.mean(), 2)) + " deg",
                   xaxis_title_text="Unique AIS Positions",
                   width=900)
 pio.write_html(fig5, file="../tests/line_plot.html", auto_open=False)
 
 
 
-t1 = go.Scatter(x=sv.index, y=sv["SPEED"], mode="lines", name="VSPD kn", line=dict(width=1.5), hoverinfo="skip")
+t1 = go.Scatter(x=sv.index, y=sv["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5), hoverinfo="skip")
 t2 = go.Scatter(x=sv.index, y=sv["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5), hoverinfo="skip")
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
-fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["SPEED", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
-                         "Compliant Yaw (Mean): " + str(round(sv[sv.SPEED <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
-                         "Non Compliant Yaw (Mean):  " + str(round(sv[sv.SPEED > 10].Yaw.mean(), 2)) + " deg",
+fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
+                         "Compliant Yaw (Mean): " + str(round(sv[sv['VSPD kn'] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
+                         "Non Compliant Yaw (Mean):  " + str(round(sv[sv['VSPD kn'] > 10].Yaw.mean(), 2)) + " deg",
                    xaxis_title_text="Unique AIS Positions",
                    width=900)
 ########################################################################
@@ -263,7 +252,7 @@ fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(sv.dropna()[["SPEE
 ch_transit_speeders = []
 for mmsi in ch.MMSI.unique():
     ship = ch[ch.MMSI == mmsi]
-    compl = len(ship[ship.SPEED <= 10])
+    compl = len(ship[ship['VSPD kn'] <= 10])
     ch_transit_speeders.append(round(compl / len(ship), 2))
 
 np.array(ch_transit_speeders).mean()
@@ -271,7 +260,7 @@ np.array(ch_transit_speeders).mean()
 sv_transit_speeders = []
 for mmsi in sv.MMSI.unique():
     ship = sv[sv.MMSI == mmsi]
-    compl = len(ship[ship.SPEED <= 10])
+    compl = len(ship[ship['VSPD kn'] <= 10])
     sv_transit_speeders.append(round(compl / len(ship), 2))
 
 np.array(sv_transit_speeders).mean()

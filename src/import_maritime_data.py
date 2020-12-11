@@ -8,11 +8,11 @@ import math
 import sys
 
 
-def filter_blacklisters(res):
+def filter_blacklisters(res, blacklist):
     res = res[~res.MMSI.isin(blacklist)]
     new_blacklisters = []
     for j in range(res.shape[0]):
-        if res.iloc[j]["AIS TYPE"] in [30, 31, 32, 33, 34, 35, 36, 37,
+        if res.iloc[j]["AIS Type"] in [30, 31, 32, 33, 34, 35, 36, 37,
                                        51, 52, 53, 55, 57, 58, 59]:
             new_blacklisters.append(res.iloc[j].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
@@ -121,6 +121,7 @@ def import_report(path):
             # offshore
             else:
                 input_times = list(ports[i][ports[i]["Location"] == "offshore"]["Date/Time UTC"])
+            # match wind speed to location
             for ii in range(len(input_times)):
                 min_timedelta = timedelta(hours=WIND_TIME_TOL)
                 min_timedelta_index = -1
@@ -136,36 +137,28 @@ def import_report(path):
                     for k in final_winds:
                         final_winds[k].append(wind_data[k].iloc[min_timedelta_index])
                 else:
+                    # handle missing wind vals
                     for k in final_winds:
                         final_winds[k].append(float("NaN"))
-
-            # print(len(final_winds["WDIR degT"]))
             for k in final_winds:
-                # ports[i][k] = final_winds[k] #chain version
                 if j % 2:
-                    # print("FUCK!")
                     ports[i].loc[ports[i].Location == "nearshore", k] = final_winds[k]
                 else:
                     ports[i].loc[ports[i].Location == "offshore", k] = final_winds[k]
-                    # print("GREAT success)
-                    # print(ports[i].columns)
-                # ports[i].loc[:, k] = final_winds[k] # loc version (might be broken)
 
         ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
                             (ports[i].Course <= course_ranges[i][0][1]) |
                             (ports[i].Course >= course_ranges[i][1][0]) &
                             (ports[i].Course <= course_ranges[i][1][1])]
         ports[i].Course = round(ports[i].Course).astype("int")
-        # ports[i]["Course Behavior"] = ports[i].COURSE # chain version
         ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course"]
         courses = {}
         for behavior, course_range in zip(course_behavior, course_ranges[i]):
             lower_bound = course_range[0]
             upper_bound = course_range[1]
             for j in range(lower_bound, upper_bound + 1):
-                courses[j] = course_behavior
-        ports[i].loc[:, "Course Behavior"].replace(courses, inplace=True).astype("str")
-        # ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course Behavior"].replace(courses).astype("str")
+                courses[j] = behavior
+        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course Behavior"].replace(courses).astype("str")
         ### Vessel Class specification
         ports[i].loc[:, "Vessel Class"] = "Panamax"
         ports[i].loc[:, "Vessel Class"][ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)] = "Post-Panamax"
@@ -180,10 +173,19 @@ def import_report(path):
             EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
 
         ports[i].loc[:, "Effective Beam ft"] = EB
-        # ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:, "effective beam m"] * 3.28
+        # ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:, "Effective Beam m"] * 3.28
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:, "Effective Beam ft"].round(0)
+        ports[i] = filter_blacklisters(ports[i], blacklist)
+        ports[i].loc[:, "rounded date"] = [ports[i].loc[:, "Date/Time UTC"].iloc[ii].floor("Min") for ii in range(len(ports[i].loc[:, "Date/Time UTC"]))]
 
-        # FORMERLY LVL_PLTS
+        mp = meetpass(ports[i])
+        two_way = twoway(ports[i], mp)
+        ports[i]["Transit"] = "One Way Transit"
+        if not isinstance(two_way, type(None)):
+            ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two Way Transit"
+
+        stats_res = ports[i]
+
         mean = pd.DataFrame(
             ports[i].groupby(["Name", "MMSI"])["VSPD kn"].mean()).rename(
             {"VSPD kn": "Mean Speed kn"}, axis=1).round(1)
@@ -195,8 +197,8 @@ def import_report(path):
         columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[],
                    "LOA ft":[], "Course":[], "AIS Type":[],
                    "WSPD mph":[], "GST mph":[], "WDIR degT":[], "Beam ft":[],
-                   "Heading":[], "Course Behavior":[], "Effective Beam":[],
-                   "Vessel Class":[], "Location":[], "Yaw":[]}
+                   "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
+                   "Vessel Class":[], "Location":[], "Yaw":[], "Transit":[]}
         for key, value in d.items():
             for k in columns.keys():
                 columns[k].append(ports[i][(ports[i].Name == key[0]) &
@@ -206,42 +208,26 @@ def import_report(path):
         merged_speeds = merged_speeds.reset_index()
 
         lvl_res = merged_speeds
-        stats_res = ports[i]
-
-        lvl_res = filter_blacklisters(lvl_res)
-        stats_res = filter_blacklisters(stats_res)
-
         lvl_res.sort_values("Max Speed kn", ascending=False, inplace=True)
         lvl_res = lvl_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                    "Course", "Heading", "Course Behavior", "Yaw", "Effective Beam ft",
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
-                   "Longitude"]]
-        stats_res.loc[:, "rounded date"] = [stats_res.loc[:, "Date/Time UTC"].iloc[i].floor("Min") for i in range(len(stats_res.loc[:, "Date/Time UTC"]))]
+                   "Longitude", "Transit"]]
 
-            # mp = meetpass(res)
-            # two_way = twoway(res, mp)
-            # res["transit"] = "one way transit"
-            # res["transit"][res.index.isin(two_way.index)] = "two way transit"
-            # for row in range(len(res)):
-            #     if res.loc[row, "WSPD mph"] != "NaN":
-            #         high_wind = res[res["WSPD mph"] >= 30]
-            #         res["adverse wind"] = "no adverse wind conditions"
-            #         res["adverse wind"][res.index.isin(high_wind.index)] = "adverse wind conditions"
+        # for row in range(len(res)):
+        #     if res.loc[row, "WSPD mph"] != "NaN":
+        #         high_wind = res[res["WSPD mph"] >= 30]
+        #         res["adverse wind"] = "no adverse wind conditions"
+        #         res["adverse wind"][res.index.isin(high_wind.index)] = "adverse wind conditions"
 
-
-        stats_res = stats_res[["Name", "MMSI", "Date/Time UTC", "VSPD kn",
-                       "LOA ft", "Latitude", "Longitude", "AIS Type", "Course",
-                       "Course Behavior", "Heading", "Location", "Vessel Class",
-                       "Beam ft", "Yaw", "Effective Beam ft",
-                       "WDIR degT", "WSPD mph", "GST mph", "rounded date"]] #"adverse wind"]]
+        stats_res = stats_res[["Date/Time UTC", "Name", "MMSI", "VSPD kn",
+                                "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
+                                "Course", "Heading", "Course Behavior",
+                                "Yaw", "Effective Beam ft",
+                                "WDIR degT", "WSPD mph", "GST mph",
+                                "Location", "Latitude", "Longitude", "rounded date", "Transit"]]
 
         ports[i] = [lvl_res, stats_res]
 
     return ports[0], ports[1] # ch, sv
-
-
-# path = "/Users/omrinewman/riwhale/maritime-whale/tests/2020-11-16.csv"
-# out = import_report(path, STATS)
-# ch = out[0]
-# sv = out[1]

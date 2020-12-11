@@ -31,7 +31,7 @@ def meetpass_helper(df, time_tolerance):
 
     mmsi = list(times.MMSI)
     timestamp = list(times["Date/Time UTC"])
-    course = list(times["course behavior"])
+    course = list(times["Course Behavior"])
 
     potential_times = []
 
@@ -56,7 +56,7 @@ def meetpass(df):
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
     flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
-            ["MMSI", "course behavior", pd.Grouper(
+            ["MMSI", "Course Behavior", pd.Grouper(
                 key="Date/Time UTC", freq="min")])[["Date/Time UTC"]].size()
 
     # sub should contain all the flagged times
@@ -78,20 +78,14 @@ def meetpass(df):
             this_time = cur_val.get_level_values(1)[0]
             this_lat = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)].Latitude.values[0].round(5)
             this_long = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)].Longitude.values[0].round(5)
-            this_class = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["vessel class"].values[0]
-            this_wdir = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["WDIR degT"].values[0]
-            this_wspd = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["WSPD mph"].values[0]
-            this_gst = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["GST mph"].values[0]
+            this_class = rounded_df[(rounded_df.MMSI == cur_key) & (rounded_df["Date/Time UTC"] == this_time)]["Vessel Class"].values[0]
             for inner_key, inner_val in sub.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
                     that_time = that[1]
                     that_lat = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)].Latitude.values[0].round(5)
                     that_long = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)].Longitude.values[0].round(5)
-                    that_class = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["vessel class"].values[0]
-                    that_wdir = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["WDIR degT"].values[0]
-                    that_wspd = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["WSPD mph"].values[0]
-                    that_gst = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["GST mph"].values[0]
+                    that_class = rounded_df[(rounded_df.MMSI == inner_key) & (rounded_df["Date/Time UTC"] == that_time)]["Vessel Class"].values[0]
                     if (this_time == that_time) and (this_course != that_course):
                         dist = calc_naut_dist(this_lat, this_long, that_lat, that_long)
                         # check if true encounter (within minimum distance)
@@ -104,12 +98,12 @@ def meetpass(df):
                             key = tuple(fragments)
                             if key not in true_encs:
                                 # create new entry
-                                true_encs[key] = (this_time, dist, this_wdir, this_wspd, this_gst)
+                                true_encs[key] = (this_time, dist)
                                 # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
                             else:
                                 # minimize distance (update)
                                 if true_encs[key][1] > dist:
-                                    true_encs[key] = (this_time, dist, this_wdir, this_wspd, this_gst)
+                                    true_encs[key] = (this_time, dist)
                                     # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
             multiindex = cur_val.delete(0)
             cur_val = multiindex
@@ -129,11 +123,13 @@ def twoway(df, true_encs):
         two_way.append(twoway_helper(df, that_mmsi, that_course, enc_time))
         # two_way.append(pd.concat([twoway_helper(df, this_mmsi, this_course, enc_time),
         #                           twoway_helper(df, that_mmsi, that_course, enc_time)]))
+    if two_way == []:
+        return None
     return pd.concat(two_way)
 
 
 def twoway_helper(df, mmsi, course, enc_time):
-    res = df[(df.MMSI == mmsi) & (df["course behavior"] == course) &
+    res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res
 # use "2020-10-06.csv" path for testing
