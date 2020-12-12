@@ -33,7 +33,7 @@ def main():
             os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
             maritime_data = [[port[0] for port in maritime_report],
                              [port[1] for port in maritime_report]]
-            caches = ((date + "/ch-geo", date + "/sv-geo"),
+            caches = ((date + "/ch-max", date + "/sv-max"),
                       (date + "/ch", date + "/sv"))
             for i in range(len(caches)):
                 for j in range(len(maritime_data[i])):
@@ -47,7 +47,7 @@ def main():
         # load cache into memory
         span = 0
         data_frames = []
-        names = ["ch-geo.csv", "sv-geo.csv", "ch.csv", "sv.csv"]
+        names = ["ch-max.csv", "sv-max.csv", "ch.csv", "sv.csv"]
         dirs = sorted([f.name for f in os.scandir("../cache/")
                       if f.is_dir()], reverse=True)
         for subdir in dirs:
@@ -59,14 +59,6 @@ def main():
                     for i in range(len(names)):
                         if names[i] in filename:
                             caches[i] = pd.read_csv(filename)
-                    # if "ch-geo.csv" in filename:
-                    #     caches[0] = pd.read_csv(filename)
-                    # elif "sv-geo.csv" in filename:
-                    #     caches[1] = pd.read_csv(filename)
-                    # elif "ch.csv" in filename:
-                    #     caches[2] = pd.read_csv(filename)
-                    # elif "sv.csv" in filename:
-                    #     caches[3] = pd.read_csv(filename)
             if True in [isinstance(cache, type(None)) for cache in caches]:
                 log(logfile, "Empty/partial cache found: " + subdir)
                 continue
@@ -93,7 +85,7 @@ def main():
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
 
         filetypes = ["xlsx", "csv"]
-        filenames = (("master-ch-geo", "master-sv-geo"), ("master-ch-stats", "master-sv-stats"))
+        filenames = (("master-ch-max", "master-sv-max"), ("master-ch", "master-sv"))
         for i in range(len(filetypes)): # loop controlling file type
             for j in range(len(maritime_data)):
                 for k in range(len(filenames[j])):
