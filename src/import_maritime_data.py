@@ -232,7 +232,7 @@ def import_report(path):
                                 "Course", "Heading", "Course Behavior",
                                 "Yaw", "Effective Beam ft",
                                 "WDIR degT", "WSPD mph", "GST mph",
-                                "Location", "Latitude", "Longitude", "Transit"]]
+                                "Location", "Latitude", "Longitude", "rounded date", "Transit"]]
 
         ports[i] = [lvl_res, stats_res]
 
