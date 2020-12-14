@@ -29,6 +29,26 @@ ch = ch.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 sv = pd.concat(sv_agg)
 sv = sv.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 
+for row in range(len(ch)):
+    if (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 800) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 400) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 1000) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 500) * 100, 2)
+
+for row in range(len(sv)):
+    if (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
+
 ch_compliant = ch[ch["VSPD kn"] <= 10]
 sv_compliant = sv[sv["VSPD kn"] <= 10]
 ch_non_compliant = ch[ch["VSPD kn"] > 10]
@@ -82,8 +102,8 @@ def effective_beam(yaw, beam, loa):
     import math
     return (math.cos(math.radians(90-yaw))*loa) + (math.cos(math.radians(yaw))*beam)
 
+effective_beam(10, 150, 1100)
 effective_beam(10, 160, 1000)
-effective_beam(10, 160, 1201)
 ##################Stats findings graph for website###############################
 fig1 = px.histogram(ch, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
 fig1.update_layout(barmode="overlay",
@@ -278,6 +298,106 @@ for mmsi in sv.MMSI.unique():
 
 np.array(sv_transit_speeders).mean()
 ########################################################################
+
+for row in range(len(ch)):
+    if (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 800) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 400) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 1000) * 100, 2)
+    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
+        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 500) * 100, 2)
+
+for row in range(len(sv)):
+    if (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
+    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
+        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
+
+px.strip(ch[ch['Vessel Class'] == 'Post-Panamax'], x="Name", y="% Channel Occupied", hover_data=hover_dict, width=950, height=550, color="Transit", stripmode="overlay",
+        title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
+               "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
+                )
+
+
+fig = px.density_contour(ch[ch['Vessel Class'] == 'Post-Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit', color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500)
+fig.update_layout(title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
+                         "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
+                         )
+fig1 = px.histogram(ch[ch['Vessel Class'] == 'Post-Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
+fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
+                   title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
+                         "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%',
+                   showlegend = True,hoverlabel=dict(bgcolor="white", font_size=13),
+                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
+fig1.data[0].marker.line.width = 0.5
+fig1.data[0].marker.line.color = "black"
+fig1.data[1].marker.line.width = 0.5
+fig1.data[1].marker.line.color = "black"
+fig1
+
+px.strip(ch[ch['Vessel Class'] == 'Panamax'], x="Name", y="% Channel Occupied", hover_data=hover_dict, width=950, height=550, color="Transit", stripmode="overlay",
+        title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
+               "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
+                )
+
+fig = px.density_contour(ch[ch['Vessel Class'] == 'Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit', color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500)
+fig.update_layout(title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
+                        "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
+                        )
+fig1 = px.histogram(ch[ch['Vessel Class'] == 'Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
+fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
+                   title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
+                          "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%',
+                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
+                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
+fig1.data[0].marker.line.width = 0.5
+fig1.data[0].marker.line.color = "black"
+fig1.data[1].marker.line.width = 0.5
+fig1.data[1].marker.line.color = "black"
+fig1
+
+fig = px.density_contour(sv[sv['Vessel Class'] == 'Post-Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit')
+fig.update_layout(title="Post-Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
+                        "Post-Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
+                        )
+
+fig1 = px.histogram(sv[sv['Vessel Class'] == 'Post-Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
+fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
+                   title = "Post-Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
+                            "Post-Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%',
+                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
+                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
+fig1.data[0].marker.line.width = 0.5
+fig1.data[0].marker.line.color = "black"
+fig1.data[1].marker.line.width = 0.5
+fig1.data[1].marker.line.color = "black"
+fig1
+
+
+fig = px.density_contour(sv[sv['Vessel Class'] == 'Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit')
+fig.update_layout(title="Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
+                        "Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
+                        )
+
+fig1 = px.histogram(sv[sv['Vessel Class'] == 'Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
+fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
+                   title = "Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
+                            "Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%',
+                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
+                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
+fig1.data[0].marker.line.width = 0.5
+fig1.data[0].marker.line.color = "black"
+fig1.data[1].marker.line.width = 0.5
+fig1.data[1].marker.line.color = "black"
+fig1
+
+########################################################################
 # px.violin(non_compliant.Yaw)
 # px.violin(compliant.Yaw)
 # px.histogram(ch, x="effective beam ft", color="vessel class")
@@ -411,88 +531,88 @@ np.array(sv_transit_speeders).mean()
 # sv_non_compliant[["SPEED", "Yaw"]].corr()
 #
 #
-# # CHARLESTON
-# ch_dat = {"Proportion of Transits":[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + "%",
-#                                     str(round(ch_post_panamax.shape[0]/ch.shape[0]*100, 2)) + "%",
-#                                     "100%"],
-#
-#           "Compliance Rate":[str(round(sum(ch_panamax["SPEED"] <= 10) / ch_panamax.shape[0] * 100, 2)) + "%",
-#                              str(round(sum(ch_post_panamax["SPEED"] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + "%",
-#                              str(round(sum(ch["SPEED"] <= 10) / ch.shape[0] * 100, 2)) + "%"],
-#
-#           "Nearshore Median Speed":[str(round(ch_panamax[ch_panamax["location"] == "nearshore"]["SPEED"].median(),2)),
-#                                     str(round(ch_post_panamax[ch_post_panamax["location"] == "nearshore"]["SPEED"].median(),2)),
-#                                     str(round(ch[ch["location"] == "nearshore"]["SPEED"].median(),2))],
-#
-#           "Offshore Median Speed":[str(round(ch_panamax[ch_panamax["location"] == "offshore"]["SPEED"].median(),2)),
-#                                    str(round(ch_post_panamax[ch_post_panamax["location"] == "offshore"]["SPEED"].median(),2)),
-#                                    str(round(ch[ch["location"] == "offshore"]["SPEED"].median(),2))],
-#
-#           "Inbound Median Speed":[str(round(ch_panamax[ch_panamax["course behavior"] == "Inbound"]["SPEED"].median(),2)),
-#                                   str(round(ch_post_panamax[ch_post_panamax["course behavior"] == "Inbound"]["SPEED"].median(),2)),
-#                                   str(round(ch[ch["course behavior"] == "Inbound"]["SPEED"].median(),2))],
-#
-#           "Outbound Median Speed":[str(round(ch_panamax[ch_panamax["course behavior"] == "Outbound"]["SPEED"].median(),2)),
-#                                    str(round(ch_post_panamax[ch_post_panamax["course behavior"] == "Outbound"]["SPEED"].median(),2)),
-#                                    str(round(ch[ch["course behavior"] == "Outbound"]["SPEED"].median(),2))],
-#
-#           "VSPD-WSPD correlation":[str(round(ch_panamax.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2)),
-#                                    str(round(ch_post_panamax.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2)),
-#                                    str(round(ch.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2))],
-#
-#           "VSPD-GST correlation":[str(round(ch_panamax.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2)),
-#                                    str(round(ch_post_panamax.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2)),
-#                                    str(round(ch.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2))]
-#          }
-#
-# ch_index = ["Panamax", "Post Panamax", "Combined"]
-#
-# # SAVANNAH
-# sv_dat = {"Proportion of Transits":[str(round(sv_panamax.shape[0]/sv.shape[0]*100, 2)) + "%",
-#                                 str(round(sv_post_panamax.shape[0]/sv.shape[0]*100, 2)) + "%",
-#                                 "100%"],
-#
-#           "Compliance Rate":[str(round(sum(sv_panamax["SPEED"] <= 10) / sv_panamax.shape[0] * 100, 2)) + "%",
-#                         str(round(sum(sv_post_panamax["SPEED"] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + "%",
-#                         str(round(sum(sv["SPEED"] <= 10) / sv.shape[0] * 100, 2)) + "%"],
-#
-#           "Nearshore Median Speed":[str(round(sv_panamax[sv_panamax["location"] == "nearshore"]["SPEED"].median(),2)),
-#                                     str(round(sv_post_panamax[sv_post_panamax["location"] == "nearshore"]["SPEED"].median(),2)),
-#                                     str(round(sv[sv["location"] == "nearshore"]["SPEED"].median(),2))],
-#
-#           "Offshore Median Speed":[str(round(sv_panamax[sv_panamax["location"] == "offshore"]["SPEED"].median(),2)),
-#                                   str(round(sv_post_panamax[sv_post_panamax["location"] == "offshore"]["SPEED"].median(),2)),
-#                                   str(round(sv[sv["location"] == "offshore"]["SPEED"].median(),2))],
-#
-#           "Inbound Median Speed":[str(round(sv_panamax[sv_panamax["course behavior"] == "Inbound"]["SPEED"].median(),2)),
-#                                     str(round(sv_post_panamax[sv_post_panamax["course behavior"] == "Inbound"]["SPEED"].median(),2)),
-#                                     str(round(sv[sv["course behavior"] == "Inbound"]["SPEED"].median(),2))],
-#
-#           "Outbound Median Speed":[str(round(sv_panamax[sv_panamax["course behavior"] == "Outbound"]["SPEED"].median(),2)),
-#                         str(round(sv_post_panamax[sv_post_panamax["course behavior"] == "Outbound"]["SPEED"].median(),2)),
-#                         str(round(sv[sv["course behavior"] == "Outbound"]["SPEED"].median(),2))],
-#
-#           "VSPD-WSPD correlation":[str(round(sv_panamax.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2)),
-#                                  str(round(sv_post_panamax.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2)),
-#                                  str(round(sv.dropna()[["SPEED", "WSPD mph"]].corr().iloc[0][1], 2))],
-#
-#           "VSPD-GST correlation":[str(round(sv_panamax.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2)),
-#                                   str(round(sv_post_panamax.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2)),
-#                                   str(round(sv.dropna()[["SPEED", "GST mph"]].corr().iloc[0][1], 2))]
-#                                  }
-#
-# sv_index = ["Panamax", "Post Panamax", "Combined"]
-#
-#
+# CHARLESTON
+ch_dat = {"Proportion of Transits":[str(round(ch_panamax.shape[0]/ch.shape[0]*100, 2)) + "%",
+                                    str(round(ch_post_panamax.shape[0]/ch.shape[0]*100, 2)) + "%",
+                                    "100%"],
+
+          "Compliance Rate":[str(round(sum(ch_panamax["VSPD kn"] <= 10) / ch_panamax.shape[0] * 100, 2)) + "%",
+                             str(round(sum(ch_post_panamax["VSPD kn"] <= 10) / ch_post_panamax.shape[0] * 100, 2)) + "%",
+                             str(round(sum(ch["VSPD kn"] <= 10) / ch.shape[0] * 100, 2)) + "%"],
+
+          "Nearshore Median Speed":[str(round(ch_panamax[ch_panamax["Location"] == "nearshore"]["VSPD kn"].median(),2)),
+                                    str(round(ch_post_panamax[ch_post_panamax["Location"] == "nearshore"]["VSPD kn"].median(),2)),
+                                    str(round(ch[ch["Location"] == "nearshore"]["VSPD kn"].median(),2))],
+
+          "Offshore Median Speed":[str(round(ch_panamax[ch_panamax["Location"] == "offshore"]["VSPD kn"].median(),2)),
+                                   str(round(ch_post_panamax[ch_post_panamax["Location"] == "offshore"]["VSPD kn"].median(),2)),
+                                   str(round(ch[ch["Location"] == "offshore"]["VSPD kn"].median(),2))],
+
+          "Inbound Median Speed":[str(round(ch_panamax[ch_panamax["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)),
+                                  str(round(ch_post_panamax[ch_post_panamax["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)),
+                                  str(round(ch[ch["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2))],
+
+          "Outbound Median Speed":[str(round(ch_panamax[ch_panamax["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)),
+                                   str(round(ch_post_panamax[ch_post_panamax["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)),
+                                   str(round(ch[ch["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2))],
+
+          "VSPD-WSPD correlation":[str(round(ch_panamax.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
+                                   str(round(ch_post_panamax.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
+                                   str(round(ch.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))],
+
+          "VSPD-GST correlation":[str(round(ch_panamax.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2)),
+                                   str(round(ch_post_panamax.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2)),
+                                   str(round(ch.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2))]
+         }
+
+ch_index = ["Panamax", "Post Panamax", "Combined"]
+
+# SAVANNAH
+sv_dat = {"Proportion of Transits":[str(round(sv_panamax.shape[0]/sv.shape[0]*100, 2)) + "%",
+                                str(round(sv_post_panamax.shape[0]/sv.shape[0]*100, 2)) + "%",
+                                "100%"],
+
+          "Compliance Rate":[str(round(sum(sv_panamax["VSPD kn"] <= 10) / sv_panamax.shape[0] * 100, 2)) + "%",
+                        str(round(sum(sv_post_panamax["VSPD kn"] <= 10) / sv_post_panamax.shape[0] * 100, 2)) + "%",
+                        str(round(sum(sv["VSPD kn"] <= 10) / sv.shape[0] * 100, 2)) + "%"],
+
+          "Nearshore Median Speed":[str(round(sv_panamax[sv_panamax["Location"] == "nearshore"]["VSPD kn"].median(),2)),
+                                    str(round(sv_post_panamax[sv_post_panamax["Location"] == "nearshore"]["VSPD kn"].median(),2)),
+                                    str(round(sv[sv["Location"] == "nearshore"]["VSPD kn"].median(),2))],
+
+          "Offshore Median Speed":[str(round(sv_panamax[sv_panamax["Location"] == "offshore"]["VSPD kn"].median(),2)),
+                                  str(round(sv_post_panamax[sv_post_panamax["Location"] == "offshore"]["VSPD kn"].median(),2)),
+                                  str(round(sv[sv["Location"] == "offshore"]["VSPD kn"].median(),2))],
+
+          "Inbound Median Speed":[str(round(sv_panamax[sv_panamax["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)),
+                                    str(round(sv_post_panamax[sv_post_panamax["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)),
+                                    str(round(sv[sv["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2))],
+
+          "Outbound Median Speed":[str(round(sv_panamax[sv_panamax["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)),
+                        str(round(sv_post_panamax[sv_post_panamax["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)),
+                        str(round(sv[sv["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2))],
+
+          "VSPD-WSPD correlation":[str(round(sv_panamax.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
+                                 str(round(sv_post_panamax.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
+                                 str(round(sv.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))],
+
+          "VSPD-GST correlation":[str(round(sv_panamax.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2)),
+                                  str(round(sv_post_panamax.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2)),
+                                  str(round(sv.dropna()[["VSPD kn", "GST mph"]].corr().iloc[0][1], 2))]
+                                 }
+
+sv_index = ["Panamax", "Post Panamax", "Combined"]
+
+
+pd.DataFrame(ch_dat, ch_index)
 # pd.DataFrame(ch_dat, ch_index)
-# # pd.DataFrame(ch_dat, ch_index)
-#
+
+pd.DataFrame(sv_dat, sv_index)
 # pd.DataFrame(sv_dat, sv_index)
-# # pd.DataFrame(sv_dat, sv_index)
 #
 #
 # ###### meeting/passing
-# ch_meetpass = meetpass(ch)
+ch_meetpass = meetpass(ch)
 # sv_meetpass = meetpass(sv)
 # for item in ch_meetpass.items():
 #     print(item)
@@ -574,6 +694,8 @@ np.array(sv_transit_speeders).mean()
 # sv["transit"][sv.index.isin(sv_two_way.index)] = "two way transit"
 #
 #
+#
+# ch_two_way[(ch_two_way.MMSI == df.index.get_level_values(2)[8]) | (ch_two_way.MMSI == df.index.get_level_values(2)[9])]
 #
 # for i in range(len(df)):
 #     if i%2 == 0:
