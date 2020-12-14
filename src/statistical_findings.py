@@ -319,83 +319,21 @@ for row in range(len(sv)):
     elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
         sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
 
-px.strip(ch[ch['Vessel Class'] == 'Post-Panamax'], x="Name", y="% Channel Occupied", hover_data=hover_dict, width=950, height=550, color="Transit", stripmode="overlay",
-        title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
-               "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
-                )
+
+fig = px.density_contour(ch[(ch['Transit'] == 'One Way Transit') & (ch['WSPD mph'] < 30)], y='VSPD kn', x='% Channel Occupied',
+                         color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
+                         title="Non Adverse Conditions: " + str(round(len(ch[(ch['Transit'] == 'One Way Transit') & (ch['WSPD mph'] < 30)]) / len(ch) * 100, 2)) + '%')
+fig.update_traces(contours_coloring = "fill", colorscale = "greens")
+fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
+                line=dict(color="Red", dash="solid", width=1.5), name="test", templateitemname="test", visible=True)
 
 
-fig = px.density_contour(ch[ch['Vessel Class'] == 'Post-Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit', color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500)
-fig.update_layout(title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
-                         "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
-                         )
-fig1 = px.histogram(ch[ch['Vessel Class'] == 'Post-Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
-fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
-                   title="Post-Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
-                         "Post-Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Post-Panamax')]) / len(ch[ch['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%',
-                   showlegend = True,hoverlabel=dict(bgcolor="white", font_size=13),
-                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
-fig1.data[0].marker.line.width = 0.5
-fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.5
-fig1.data[1].marker.line.color = "black"
-fig1
-
-px.strip(ch[ch['Vessel Class'] == 'Panamax'], x="Name", y="% Channel Occupied", hover_data=hover_dict, width=950, height=550, color="Transit", stripmode="overlay",
-        title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
-               "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
-                )
-
-fig = px.density_contour(ch[ch['Vessel Class'] == 'Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit', color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500)
-fig.update_layout(title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
-                        "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
-                        )
-fig1 = px.histogram(ch[ch['Vessel Class'] == 'Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
-fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
-                   title="Panamax Two Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'Two Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
-                          "Panamax One Way Transits (Charleston): " + str(round(len(ch[(ch.Transit == 'One Way Transit') & (ch['Vessel Class'] == 'Panamax')]) / len(ch[ch['Vessel Class'] == 'Panamax']) * 100, 2)) + '%',
-                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
-                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
-fig1.data[0].marker.line.width = 0.5
-fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.5
-fig1.data[1].marker.line.color = "black"
-fig1
-
-fig = px.density_contour(sv[sv['Vessel Class'] == 'Post-Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit')
-fig.update_layout(title="Post-Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
-                        "Post-Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%'
-                        )
-
-fig1 = px.histogram(sv[sv['Vessel Class'] == 'Post-Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
-fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
-                   title = "Post-Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%' '<br>'
-                            "Post-Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Post-Panamax')]) / len(sv[sv['Vessel Class'] == 'Post-Panamax']) * 100, 2)) + '%',
-                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
-                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
-fig1.data[0].marker.line.width = 0.5
-fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.5
-fig1.data[1].marker.line.color = "black"
-fig1
-
-
-fig = px.density_contour(sv[sv['Vessel Class'] == 'Panamax'], y='VSPD kn', x='% Channel Occupied', color='Transit')
-fig.update_layout(title="Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
-                        "Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%'
-                        )
-
-fig1 = px.histogram(sv[sv['Vessel Class'] == 'Panamax'], x="% Channel Occupied", color="Transit", opacity=0.6)#, color_discrete_sequence=["darkslateblue", "salmon"])
-fig1.update_layout(barmode="overlay", yaxis_title_text = "Unique AIS Positions",
-                   title = "Panamax Two Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'Two Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%' '<br>'
-                            "Panamax One Way Transits (Savannah): " + str(round(len(sv[(sv.Transit == 'One Way Transit') & (sv['Vessel Class'] == 'Panamax')]) / len(sv[sv['Vessel Class'] == 'Panamax']) * 100, 2)) + '%',
-                   showlegend = True, hoverlabel=dict(bgcolor="white", font_size=13),
-                   legend_title_text="", plot_bgcolor="#F1F1F1", font=dict(size=11))
-fig1.data[0].marker.line.width = 0.5
-fig1.data[0].marker.line.color = "black"
-fig1.data[1].marker.line.width = 0.5
-fig1.data[1].marker.line.color = "black"
-fig1
+fig = px.density_contour(sv[(sv['Transit'] == 'One Way Transit') & (sv['WSPD mph'] < 30)], y='VSPD kn', x='% Channel Occupied',
+                            color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
+                            title="Non Adverse Conditions: " + str(round(len(sv[(sv['Transit'] == 'One Way Transit') & (sv['WSPD mph'] < 30)]) / len(sv) * 100, 2)) + '%')
+fig.update_traces(contours_coloring = "fill", colorscale = "greens")
+fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
+                line=dict(color="Red", dash="solid", width=1.5), name="test", templateitemname="test", visible=True)
 
 ########################################################################
 # px.violin(non_compliant.Yaw)
