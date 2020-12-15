@@ -29,26 +29,6 @@ ch = ch.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 sv = pd.concat(sv_agg)
 sv = sv.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 
-for row in range(len(ch)):
-    if (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
-        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 800) * 100, 2)
-    elif (ch.loc[row, 'Vessel Class'] == 'Post-Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
-        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 400) * 100, 2)
-    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'One Way Transit'):
-        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 1000) * 100, 2)
-    elif (ch.loc[row, 'Vessel Class'] == 'Panamax') & (ch.loc[row, 'Transit'] == 'Two Way Transit'):
-        ch.loc[row, '% Channel Occupied'] = round((ch.loc[row, 'Effective Beam ft'] / 500) * 100, 2)
-
-for row in range(len(sv)):
-    if (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
-        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
-    elif (sv.loc[row, 'Vessel Class'] == 'Post-Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
-        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
-    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'One Way Transit'):
-        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 600) * 100, 2)
-    elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
-        sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
-
 ch_compliant = ch[ch["VSPD kn"] <= 10]
 sv_compliant = sv[sv["VSPD kn"] <= 10]
 ch_non_compliant = ch[ch["VSPD kn"] > 10]

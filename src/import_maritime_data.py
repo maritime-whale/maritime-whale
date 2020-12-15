@@ -29,6 +29,10 @@ def import_report(path):
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
+    # for row in range(len(ports[i])):
+    #     print(row)
+    # for row in range(len(df)):
+    #     print(row)
     df = df[~df.MMSI.isin(df[df.SPEED >= 40].MMSI.values)]
     df = df[~df.MMSI.isin(df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
     df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
@@ -145,7 +149,6 @@ def import_report(path):
                     ports[i].loc[ports[i].Location == "nearshore", k] = final_winds[k]
                 else:
                     ports[i].loc[ports[i].Location == "offshore", k] = final_winds[k]
-
         ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
                             (ports[i].Course <= course_ranges[i][0][1]) |
                             (ports[i].Course >= course_ranges[i][1][0]) &
@@ -184,6 +187,21 @@ def import_report(path):
         if not isinstance(two_way, type(None)):
             ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two Way Transit"
 
+        ports[i] = ports[i].reset_index()
+        channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
+        for row in range(len(ports[i])):
+            if (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "One Way Transit"):
+                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][0]) * 100, 2)
+            elif (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][1]) * 100, 2)
+            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "One Way Transit"):
+                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][2]) * 100, 2)
+            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][3]) * 100, 2)
+            else:
+                sys.stderr.write("Error: Undefined vessel class and transit combination...\n")
+                ports[i].loc[row, "% Channel Occupied"] = float("NaN")
+
         stats_res = ports[i]
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
         if i % 2:
@@ -204,7 +222,8 @@ def import_report(path):
                    "LOA ft":[], "Course":[], "AIS Type":[],
                    "WSPD mph":[], "GST mph":[], "WDIR degT":[], "Beam ft":[],
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
-                   "Vessel Class":[], "Location":[], "Yaw":[], "Transit":[]}
+                   "Vessel Class":[], "Location":[], "Yaw":[], "Transit":[],
+                   "% Channel Occupied":[]}
         for key, value in d.items():
             for k in columns.keys():
                 columns[k].append(ports[i][(ports[i].Name == key[0]) &
@@ -219,7 +238,7 @@ def import_report(path):
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                    "Course", "Heading", "Course Behavior", "Yaw", "Effective Beam ft",
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
-                   "Longitude", "Transit"]]
+                   "Longitude", "Transit", "% Channel Occupied"]]
 
         # for row in range(len(res)):
         #     if res.loc[row, "WSPD mph"] != "NaN":
@@ -232,7 +251,8 @@ def import_report(path):
                                 "Course", "Heading", "Course Behavior",
                                 "Yaw", "Effective Beam ft",
                                 "WDIR degT", "WSPD mph", "GST mph",
-                                "Location", "Latitude", "Longitude", "rounded date", "Transit"]]
+                                "Location", "Latitude", "Longitude",
+                                "Transit", "% Channel Occupied"]]
 
         ports[i] = [lvl_res, stats_res]
 
