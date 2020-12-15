@@ -85,7 +85,7 @@ def main():
         for i in range(len(map_data)):
             map_data[i] = pd.concat(map_data[i]).reset_index().drop("index", axis=1)
         geoplots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
-        zooms = (10.5, 11.5, 8)
+        zooms = (10.5, 11, 8)
         sizes = ((431, 707), (431, 707), (431, 707))
         heat = (False, False, False)
         token = open("../conf/.mapbox_token").read()
