@@ -97,7 +97,7 @@ def main():
         for i in range(len(maritime_data[0])):
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
-        zooms = (10.5, 11.5, 8)
+        zooms = (10.5, 11, 8)
         sizes = ((431, 707), (431, 707), (431, 707))
         heat = (False, False, False)
         token = open("../conf/.mapbox_token").read()
@@ -115,20 +115,20 @@ def main():
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
 
-        pio.write_html(generate_wspd_hist(stats_data[0], stats_data[2]), file="../html/wspd_hist_ch.html", auto_open=False)
-        pio.write_html(generate_wspd_hist(stats_data[1], stats_data[3]), file="../html/wspd_hist_sv.html", auto_open=False)
+        pio.write_html(generate_wspd_hist(stats_data[2]), file="../html/wspd_hist_ch.html", auto_open=False)
+        pio.write_html(generate_wspd_hist(stats_data[3]), file="../html/wspd_hist_sv.html", auto_open=False)
 
-        # pio.write_html(generate_wspd_vs_vspd(stats_data[0], stats_data[3]), file="../html/wspd_vs_vspd_ch.html", auto_open=False)
-        # pio.write_html(generate_wspd_vs_vspd(stats_data[1], stats_data[4]), file="../html/wspd_vs_vspd_sv.html", auto_open=False)
-        #
-        # pio.write_html(generate_strip_plot(stats_data[0]), file="../html/vspd_strip_ch.html", auto_open=False)
-        # pio.write_html(generate_strip_plot(stats_data[1]), file="../html/vspd_strip_sv.html", auto_open=False)
-        #
-        # pio.write_html(generate_line_plot(stats_data[0]), file="../html/line_ch.html", auto_open=False)
-        # pio.write_html(generate_line_plot(stats_data[1]), file="../html/line_sv.html", auto_open=False)
-        #
-        # pio.write_html(generate_channel_occ(stats_data[0]), file="../html/channel_occupation_ch.html", auto_open=False)
-        # pio.write_html(generate_channel_occ(stats_data[1]), file="../html/channel_occupation_sv.html", auto_open=False)
+        pio.write_html(generate_wspd_vs_vspd(stats_data[2]), file="../html/wspd_vs_vspd_ch.html", auto_open=False)
+        pio.write_html(generate_wspd_vs_vspd(stats_data[3]), file="../html/wspd_vs_vspd_sv.html", auto_open=False)
+
+        pio.write_html(generate_strip_plot(stats_data[0]), file="../html/vspd_strip_ch.html", auto_open=False)
+        pio.write_html(generate_strip_plot(stats_data[1]), file="../html/vspd_strip_sv.html", auto_open=False)
+
+        pio.write_html(generate_line_plot(stats_data[0]), file="../html/line_ch.html", auto_open=False)
+        pio.write_html(generate_line_plot(stats_data[1]), file="../html/line_sv.html", auto_open=False)
+
+        pio.write_html(generate_channel_occ(stats_data[2]), file="../html/channel_occupation_ch.html", auto_open=False)
+        pio.write_html(generate_channel_occ(stats_data[3]), file="../html/channel_occupation_sv.html", auto_open=False)
 
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")

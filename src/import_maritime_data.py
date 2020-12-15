@@ -7,6 +7,8 @@ import math
 # import timedelta
 import sys
 
+# def validate_vmr(vmr):
+#     return None
 
 def filter_blacklisters(res, blacklist):
     res = res[~res.MMSI.isin(blacklist)]
@@ -20,7 +22,6 @@ def filter_blacklisters(res, blacklist):
 
     res = res[~res.MMSI.isin(new_blacklisters)]
     return res
-
 
 def import_report(path):
 # def import_report(path):

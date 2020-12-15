@@ -1,11 +1,7 @@
 # NOTES:
 # https://plotly.com/python/mapbox-layers/ (example used)
-
-# from import_maritime_data import *
-
 import plotly.graph_objects as go
 import plotly.express as px
-# import pandas as pd
 
 def generate_geo_plot(df, zoom, size, heatmap_enabled, token):
     fig = None
@@ -47,10 +43,10 @@ def generate_vspd_hist(df):
                        plot_bgcolor="#F1F1F1",
                        font=dict(size=11))
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
-                    line=dict(color="Red", dash="solid", width=1.5), name="test")
+                    line=dict(color="Red", dash="solid", width=1.5))
     fig.add_shape(type="line", x0=df["VSPD kn"].mean(), y0=0, x1=df["VSPD kn"].mean(), y1=1,
                    xref="x", yref="paper",
-                   line=dict(color="black", dash="dash", width=1.5), name="test")
+                   line=dict(color="black", dash="dash", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
                         xref="x", x=10.15, yref="paper", y=1)
     fig.add_annotation(text="Mean", showarrow=False, textangle=90, font=dict(color="black"),
@@ -62,7 +58,7 @@ def generate_vspd_hist(df):
     fig.data[1].marker.line.color = "black"
     return fig
 
-def generate_wspd_hist(df, df_dropna):
+def generate_wspd_hist(df_dropna):
     fig = px.histogram(df_dropna["WSPD mph"], color_discrete_sequence=["lightsteelblue"], nbins=15)
     fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
                             x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
@@ -78,21 +74,59 @@ def generate_wspd_hist(df, df_dropna):
     fig.data[0].marker.line.color = "black"
     return fig
 
-def generate_wspd_vs_vspd(df):
-    fig = None
+def generate_wspd_vs_vspd(df_dropna):
+    fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
+    fig.update_traces(contours_coloring = "fill", colorscale = "blues")
+    fig.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
+                       hoverlabel=dict(bgcolor="white", font_size=13),
+                       font=dict(size=11))
     return fig
 
 def generate_strip_plot(df):
-    fig = None
     hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
                   "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
                   "Location":False, "Name":False}
+    fig = px.strip(df, x="Name", y="VSPD kn",
+                    color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
+                    color_discrete_sequence=["darkslateblue", "salmon"], width=900, height=600,
+                    title= "One Way Transits: " + str(round((df[df.Transit == "One Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
+                           "Two Way Transits: " + str(round((df[df.Transit == "Two Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
+    fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
+                    line=dict(color="Red", dash="solid", width=1.5))
+    fig.update_layout(xaxis_title_text = "",
+                      hoverlabel=dict(bgcolor="white",
+                                        font_size=13),
+                      legend_title_text="",
+                      font=dict(size=12),
+                      plot_bgcolor="#F1F1F1")
+    fig.update_traces(marker_size=5.5)
     return fig
 
 def generate_line_plot(df):
-    fig = None
+    t1 = go.Scatter(x=df.index, y=df["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#1f77b4"), hoverinfo="skip")
+    t2 = go.Scatter(x=df.index, y=df["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="#9467bd"), hoverinfo="skip")
+    fig = go.Figure(data=[t1, t2])
+    fig.update_layout(title="VSPD-Yaw Correlation: " + str(round(df.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
+                             "Compliant Yaw (Mean): " + str(round(df[df["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
+                             "Non Compliant Yaw (Mean):  " + str(round(df[df["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
+                      xaxis_title_text="Unique AIS Positions",
+                      width=900,
+                      height=500,
+                      plot_bgcolor="#F1F1F1",
+                      font=dict(size=11))
     return fig
 
 def generate_channel_occ(df):
-    fig = None
+    hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
+                  "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
+                  "Location":False, "Name":False}
+    fig = px.scatter(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied", hover_data=hover_dict,
+                             color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
+                             title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
+    # fig = px.density_contour(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied",
+    #                          color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
+    #                          title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
+    # fig.update_traces(contours_coloring = "fill", colorscale = "greens")
+    fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
+                    line=dict(color="Red", dash="solid", width=1.5))
     return fig
