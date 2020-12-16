@@ -20,18 +20,13 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, token):
                                 hover_data=["Date/Time UTC", "Course Behavior",
                                 "Max Speed kn", "Mean Speed kn", "WSPD mph", "LOA ft"],
                                 zoom=zoom, height=size[0], width=size[1])
-    fig.update_layout(
-        mapbox_accesstoken=token,
-        mapbox_style="satellite-streets",
-        showlegend=False
-    )
+    fig.update_layout(mapbox_accesstoken=token,
+                      mapbox_style="satellite-streets", showlegend=False)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
 def generate_vspd_hist(df):
-    # fig = None
-    # print(df)
-    fig = px.histogram(df, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
+    fig = px.histogram(df, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "#ab63eb"])
     fig.update_layout(barmode="overlay",
                        xaxis_title_text = "VSPD kn",
                        yaxis_title_text = "Unique AIS Positions",
@@ -88,7 +83,7 @@ def generate_strip_plot(df):
                   "Location":False, "Name":False}
     fig = px.strip(df, x="Name", y="VSPD kn",
                     color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
-                    color_discrete_sequence=["darkslateblue", "salmon"], width=900, height=600,
+                    color_discrete_sequence=["darkslateblue", "#ab63eb"], width=900, height=600,
                     title= "One Way Transits: " + str(round((df[df.Transit == "One Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
                            "Two Way Transits: " + str(round((df[df.Transit == "Two Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
@@ -99,7 +94,7 @@ def generate_strip_plot(df):
                       legend_title_text="",
                       font=dict(size=12),
                       plot_bgcolor="#F1F1F1")
-    fig.update_traces(marker_size=5.5)
+    fig.update_traces(marker_size=4)
     return fig
 
 def generate_line_plot(df):
@@ -117,16 +112,15 @@ def generate_line_plot(df):
     return fig
 
 def generate_channel_occ(df):
-    hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-                  "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
-                  "Location":False, "Name":False}
-    fig = px.scatter(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied", hover_data=hover_dict,
-                             color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
-                             title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
-    # fig = px.density_contour(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied",
+    # hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
+    #               "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
+    #               "Location":False, "Name":False}
+    # fig = px.scatter(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied", hover_data=hover_dict,
     #                          color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
     #                          title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
-    # fig.update_traces(contours_coloring = "fill", colorscale = "greens")
+    fig = px.density_contour(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], y="VSPD kn", x="% Channel Occupied", width=800, height=500,
+                             title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
+    fig.update_traces(contours_coloring = "fill", colorscale = "greens")
     fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
     return fig
