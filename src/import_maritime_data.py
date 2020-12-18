@@ -23,7 +23,9 @@ def filter_blacklisters(res, blacklist):
                                        51, 52, 53, 55, 57, 58, 59]:
             new_blacklisters.append(res.iloc[j].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
-        f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]) + "\n")
+        contents = [str(mmsi) for mmsi in new_blacklisters]
+        if contents != []:
+            f.write("\n".join(contents) + "\n")
 
     res = res[~res.MMSI.isin(new_blacklisters)]
     return res
