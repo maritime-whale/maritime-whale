@@ -31,26 +31,26 @@ def generate_vspd_hist(df):
         #barmode="overlay"
                        yaxis_title_text = "Unique AIS Positions",
                        title = "Vessl Speed Histogram" '<br>'
-                               "Compliance Rate: " + str(round(sum(df["VSPD kn"] <= 10) / df.shape[0] * 100, 2)) + "%", #"<br>"
-                               #"Mean VSPD: " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
+                               "Compliance Rate: " + str(round(sum(df["VSPD kn"] <= 10) / df.shape[0] * 100, 2)) + "%" "<br>"
+                               "Mean VSPD (Panamax and Post Panamax): " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
                        showlegend = True, hoverlabel=dict(bgcolor="white",
                                          font_size=13),
                        legend_title_text="",
-                       width=900,
+                       width=875,
                        height=600,
                        plot_bgcolor="#F1F1F1",
-                       font=dict(size=12),
-                       titlefont=dict(size=14))
+                       font=dict(size=11),
+                       titlefont=dict(size=11))
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
-    fig.add_shape(type="line", x0=df["VSPD kn"].mean(), y0=0, x1=df["VSPD kn"].mean(), y1=1,
-                   xref="x", yref="paper",
-                   line=dict(color="black", dash="dash", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
-                        xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
-    fig.add_annotation(text="Mean", showarrow=False, textangle=90, font=dict(color="black"),
-                        xref="x", x=df["VSPD kn"].mean()+0.15, yref="paper", y=1,
-                        hovertext=str(round(df["VSPD kn"].mean(), 2)) + " kn")
+                    xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
+    # fig.add_shape(type="line", x0=df["VSPD kn"].mean(), y0=0, x1=df["VSPD kn"].mean(), y1=1,
+    #                xref="x", yref="paper",
+    #                line=dict(color="black", dash="dash", width=1.5))
+    # fig.add_annotation(text="Mean", showarrow=False, textangle=90, font=dict(color="black"),
+    #                     xref="x", x=df["VSPD kn"].mean()+0.15, yref="paper", y=1,
+    #                     hovertext=str(round(df["VSPD kn"].mean(), 2)) + " kn")
     fig.data[0].marker.line.width = 0.5
     fig.data[0].marker.line.color = "black"
     # fig.data[1].marker.line.width = 0.5
@@ -73,7 +73,7 @@ def generate_strip_plot(df):
                       hoverlabel=dict(bgcolor="white",
                                         font_size=13),
                       legend_title_text="",
-                       width=900,
+                       width=875,
                        height=650,
                        plot_bgcolor="#F1F1F1",
                        font=dict(size=12),
@@ -90,7 +90,7 @@ def generate_wspd_hist(df_dropna):
                              "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "% ",
                       xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
                       showlegend = False, hoverlabel=dict(bgcolor="white",font_size=13),
-                      width=900,
+                      width=875,
                       height=600,
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
@@ -109,7 +109,7 @@ def generate_wspd_vs_vspd(df_dropna):
                       title= "Vessel and Wind Speed Density Plot" '<br>'
                              "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
                        hoverlabel=dict(bgcolor="white", font_size=13),
-                       width=900,
+                       width=875,
                        height=600,
                        plot_bgcolor="#F1F1F1",
                        font=dict(size=12),
@@ -126,7 +126,7 @@ def generate_line_plot(df):
                              "Compliant VSPD mean Yaw: " + str(round(df[df["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
                              "Non Compliant VSPD mean Yaw:  " + str(round(df[df["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                       xaxis_title_text="AIS Positions",
-                      width=900,
+                      width=875,
                       height=600,
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
@@ -146,7 +146,7 @@ def generate_channel_occ(df):
     #                                 "Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
     # df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]
     fig = px.density_heatmap(df, x="VSPD kn", y="% Channel Occupied",
-                            width=800, height=500, hover_data=hover_dict,
+                            hover_data=hover_dict,
                             color_continuous_scale="greens",
                             nbinsx=20, nbinsy=20, #color_continuous_midpoint=20,
                              title= "Vessel Speed and Occupied Channel Heatmap")# '<br>'
@@ -160,7 +160,7 @@ def generate_channel_occ(df):
     #                 line=dict(color="Red", dash="solid", width=1.5))
     # fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
     #                     xref="x", x=10.15, yref="paper", y=1)
-    fig.update_layout(width=900,
+    fig.update_layout(width=875,
                       height=600,
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
