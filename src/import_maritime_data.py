@@ -7,8 +7,13 @@ import math
 # import timedelta
 import sys
 
-# def validate_vmr(vmr):
-#     return None
+def validate_vmr(df):
+    df = df[~df.index.isin(df[df["Beam ft"] >= 500].index)] #check with Jon on this..
+    df = df[~df.index.isin(df[df["Course"] == 511].index)]
+    df = df[~df.index.isin(df[df["Heading"] == 511].index)]
+    df = df[~df.index.isin(df[df["VSPD kn"] >= 40].index)]
+    df = df[~df.MMSI.isin(df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
+    return df
 
 def filter_blacklisters(res, blacklist):
     res = res[~res.MMSI.isin(blacklist)]
@@ -18,7 +23,7 @@ def filter_blacklisters(res, blacklist):
                                        51, 52, 53, 55, 57, 58, 59]:
             new_blacklisters.append(res.iloc[j].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
-        f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]))
+        f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]) + "\n")
 
     res = res[~res.MMSI.isin(new_blacklisters)]
     return res
@@ -30,12 +35,12 @@ def import_report(path):
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
+    # df = filter_blacklisters(df, blacklist)
     # for row in range(len(ports[i])):
     #     print(row)
     # for row in range(len(df)):
     #     print(row)
-    df = df[~df.MMSI.isin(df[df.SPEED >= 40].MMSI.values)]
-    df = df[~df.MMSI.isin(df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
+
     df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude", "SPEED": "VSPD kn",
                "COURSE": "Course", "HEADING": "Heading", "AIS TYPE": "AIS Type"}, axis=1,
@@ -53,6 +58,8 @@ def import_report(path):
     # if mode == "sub-panamax":
     #     sub_panamax = df[df["LOA m"] < 200]
     # df = df[df["LOA m"] >= 200]
+    # input validation function
+    df = validate_vmr(df)
     df = df[df["LOA ft"] >= 656]
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])

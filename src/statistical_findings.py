@@ -45,6 +45,9 @@ ch_post_panamax = ch[ch["Vessel Class"] == "Post-Panamax"]
 sv_panamax = sv[sv["Vessel Class"] == "Panamax"]
 sv_post_panamax = sv[sv["Vessel Class"] == "Post-Panamax"]
 
+ch[['WSPD mph', 'Yaw']].corr()
+
+sv[['WSPD mph', 'Yaw']].corr()
 
 # ch_meetpass = meetpass(ch)
 # ch_two_way = twoway(ch, ch_meetpass)
@@ -56,7 +59,7 @@ sv_post_panamax = sv[sv["Vessel Class"] == "Post-Panamax"]
 # sv["transit"] = "One Way Transit"
 # sv["transit"][sv.index.isin(sv_two_way.index)] = "Two Way Transit"
 
-
+ch
 
 hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
               "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
@@ -112,7 +115,7 @@ fig1.data[0].marker.line.width = 0.5
 fig1.data[0].marker.line.color = "black"
 fig1.data[1].marker.line.width = 0.5
 fig1.data[1].marker.line.color = "black"
-pio.write_html(fig1, file="../tests/VSPD_hist.html", auto_open=False)
+# pio.write_html(fig1, file="../tests/VSPD_hist.html", auto_open=False)
 fig1
 
 # TITLE:
