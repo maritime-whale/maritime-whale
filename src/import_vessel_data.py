@@ -43,7 +43,9 @@ def import_report(path):
                                              37, 51, 52, 53, 55, 57, 58, 59]:
             new_blacklisters.append(aggregate.iloc[i].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
-        f.write("\n".join([str(mmsi) for mmsi in new_blacklisters]))
+        contents = [str(mmsi) for mmsi in new_blacklisters]
+        if contents != []:
+            f.write("\n".join(contents) + "\n")
 
     aggregate = aggregate[~aggregate.MMSI.isin(new_blacklisters)]
     aggregate.sort_values("Max speed kn", ascending=False, inplace=True)
