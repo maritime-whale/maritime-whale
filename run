@@ -105,12 +105,12 @@ if [ $debug_mode == 0 ]; then
         echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
     else
         echo "Initiating upload..." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        rm -rf level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        rm -rf level_one.html level_two_*.html vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git commit -am "wipe plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../../cache/master-*.* . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../../cache/blacklist.txt . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         mv ../*.html . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git add level_one.html level_two_charleston.html level_two_savannah.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git add level_one.html level_two_*.html vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git commit -am "upload plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         cd ../../src
