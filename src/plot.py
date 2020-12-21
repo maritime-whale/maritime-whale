@@ -30,7 +30,7 @@ def generate_vspd_hist(df):
     fig.update_layout(xaxis_title_text = "VSPD kn",
         #barmode="overlay"
                        yaxis_title_text = "Unique AIS Positions",
-                       title = "Vessl Speed Histogram" '<br>'
+                       title = "Vessel Speed Histogram" '<br>'
                                "Compliance Rate: " + str(round(sum(df["VSPD kn"] <= 10) / df.shape[0] * 100, 2)) + "%" "<br>"
                                "Mean VSPD (Panamax and Post Panamax): " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
                        showlegend = True, hoverlabel=dict(bgcolor="white",
@@ -64,7 +64,7 @@ def generate_strip_plot(df):
     fig = px.strip(df, x="Name", y="VSPD kn",
                     color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
                     color_discrete_sequence=["#19336a", "coral"], width=900, height=600, #darkslateblue, salmon
-                    title= "Vessel Speed Plot: One Minute Time Resolution" '<br>'
+                    title= "Vessel Speed Plot" '<br>'
                            "One Way Transits: " + str(round((df[df.Transit == "One Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
                            "Two Way Transits: " + str(round((df[df.Transit == "Two Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
@@ -136,8 +136,28 @@ def generate_line_plot(df):
 
 def generate_channel_occ(df):
     hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-                  "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
+                  "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True,
                   "Location":False, "Name":False}
+    fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
+               hover_data=hover_dict,
+               title="Non Adverse Conditions: " + str(round(len(df[df.Condition == "Non Adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
+                     "Adverse Conditions: " + str(round(len(df[df.Condition == "Adverse Condition"]) / len(df) * 100, 2)) + "%")
+    fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
+                    line=dict(color="Red", dash="solid", width=1.5))
+    fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
+                    xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
+    fig.update_layout(hoverlabel=dict(bgcolor="white",
+                                        font_size=13),
+                      legend_title_text="",
+                       width=875,
+                       height=650,
+                       plot_bgcolor="#F1F1F1",
+                       font=dict(size=12),
+                       titlefont=dict(size=14))
+    fig.update_traces(marker_size=6)
+
+
+
     # fig = px.scatter(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], x="VSPD kn", y="% Channel Occupied", hover_data=hover_dict,
     #                          color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
     #                          title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
@@ -145,11 +165,11 @@ def generate_channel_occ(df):
     #                          title= "VSPD-Occupied Channel Desntiy Plot" '<br>'
     #                                 "Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
     # df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]
-    fig = px.density_heatmap(df, x="VSPD kn", y="% Channel Occupied",
-                            hover_data=hover_dict,
-                            color_continuous_scale="greens",
-                            nbinsx=20, nbinsy=20, #color_continuous_midpoint=20,
-                             title= "Vessel Speed and Occupied Channel Heatmap")# '<br>'
+    # fig = px.density_heatmap(df, x="VSPD kn", y="% Channel Occupied",
+    #                         hover_data=hover_dict,
+    #                         color_continuous_scale="greens",
+    #                         nbinsx=20, nbinsy=20, #color_continuous_midpoint=20,
+    #                          title= "Vessel Speed and Occupied Channel Heatmap")# '<br>'
                                     #"Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
     # fig.update_traces(contours_coloring = "fill", colorscale = "greens")
     # fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
@@ -160,9 +180,9 @@ def generate_channel_occ(df):
     #                 line=dict(color="Red", dash="solid", width=1.5))
     # fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
     #                     xref="x", x=10.15, yref="paper", y=1)
-    fig.update_layout(width=875,
-                      height=600,
-                      plot_bgcolor="#F1F1F1",
-                      font=dict(size=12),
-                      titlefont=dict(size=14))
+    # fig.update_layout(width=875,
+    #                   height=600,
+    #                   plot_bgcolor="#F1F1F1",
+    #                   font=dict(size=12),
+    #                   titlefont=dict(size=14))
     return fig

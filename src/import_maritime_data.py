@@ -213,6 +213,16 @@ def import_report(path):
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
         stats_res = ports[i]
+
+        for row in range(len(stats_res)):
+            if (stats_res.loc[row, "WSPD mph"] >= 30) or (stats_res.loc[row, "Transit"] == "Two Way Transit"):
+                stats_res.loc[row, "Condition"] = "Adverse Condition"
+            elif (stats_res.loc[row, "WSPD mph"] < 30) or (stats_res.loc[row, "Transit"] == "One Way Transit"):
+                stats_res.loc[row, "Condition"] = "Non Adverse Condition"
+            else:
+                sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
+                ports[i].loc[row, "Condition"] = float("NaN")
+                # do I need an if statement for when it's two way transit but theres no available WSPD ?? Ask david if the or covers it 
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
         if i % 2:
             stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]
@@ -262,7 +272,7 @@ def import_report(path):
                                 "Yaw", "Effective Beam ft",
                                 "WDIR degT", "WSPD mph", "GST mph",
                                 "Location", "Latitude", "Longitude",
-                                "Transit", "% Channel Occupied"]]
+                                "Transit", "% Channel Occupied", "Condition"]]
 
         ports[i] = [lvl_res, stats_res]
 

@@ -58,11 +58,9 @@ sv[['WSPD mph', 'Yaw']].corr()
 # sv_two_way = twoway(sv, sv_meetpass)
 # sv["transit"] = "One Way Transit"
 # sv["transit"][sv.index.isin(sv_two_way.index)] = "Two Way Transit"
-
-ch
-
+ch.columns
 hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-              "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
+              "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True,
               "Location":False, "Name":False}
 
 # fig = px.scatter(ch, "Longitude", "Latitude")
@@ -302,6 +300,23 @@ for row in range(len(sv)):
     elif (sv.loc[row, 'Vessel Class'] == 'Panamax') & (sv.loc[row, 'Transit'] == 'Two Way Transit'):
         sv.loc[row, '% Channel Occupied'] = round((sv.loc[row, 'Effective Beam ft'] / 300) * 100, 2)
 
+fig = px.scatter(ch, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
+           hover_data=hover_dict,
+           title="Non Adverse Conditions: " + str(round(len(ch[ch.Condition == "Non Adverse Condition"]) / len(ch) * 100, 2)) + "%" + "<br>"
+                 "Adverse Conditions: " + str(round(len(ch[ch.Condition == "Adverse Condition"]) / len(ch) * 100, 2)) + "%")
+fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
+                line=dict(color="Red", dash="solid", width=1.5))
+fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
+                xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
+fig.update_layout(hoverlabel=dict(bgcolor="white",
+                                    font_size=13),
+                  legend_title_text="",
+                   width=875,
+                   height=650,
+                   plot_bgcolor="#F1F1F1",
+                   font=dict(size=12),
+                   titlefont=dict(size=14))
+fig.update_traces(marker_size=6)
 
 fig = px.density_contour(ch[(ch['Transit'] == 'One Way Transit') & (ch['WSPD mph'] < 30)], y='VSPD kn', x='% Channel Occupied',
                          color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
