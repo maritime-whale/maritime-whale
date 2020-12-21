@@ -16,33 +16,33 @@ import os
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
-    # days = fetch_latest_reports(logfile)
-    # if not days:
-    #     log(logfile, "No new vessel movement reports.")
-    #     return
-    # dates = (day.strftime("%Y_%m_%d") for day in days)
-    # date_strs = (day.strftime("%B %d %Y") for day in days)
-    # sync_required = False
-    # for date, date_str, day in zip(dates, date_strs, days):
-    #     if not os.path.exists("../cache/" + date):
-    #         if not sync_required:
-    #             sync_required = True
-    #         input_filename = day.strftime("%Y-%m-%d.csv")
-    #         maritime_report = import_report("../temp/" + input_filename)
-    #         log(logfile, "Importing data from " + input_filename + "...")
-    #         os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
-    #         maritime_data = [[port[0] for port in maritime_report],
-    #                          [port[1] for port in maritime_report]]
-    #         caches = ((date + "/ch-max", date + "/sv-max"),
-    #                   (date + "/ch", date + "/sv"))
-    #         for i in range(len(caches)):
-    #             for j in range(len(maritime_data[i])):
-    #                 create_csv_cache([maritime_data[i][j]], caches[i][j])
-    #         log(logfile, "Created cache for " + date_str + ".")
-    #     else:
-    #         # latest data already exists in cache
-    #         log(logfile, "Cache already exists for " + date_str + ".")
-    sync_required = True
+    days = fetch_latest_reports(logfile)
+    if not days:
+        log(logfile, "No new vessel movement reports.")
+        return
+    dates = (day.strftime("%Y_%m_%d") for day in days)
+    date_strs = (day.strftime("%B %d %Y") for day in days)
+    sync_required = False
+    for date, date_str, day in zip(dates, date_strs, days):
+        if not os.path.exists("../cache/" + date):
+            if not sync_required:
+                sync_required = True
+            input_filename = day.strftime("%Y-%m-%d.csv")
+            maritime_report = import_report("../temp/" + input_filename)
+            log(logfile, "Importing data from " + input_filename + "...")
+            os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
+            maritime_data = [[port[0] for port in maritime_report],
+                             [port[1] for port in maritime_report]]
+            caches = ((date + "/ch-max", date + "/sv-max"),
+                      (date + "/ch", date + "/sv"))
+            for i in range(len(caches)):
+                for j in range(len(maritime_data[i])):
+                    create_csv_cache([maritime_data[i][j]], caches[i][j])
+            log(logfile, "Created cache for " + date_str + ".")
+        else:
+            # latest data already exists in cache
+            log(logfile, "Cache already exists for " + date_str + ".")
+    # sync_required = True
 
     if sync_required:
         # load cache into memory
