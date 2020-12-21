@@ -63,7 +63,7 @@ def generate_strip_plot(df):
                   "Location":False, "Name":False}
     fig = px.strip(df, x="Name", y="VSPD kn",
                     color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
-                    color_discrete_sequence=["#19336a", "coral"], width=900, height=600, #darkslateblue, salmon
+                    color_discrete_sequence=["#19336a", "green"], width=900, height=600, #darkslateblue, salmon
                     title= "Vessel Speed Plot" '<br>'
                            "One Way Transits: " + str(round((df[df.Transit == "One Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
                            "Two Way Transits: " + str(round((df[df.Transit == "Two Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
@@ -119,7 +119,7 @@ def generate_wspd_vs_vspd(df_dropna):
 
 def generate_line_plot(df):
     t1 = go.Scatter(x=df.index, y=df["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
-    t2 = go.Scatter(x=df.index, y=df["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="darkorange"), hoverinfo="skip")
+    t2 = go.Scatter(x=df.index, y=df["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
     fig = go.Figure(data=[t1, t2])
     fig.update_layout(title="Vessel Speed and Yaw Line Plot" '<br>'
                              "VSPD-Yaw Correlation: " + str(round(df.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
@@ -140,7 +140,8 @@ def generate_channel_occ(df):
                   "Location":False, "Name":False}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
                hover_data=hover_dict,
-               title="Non Adverse Conditions: " + str(round(len(df[df.Condition == "Non Adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
+               title="Vessel Speed and Occupied Channel" + "<br>"
+                     "Non Adverse Conditions: " + str(round(len(df[df.Condition == "Non Adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
                      "Adverse Conditions: " + str(round(len(df[df.Condition == "Adverse Condition"]) / len(df) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
