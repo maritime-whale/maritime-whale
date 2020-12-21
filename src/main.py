@@ -115,8 +115,8 @@ def main():
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
 
-        pio.write_html(generate_wspd_hist(stats_data[2]), file="../html/wspd_hist_ch.html", auto_open=False)
-        pio.write_html(generate_wspd_hist(stats_data[3]), file="../html/wspd_hist_sv.html", auto_open=False)
+        pio.write_html(generate_wspd_hist(stats_data[2], True), file="../html/wspd_hist_ch.html", auto_open=False)
+        pio.write_html(generate_wspd_hist(stats_data[3], False), file="../html/wspd_hist_sv.html", auto_open=False)
 
         pio.write_html(generate_wspd_vs_vspd(stats_data[2]), file="../html/wspd_vs_vspd_ch.html", auto_open=False)
         pio.write_html(generate_wspd_vs_vspd(stats_data[3]), file="../html/wspd_vs_vspd_sv.html", auto_open=False)

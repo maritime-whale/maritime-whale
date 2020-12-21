@@ -83,23 +83,28 @@ def generate_strip_plot(df):
     return fig
 
 
-def generate_wspd_hist(df_dropna):
+def generate_wspd_hist(df_dropna, show_threshold):
     fig = px.histogram(df_dropna["WSPD mph"], color_discrete_sequence=["steelblue"], nbins=15)
-    fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
-                            x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
-    fig.update_layout(title= "Windspeed Histogram" '<br>'
-                             "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "% ",
-                      xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
-                      showlegend = False, hoverlabel=dict(bgcolor="white",font_size=13),
+    fig.update_layout(title="Windspeed Histogram")
+
+    fig.data[0].marker.line.width = 0.5
+    fig.data[0].marker.line.color = "black"
+
+    if show_threshold:
+        fig.update_layout(title="Windspeed Histogram" + "<br>"
+                                 "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "% ")
+        fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
+                                x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
+        fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
+                        xref="x", x=30.4, yref="paper", y=1)
+
+    fig.update_layout(xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
+                      showlegend = False, hoverlabel = dict(bgcolor="white",font_size=13),
                       width=875,
                       height=600,
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
                       titlefont=dict(size=14))
-    fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
-                        xref="x", x=30.4, yref="paper", y=1)
-    fig.data[0].marker.line.width = 0.5
-    fig.data[0].marker.line.color = "black"
     return fig
 
 
