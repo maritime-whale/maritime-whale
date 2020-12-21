@@ -136,7 +136,7 @@ def generate_line_plot(df):
 
 def generate_channel_occ(df):
     hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-                  "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True,
+                  "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True, "Vessel Class":True,
                   "Location":False, "Name":False}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
                hover_data=hover_dict,

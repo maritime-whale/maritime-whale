@@ -60,7 +60,7 @@ sv[['WSPD mph', 'Yaw']].corr()
 # sv["transit"][sv.index.isin(sv_two_way.index)] = "Two Way Transit"
 ch.columns
 hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-              "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True,
+              "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True, "Vessel Class":True,
               "Location":False, "Name":False}
 
 # fig = px.scatter(ch, "Longitude", "Latitude")
@@ -230,8 +230,8 @@ fig4.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: "
                    hoverlabel=dict(bgcolor="white", font_size=13),
                    font=dict(size=11))
 ########################################################################
-t1 = go.Scatter(x=ch.index, y=ch["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#1f77b4"), hoverinfo="skip")
-t2 = go.Scatter(x=ch.index, y=ch["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="#9467bd"), hoverinfo="skip")
+t1 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
+t2 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
 fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
@@ -304,6 +304,24 @@ fig = px.scatter(ch, x="VSPD kn", y="% Channel Occupied", color="Condition", col
            hover_data=hover_dict,
            title="Non Adverse Conditions: " + str(round(len(ch[ch.Condition == "Non Adverse Condition"]) / len(ch) * 100, 2)) + "%" + "<br>"
                  "Adverse Conditions: " + str(round(len(ch[ch.Condition == "Adverse Condition"]) / len(ch) * 100, 2)) + "%")
+fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
+                line=dict(color="Red", dash="solid", width=1.5))
+fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
+                xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
+fig.update_layout(hoverlabel=dict(bgcolor="white",
+                                    font_size=13),
+                  legend_title_text="",
+                   width=875,
+                   height=650,
+                   plot_bgcolor="#F1F1F1",
+                   font=dict(size=12),
+                   titlefont=dict(size=14))
+fig.update_traces(marker_size=6)
+
+fig = px.scatter(sv, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
+           hover_data=hover_dict,
+           title="Non Adverse Conditions: " + str(round(len(sv[sv.Condition == "Non Adverse Condition"]) / len(sv) * 100, 2)) + "%" + "<br>"
+                 "Adverse Conditions: " + str(round(len(sv[sv.Condition == "Adverse Condition"]) / len(sv) * 100, 2)) + "%")
 fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                 line=dict(color="Red", dash="solid", width=1.5))
 fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
