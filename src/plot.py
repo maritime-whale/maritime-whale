@@ -118,8 +118,8 @@ def generate_wspd_vs_vspd(df_dropna):
 
 
 def generate_line_plot(df):
-    t1 = go.Scatter(x=df.index, y=df["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
-    t2 = go.Scatter(x=df.index, y=df["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
+    t1 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn")["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
+    t2 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn")["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
     fig = go.Figure(data=[t1, t2])
     fig.update_layout(title="Vessel Speed and Yaw Line Plot" '<br>'
                              "VSPD-Yaw Correlation: " + str(round(df.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
