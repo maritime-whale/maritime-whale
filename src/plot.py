@@ -156,6 +156,7 @@ def generate_channel_occ(df):
                        font=dict(size=12),
                        titlefont=dict(size=14))
     fig.update_traces(marker_size=6)
+    return fig
 
 
 
@@ -186,4 +187,3 @@ def generate_channel_occ(df):
     #                   plot_bgcolor="#F1F1F1",
     #                   font=dict(size=12),
     #                   titlefont=dict(size=14))
-    return fig

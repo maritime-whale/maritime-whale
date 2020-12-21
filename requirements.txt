@@ -1,7 +1,7 @@
 pandas==1.1.5
 plotly==4.14.1
 openpyxl==3.0.5
-seaborn==0.11.0
+seaborn==0.11.1
 func-timeout==4.3.5
 google-api-python-client==1.12.8
 google-auth-httplib2==0.0.4
