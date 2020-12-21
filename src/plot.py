@@ -30,7 +30,7 @@ def generate_vspd_hist(df):
     fig.update_layout(xaxis_title_text = "VSPD kn",
         #barmode="overlay"
                        yaxis_title_text = "Unique AIS Positions",
-                       title = "Vessel Speed Histogram" '<br>'
+                       title = "Vessel Speed Histogram" "<br>"
                                "Compliance Rate: " + str(round(sum(df["VSPD kn"] <= 10) / df.shape[0] * 100, 2)) + "%" "<br>"
                                "Mean VSPD (Panamax and Post Panamax): " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
                        showlegend = True, hoverlabel=dict(bgcolor="white",
@@ -39,8 +39,9 @@ def generate_vspd_hist(df):
                        width=875,
                        height=600,
                        plot_bgcolor="#F1F1F1",
-                       font=dict(size=11),
-                       titlefont=dict(size=11))
+                       font=dict(size=12),
+                       titlefont=dict(size=14),
+                       margin=dict(l=80, r=20, t=90, b=20))
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
@@ -130,7 +131,8 @@ def generate_line_plot(df):
                       height=600,
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
-                      titlefont=dict(size=13))
+                      titlefont=dict(size=14),
+                      margin=dict(l=80, r=20, t=130, b=20))
     fig.update_xaxes(showticklabels=False)
     return fig
 
