@@ -41,7 +41,7 @@ def generate_vspd_hist(df):
                        plot_bgcolor="#F1F1F1",
                        font=dict(size=12),
                        titlefont=dict(size=14),
-                       margin=dict(l=80, r=20, t=90, b=20))
+                       margin=dict(l=80, r=80, t=90, b=20))
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
@@ -132,7 +132,7 @@ def generate_line_plot(df):
                       plot_bgcolor="#F1F1F1",
                       font=dict(size=12),
                       titlefont=dict(size=14),
-                      margin=dict(l=80, r=20, t=130, b=20))
+                      margin=dict(l=80, r=20, t=120, b=20))
     fig.update_xaxes(showticklabels=False)
     return fig
 
