@@ -184,7 +184,7 @@ def generate_channel_occ(df):
                   "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True, "Vessel Class":True,
                   "Location":False, "Name":False}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
-               hover_data=hover_dict,
+               hover_data=hover_dict, hover_name="Name",
                title="Vessel Speed and Occupied Channel" + "<br>"
                      "Non Adverse Conditions: " + str(round(len(df[df.Condition == "Non Adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
                      "Adverse Conditions: " + str(round(len(df[df.Condition == "Adverse Condition"]) / len(df) * 100, 2)) + "%")
