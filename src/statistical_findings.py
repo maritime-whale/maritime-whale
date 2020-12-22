@@ -45,10 +45,21 @@ ch_post_panamax = ch[ch["Vessel Class"] == "Post-Panamax"]
 sv_panamax = sv[sv["Vessel Class"] == "Panamax"]
 sv_post_panamax = sv[sv["Vessel Class"] == "Post-Panamax"]
 
-ch[['WSPD mph', 'Yaw']].corr()
+df = pd.read_csv("../temp/year_wind.csv")
+df['Wind speed quality'].value_counts()
 
-sv[['WSPD mph', 'Yaw']].corr()
+str(round(100 - len(ch.dropna()) / len(ch) * 100, 2)) + "%"
 
+fig = px.density_contour(pd.DataFrame({"WSPD mph":[], "VSPD kn":[]}), x="VSPD kn", y="WSPD mph")
+fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(ch.dropna()) / len(ch) * 100, 2)) + "% " +
+                        "Of Data Missing", showarrow=False, textangle=0, font=dict(color="black", size=20),
+                xref="paper", x=0.5, yref="paper", y=0.5)
+fig.update_layout(title="Vessel and Wind Speed Density Plot",
+                  width=875,
+                  height=600,
+                  plot_bgcolor="#F1F1F1",
+                  font=dict(size=12),
+                  titlefont=dict(size=14))
 # ch_meetpass = meetpass(ch)
 # ch_two_way = twoway(ch, ch_meetpass)
 # ch["Transit"] = "One Way Transit"

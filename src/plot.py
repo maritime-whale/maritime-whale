@@ -2,6 +2,12 @@
 # https://plotly.com/python/mapbox-layers/ (example used)
 import plotly.graph_objects as go
 import plotly.express as px
+import pandas as pd
+
+def check_wind_outages(df, df_dropna):
+    if len(df_dropna) / len(df) >= 0.5:
+        return True
+    return False
 
 def generate_geo_plot(df, zoom, size, heatmap_enabled, token):
     fig = None
@@ -84,47 +90,74 @@ def generate_strip_plot(df):
 
 
 def generate_wspd_hist(df, df_dropna, show_threshold):
-    fig = px.histogram(df_dropna["WSPD mph"], color_discrete_sequence=["steelblue"], nbins=15)
-    fig.update_layout(title="Windspeed Histogram" + "<br>"
-                            "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%")
+    fig = None
+    if not check_wind_outages(df, df_dropna):
 
-    fig.data[0].marker.line.width = 0.5
-    fig.data[0].marker.line.color = "black"
+        fig = px.histogram(df_dropna["WSPD mph"], color_discrete_sequence=["steelblue"], nbins=15)
+        fig.update_layout(title="Windspeed Histogram" + "<br>"
+                                "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%")
 
-    if show_threshold:
-        fig.update_layout(title="Windspeed Histogram<br>"
-                                "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
-                                "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "%",
-                                margin=dict(t=100))
-        fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
-                                x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
-        fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
-                        xref="x", x=30.4, yref="paper", y=1)
+        fig.data[0].marker.line.width = 0.5
+        fig.data[0].marker.line.color = "black"
 
-    fig.update_layout(xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
-                      showlegend = False, hoverlabel = dict(bgcolor="white",font_size=13),
-                      width=875,
-                      height=600,
-                      plot_bgcolor="#F1F1F1",
-                      font=dict(size=12),
-                      titlefont=dict(size=14))
+        if show_threshold:
+            fig.update_layout(title="Windspeed Histogram<br>"
+                                    "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
+                                    "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "%",
+                                    margin=dict(t=100))
+            fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
+                                    x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
+            fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
+                            xref="x", x=30.4, yref="paper", y=1)
+
+        fig.update_layout(xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
+                          showlegend = False, hoverlabel = dict(bgcolor="white",font_size=13),
+                          width=875,
+                          height=600,
+                          plot_bgcolor="#F1F1F1",
+                          font=dict(size=12),
+                          titlefont=dict(size=14))
+    else:
+        fig = px.histogram(pd.DataFrame({"WSPD mph":[]}), x="WSPD mph")
+        fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(df_dropna) / len(df) * 100, 2)) + "% " +
+                                "of Data Missing", showarrow=False, textangle=0, font=dict(color="black", size=20),
+                        xref="paper", x=0.5, yref="paper", y=0.5)
+        fig.update_layout(title="Windspeed Histogram",
+                          width=875,
+                          height=600,
+                          plot_bgcolor="#F1F1F1",
+                          font=dict(size=12),
+                          titlefont=dict(size=14))
     return fig
 
 
 def generate_wspd_vs_vspd(df, df_dropna):
-    fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
-    fig.update_traces(contours_coloring = "fill", colorscale = "blues")
-    fig.update_layout(xaxis_title_text = "VSPD kn",
-                      title= "Vessel and Wind Speed Density Plot" '<br>'
-                             "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
-                             "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
-                       hoverlabel=dict(bgcolor="white", font_size=13),
-                       width=875,
-                       height=600,
-                       plot_bgcolor="#F1F1F1",
-                       font=dict(size=12),
-                       titlefont=dict(size=14),
-                       margin=dict(t=100))
+    fig = None
+    if not check_wind_outages(df, df_dropna):
+        fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
+        fig.update_traces(contours_coloring = "fill", colorscale = "blues")
+        fig.update_layout(xaxis_title_text = "VSPD kn",
+                          title= "Vessel and Wind Speed Density Plot" '<br>'
+                                 "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
+                                 "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
+                           hoverlabel=dict(bgcolor="white", font_size=13),
+                           width=875,
+                           height=600,
+                           plot_bgcolor="#F1F1F1",
+                           font=dict(size=12),
+                           titlefont=dict(size=14),
+                           margin=dict(t=100))
+    else:
+        fig = px.density_contour(pd.DataFrame({"WSPD mph":[], "VSPD kn":[]}), x="VSPD kn", y="WSPD mph")
+        fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(df_dropna) / len(df) * 100, 2)) + "% " +
+                                "of Data Missing", showarrow=False, textangle=0, font=dict(color="black", size=20),
+                        xref="paper", x=0.5, yref="paper", y=0.5)
+        fig.update_layout(title="Vessel and Wind Speed Density Plot",
+                          width=875,
+                          height=600,
+                          plot_bgcolor="#F1F1F1",
+                          font=dict(size=12),
+                          titlefont=dict(size=14))
     return fig
 
 
