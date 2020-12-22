@@ -222,7 +222,6 @@ def import_report(path):
             else:
                 sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
                 ports[i].loc[row, "Condition"] = float("NaN")
-                # do I need an if statement for when it's two way transit but theres no available WSPD ?? Ask david if the or covers it 
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
         if i % 2:
             stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]
