@@ -259,12 +259,6 @@ def import_report(path):
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
                    "Longitude", "Transit", "% Channel Occupied"]]
 
-        # for row in range(len(res)):
-        #     if res.loc[row, "WSPD mph"] != "NaN":
-        #         high_wind = res[res["WSPD mph"] >= 30]
-        #         res["adverse wind"] = "no adverse wind conditions"
-        #         res["adverse wind"][res.index.isin(high_wind.index)] = "adverse wind conditions"
-
         stats_res = stats_res[["Date/Time UTC", "Name", "MMSI", "VSPD kn",
                                 "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                                 "Course", "Heading", "Course Behavior",
