@@ -5,7 +5,7 @@ import plotly.express as px
 import pandas as pd
 
 def check_wind_outages(df, df_dropna):
-    if len(df_dropna) / len(df) >= 0.5:
+    if 1 - len(df_dropna) / len(df) >= 0.5:
         return True
     return False
 
