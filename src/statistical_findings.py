@@ -179,6 +179,14 @@ fig2.update_layout(xaxis_title_text = "",
 fig2.update_traces(marker_size=5.5)
 
 ########################################################################
+ch['WSPD mph'].isna().sum()
+sv['WSPD mph'].isna().sum()
+len(ch.dropna())
+len(ch)
+
+"Wind data available: " + str(round(len(ch.dropna()) / len(ch) * 100, 2)) + "%"
+
+
 # TITLE:
 # Windspeed Histogram
 fig3 = px.histogram(ch.dropna()["WSPD mph"], color_discrete_sequence=["lightsteelblue"], nbins=15)
@@ -194,7 +202,7 @@ fig3.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90
                     xref="x", x=30.4, yref="paper", y=1)
 fig3.data[0].marker.line.width = 0.5
 fig3.data[0].marker.line.color = "black"
-pio.write_html(fig3, file="../tests/WSPD_hist.html", auto_open=False)
+# pio.write_html(fig3, file="../tests/WSPD_hist.html", auto_open=False)
 
 fig3
 
