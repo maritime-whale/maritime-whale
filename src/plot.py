@@ -102,7 +102,7 @@ def generate_wspd_hist(df, df_dropna, show_threshold):
 
         if show_threshold:
             fig.update_layout(title="Windspeed Histogram<br>"
-                                    "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
+                                    "Wind Buoy Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
                                     "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "%",
                                     margin=dict(t=100))
             fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
@@ -138,7 +138,7 @@ def generate_wspd_vs_vspd(df, df_dropna):
         fig.update_traces(contours_coloring = "fill", colorscale = "blues")
         fig.update_layout(xaxis_title_text = "VSPD kn",
                           title= "Vessel and Wind Speed Density Plot" '<br>'
-                                 "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
+                                 "Wind Buoy Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
                                  "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
                            hoverlabel=dict(bgcolor="white", font_size=13),
                            width=875,
@@ -170,6 +170,7 @@ def generate_line_plot(df):
                              "Compliant VSPD mean Yaw: " + str(round(df[df["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
                              "Non Compliant VSPD mean Yaw:  " + str(round(df[df["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
                       xaxis_title_text="AIS Positions",
+                      yaxis_title_text="Degrees and Knots",
                       width=875,
                       height=600,
                       plot_bgcolor="#F1F1F1",
@@ -177,6 +178,8 @@ def generate_line_plot(df):
                       titlefont=dict(size=14),
                       margin=dict(l=80, r=20, t=120, b=20))
     fig.update_xaxes(showticklabels=False)
+    fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
+                    line=dict(color="Red", dash="solid", width=1.5))
     return fig
 
 def generate_channel_occ(df):
