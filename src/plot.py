@@ -65,9 +65,10 @@ def generate_vspd_hist(df):
     return fig
 
 def generate_strip_plot(df):
-    hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-                  "Yaw":True, "LOA ft":False, "Beam ft":False, "Effective Beam ft":True,
-                  "Location":False, "Name":False}
+    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Condition":True, "Transit":True, "% Channel Occupied":True,
+                  "Vessel Class":True, "Course Behavior":True, "Yaw":True,
+                  "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
+                  "Location":True, "Date/Time UTC":True, "Name":False}
     fig = px.strip(df, x="Name", y="VSPD kn",
                     color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
                     color_discrete_sequence=["#19336a", "green"], width=900, height=600, #darkslateblue, salmon
@@ -186,9 +187,9 @@ def generate_line_plot(df):
     return fig
 
 def generate_channel_occ(df):
-    hover_dict = {"Date/Time UTC":True, "MMSI":False, "VSPD kn":True, "WSPD mph":True, "Course Behavior":True,
-                  "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True, "Transit":True, "Vessel Class":True,
-                  "Location":False, "Name":False}
+    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True, "Vessel Class":True, "Course Behavior":True,
+                  "Yaw":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
+                  "Location":True, "Name":False, "Date/Time UTC":True}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
                hover_data=hover_dict, hover_name="Name",
                title="Vessel Speed and Occupied Channel" + "<br>"

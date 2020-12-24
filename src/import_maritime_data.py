@@ -259,13 +259,12 @@ def import_report(path):
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
                    "Longitude", "Transit", "% Channel Occupied"]]
 
-        stats_res = stats_res[["Date/Time UTC", "Name", "MMSI", "VSPD kn",
+        stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD kn", "Transit",
+                                "Condition", "% Channel Occupied", "Yaw", "Effective Beam ft",
                                 "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                                 "Course", "Heading", "Course Behavior",
-                                "Yaw", "Effective Beam ft",
-                                "WDIR degT", "WSPD mph", "GST mph",
-                                "Location", "Latitude", "Longitude",
-                                "Transit", "% Channel Occupied", "Condition"]]
+                                "WDIR degT", "GST mph",
+                                "Location", "Latitude", "Longitude", "Date/Time UTC"]]
 
         ports[i] = [lvl_res, stats_res]
 
