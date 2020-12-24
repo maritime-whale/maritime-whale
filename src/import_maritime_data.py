@@ -213,25 +213,15 @@ def import_report(path):
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
         stats_res = ports[i]
-        # hopefully add a wspd threshold for adverse conditions for savannah. Need this from Jon
-        if i % 2:
-            for row in range(len(stats_res)):
-                if stats_res.loc[row, "Transit"] == "Two Way Transit":
-                    stats_res.loc[row, "Condition"] = "Adverse Condition"
-                elif stats_res.loc[row, "Transit"] == "One Way Transit":
-                    stats_res.loc[row, "Condition"] = "Non Adverse Condition"
-                else:
-                    sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
-                    stats_res.loc[row, "Condition"] = float("NaN")
-        else:
-            for row in range(len(stats_res)):
-                if (stats_res.loc[row, "WSPD mph"] >= 30) or (stats_res.loc[row, "Transit"] == "Two Way Transit"):
-                    stats_res.loc[row, "Condition"] = "Adverse Condition"
-                elif (stats_res.loc[row, "WSPD mph"] < 30) or (stats_res.loc[row, "Transit"] == "One Way Transit"):
-                    stats_res.loc[row, "Condition"] = "Non Adverse Condition"
-                else:
-                    sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
-                    stats_res.loc[row, "Condition"] = float("NaN")
+
+        for row in range(len(stats_res)):
+            if (stats_res.loc[row, "WSPD mph"] >= 30) or (stats_res.loc[row, "Transit"] == "Two Way Transit"):
+                stats_res.loc[row, "Condition"] = "Adverse Condition"
+            elif (stats_res.loc[row, "WSPD mph"] < 30) or (stats_res.loc[row, "Transit"] == "One Way Transit"):
+                stats_res.loc[row, "Condition"] = "Non Adverse Condition"
+            else:
+                sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
+                stats_res.loc[row, "Condition"] = float("NaN")
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
         if i % 2:
             stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]

@@ -89,34 +89,29 @@ def generate_strip_plot(df):
     return fig
 
 
-def generate_wspd_hist(df, df_dropna, show_threshold):
+def generate_wspd_hist(df, df_dropna):
     fig = None
     if not check_wind_outages(df, df_dropna):
 
         fig = px.histogram(df_dropna["WSPD mph"], color_discrete_sequence=["steelblue"], nbins=15)
-        fig.update_layout(title="Windspeed Histogram" + "<br>"
-                                "Wind Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%")
-
+        fig.update_layout(title="Windspeed Histogram<br>"
+                                "Wind Buoy Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
+                                "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "%",
+                                xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
+                                showlegend = False, hoverlabel = dict(bgcolor="white",font_size=13),
+                                width=875,
+                                height=600,
+                                plot_bgcolor="#F1F1F1",
+                                font=dict(size=12),
+                                titlefont=dict(size=14),
+                                margin=dict(t=100))
+        fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
+                                x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
+        fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
+                        xref="x", x=30.4, yref="paper", y=1)
         fig.data[0].marker.line.width = 0.5
         fig.data[0].marker.line.color = "black"
 
-        if show_threshold:
-            fig.update_layout(title="Windspeed Histogram<br>"
-                                    "Wind Buoy Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
-                                    "Adverse Wind Conditions: " + str(round((df_dropna[df_dropna["WSPD mph"] >= 30].shape[0] / df_dropna.shape[0]) * 100, 2)) + "%",
-                                    margin=dict(t=100))
-            fig.add_shape(go.layout.Shape(type="line", xref="x", yref="paper",
-                                    x0=30, y0=0, x1=30, y1=1, line={"dash": "solid", "width":1.5}))
-            fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=90, font=dict(color="black"),
-                            xref="x", x=30.4, yref="paper", y=1)
-
-        fig.update_layout(xaxis_title_text="WSPD mph", yaxis_title_text="Unique AIS Positions",
-                          showlegend = False, hoverlabel = dict(bgcolor="white",font_size=13),
-                          width=875,
-                          height=600,
-                          plot_bgcolor="#F1F1F1",
-                          font=dict(size=12),
-                          titlefont=dict(size=14))
     else:
         fig = px.histogram(pd.DataFrame({"WSPD mph":[]}), x="WSPD mph")
         fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(df_dropna) / len(df) * 100, 2)) + "% " +
@@ -139,7 +134,7 @@ def generate_wspd_vs_vspd(df, df_dropna):
         fig.update_layout(xaxis_title_text = "VSPD kn",
                           title= "Vessel and Wind Speed Density Plot" '<br>'
                                  "Wind Buoy Data Available: " + str(round(len(df.dropna()) / len(df) * 100, 2)) + "%" "<br>"
-                                 "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1] * 100, 2)) + "%",
+                                 "VSPD-WSPD Correlation: " + str(round(df_dropna[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
                            hoverlabel=dict(bgcolor="white", font_size=13),
                            width=875,
                            height=600,
@@ -147,6 +142,14 @@ def generate_wspd_vs_vspd(df, df_dropna):
                            font=dict(size=12),
                            titlefont=dict(size=14),
                            margin=dict(t=100))
+        fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
+                        line=dict(color="Red", dash="solid", width=1.5))
+        fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
+                        xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
+        fig.add_shape(go.layout.Shape(type="line", xref="paper", yref="y",
+                                x0=0, y0=30, x1=1, y1=30, line={"dash": "solid", "width":1.5}))
+        fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=0, font=dict(color="black"),
+                        xref="paper", x=1, yref="y", y=30.6)
     else:
         fig = px.density_contour(pd.DataFrame({"WSPD mph":[], "VSPD kn":[]}), x="VSPD kn", y="WSPD mph")
         fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(df_dropna) / len(df) * 100, 2)) + "% " +
