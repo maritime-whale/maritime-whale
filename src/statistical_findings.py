@@ -197,7 +197,7 @@ len(ch.dropna())
 len(ch)
 
 "Wind data available: " + str(round(len(ch.dropna()) / len(ch) * 100, 2)) + "%"
-
+ch[ch['WSPD mph'] == "N/O"]
 
 # TITLE:
 # Windspeed Histogram

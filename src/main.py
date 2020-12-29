@@ -109,8 +109,8 @@ def main():
         pio.write_html(geo_plots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
 
         stats_data = [pd.concat(maritime_data[1][0]).reset_index(), pd.concat(maritime_data[1][1]).reset_index()]
-        stats_data.append(stats_data[0].dropna())
-        stats_data.append(stats_data[1].dropna())
+        stats_data.append(stats_data[0].dropna()) #stats_data[0].dropna()
+        stats_data.append(stats_data[1].dropna()) #stats_data[1].dropna()
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
@@ -127,8 +127,8 @@ def main():
         pio.write_html(generate_line_plot(stats_data[0]), file="../html/line_ch.html", auto_open=False)
         pio.write_html(generate_line_plot(stats_data[1]), file="../html/line_sv.html", auto_open=False)
 
-        pio.write_html(generate_channel_occ(stats_data[2]), file="../html/channel_occupation_ch.html", auto_open=False)
-        pio.write_html(generate_channel_occ(stats_data[3]), file="../html/channel_occupation_sv.html", auto_open=False)
+        pio.write_html(generate_channel_occ(stats_data[0]), file="../html/channel_occupation_ch.html", auto_open=False)
+        pio.write_html(generate_channel_occ(stats_data[1]), file="../html/channel_occupation_sv.html", auto_open=False)
 
         log(logfile, "Finished program execution successfully.")
         log(logfile, "Preparing to upload...")

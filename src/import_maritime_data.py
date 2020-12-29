@@ -55,7 +55,7 @@ def import_report(path):
     df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
-    # df["Yaw"] = abs(df.COURSE - df.HEADING)
+    # df["Yaw deg"] = abs(df.COURSE - df.HEADING)
     sub_panamax = None
     # if mode == "sub-panamax":
     #     sub_panamax = df[df["LOA m"] < 200]
@@ -78,8 +78,8 @@ def import_report(path):
     buoys = [{"41004":None, "41029":None}, {"41008":None, "41033":None}]
     for i in range(len(ports)):
         ports[i] = df[df.Latitude >= 32.033] if (i == 0) else df[df.Latitude < 32.033]
-        ports[i].loc[:, "Location"] = "nearshore"
-        ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "offshore"
+        ports[i].loc[:, "Location"] = "Nearshore"
+        ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "Offshore"
         # offshore: 41004 (ch), 41008 (sv)
         # nearshore: 41029 (ch), 41033 (sv)
         year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
@@ -103,9 +103,9 @@ def import_report(path):
                                  str(year) + "-" + str(month) + "-" +
                                  str(day) + " for buoy with ID: " +
                                  id + "...\n")
-                ports[i].loc[:, "WDIR degT"] = ["Nan" for ii in range(len(ports[i]))]
-                ports[i].loc[:, "WSPD mph"] = ["Nan" for ii in range(len(ports[i]))]
-                ports[i].loc[:, "GST mph"] = ["Nan" for ii in range(len(ports[i]))]
+                ports[i].loc[:, "WDIR degT"] = [float("NaN") for ii in range(len(ports[i]))]
+                ports[i].loc[:, "WSPD mph"] = [float("NaN") for ii in range(len(ports[i]))]
+                ports[i].loc[:, "GST mph"] = [float("NaN") for ii in range(len(ports[i]))]
                 continue
             data = data[(data["#YY"] == year) &
                         (data["MM"] == month) &
@@ -131,10 +131,10 @@ def import_report(path):
             target_times = list(wind_data["Date/Time UTC"])
             # nearshore
             if j % 2:
-                input_times = list(ports[i][ports[i]["Location"] == "nearshore"]["Date/Time UTC"])
+                input_times = list(ports[i][ports[i]["Location"] == "Nearshore"]["Date/Time UTC"])
             # offshore
             else:
-                input_times = list(ports[i][ports[i]["Location"] == "offshore"]["Date/Time UTC"])
+                input_times = list(ports[i][ports[i]["Location"] == "Offshore"]["Date/Time UTC"])
             # match wind speed to location
             for ii in range(len(input_times)):
                 min_timedelta = timedelta(hours=WIND_TIME_TOL)
@@ -156,9 +156,9 @@ def import_report(path):
                         final_winds[k].append(float("NaN"))
             for k in final_winds:
                 if j % 2:
-                    ports[i].loc[ports[i].Location == "nearshore", k] = final_winds[k]
+                    ports[i].loc[ports[i].Location == "Nearshore", k] = final_winds[k]
                 else:
-                    ports[i].loc[ports[i].Location == "offshore", k] = final_winds[k]
+                    ports[i].loc[ports[i].Location == "Offshore", k] = final_winds[k]
         ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
                             (ports[i].Course <= course_ranges[i][0][1]) |
                             (ports[i].Course >= course_ranges[i][1][0]) &
@@ -176,12 +176,12 @@ def import_report(path):
         ports[i].loc[:, "Vessel Class"] = "Panamax"
         ports[i].loc[:, "Vessel Class"][ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)] = "Post-Panamax"
 
-        ports[i].loc[:, "Yaw"] = abs(ports[i].loc[:, "Course"] - ports[i].loc[:, "Heading"])
+        ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] - ports[i].loc[:, "Heading"])
 
         EB = []
         loa = ports[i]["LOA ft"].values
         beam = ports[i]["Beam ft"].values
-        yaw = ports[i]["Yaw"].values
+        yaw = ports[i]["Yaw deg"].values
         for l in range(ports[i].shape[0]):
             EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
 
@@ -218,7 +218,7 @@ def import_report(path):
             if (stats_res.loc[row, "WSPD mph"] >= 30) or (stats_res.loc[row, "Transit"] == "Two Way Transit"):
                 stats_res.loc[row, "Condition"] = "Adverse Condition"
             elif (stats_res.loc[row, "WSPD mph"] < 30) or (stats_res.loc[row, "Transit"] == "One Way Transit"):
-                stats_res.loc[row, "Condition"] = "Non Adverse Condition"
+                stats_res.loc[row, "Condition"] = "Non-adverse Condition"
             else:
                 sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
                 stats_res.loc[row, "Condition"] = float("NaN")
@@ -241,7 +241,7 @@ def import_report(path):
                    "LOA ft":[], "Course":[], "AIS Type":[],
                    "WSPD mph":[], "GST mph":[], "WDIR degT":[], "Beam ft":[],
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
-                   "Vessel Class":[], "Location":[], "Yaw":[], "Transit":[],
+                   "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
                    "% Channel Occupied":[]}
         for key, value in d.items():
             for k in columns.keys():
@@ -255,12 +255,12 @@ def import_report(path):
         lvl_res.sort_values("Max Speed kn", ascending=False, inplace=True)
         lvl_res = lvl_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
-                   "Course", "Heading", "Course Behavior", "Yaw", "Effective Beam ft",
+                   "Course", "Heading", "Course Behavior", "Yaw deg", "Effective Beam ft",
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
                    "Longitude", "Transit", "% Channel Occupied"]]
 
-        stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD kn", "Transit",
-                                "Condition", "% Channel Occupied", "Yaw", "Effective Beam ft",
+        stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
+                                "Condition", "% Channel Occupied", "Yaw deg", "Effective Beam ft",
                                 "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                                 "Course", "Heading", "Course Behavior",
                                 "WDIR degT", "GST mph",
