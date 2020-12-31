@@ -16,33 +16,33 @@ import os
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
-    # days = fetch_latest_reports(logfile)
-    # if not days:
-    #     log(logfile, "No new vessel movement reports.")
-    #     return
-    # dates = (day.strftime("%Y_%m_%d") for day in days)
-    # date_strs = (day.strftime("%B %d %Y") for day in days)
-    # sync_required = False
-    # for date, date_str, day in zip(dates, date_strs, days):
-    #     if not os.path.exists("../cache/" + date):
-    #         if not sync_required:
-    #             sync_required = True
-    #         input_filename = day.strftime("%Y-%m-%d.csv")
-    #         maritime_report = import_report("../temp/" + input_filename)
-    #         log(logfile, "Importing data from " + input_filename + "...")
-    #         os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
-    #         maritime_data = [[port[0] for port in maritime_report],
-    #                          [port[1] for port in maritime_report]]
-    #         caches = ((date + "/ch-max", date + "/sv-max"),
-    #                   (date + "/ch", date + "/sv"))
-    #         for i in range(len(caches)):
-    #             for j in range(len(maritime_data[i])):
-    #                 create_csv_cache([maritime_data[i][j]], caches[i][j])
-    #         log(logfile, "Created cache for " + date_str + ".")
-    #     else:
-    #         # latest data already exists in cache
-    #         log(logfile, "Cache already exists for " + date_str + ".")
-    sync_required = True
+    days = fetch_latest_reports(logfile)
+    if not days:
+        log(logfile, "No new vessel movement reports.")
+        return
+    dates = (day.strftime("%Y_%m_%d") for day in days)
+    date_strs = (day.strftime("%B %d %Y") for day in days)
+    sync_required = False
+    for date, date_str, day in zip(dates, date_strs, days):
+        if not os.path.exists("../cache/" + date):
+            if not sync_required:
+                sync_required = True
+            input_filename = day.strftime("%Y-%m-%d.csv")
+            maritime_report = import_report("../temp/" + input_filename)
+            log(logfile, "Importing data from " + input_filename + "...")
+            os.makedirs(os.path.dirname("../cache/" + date + "/"), exist_ok=True)
+            maritime_data = [[port[0] for port in maritime_report],
+                             [port[1] for port in maritime_report]]
+            caches = ((date + "/ch-max", date + "/sv-max"),
+                      (date + "/ch", date + "/sv"))
+            for i in range(len(caches)):
+                for j in range(len(maritime_data[i])):
+                    create_csv_cache([maritime_data[i][j]], caches[i][j])
+            log(logfile, "Created cache for " + date_str + ".")
+        else:
+            # latest data already exists in cache
+            log(logfile, "Cache already exists for " + date_str + ".")
+    # sync_required = True
 
     if sync_required:
         # load cache into memory
@@ -86,14 +86,21 @@ def main():
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
 
         filetypes = ["xlsx", "csv"]
-        filenames = (("master-ch-max", "master-sv-max"), ("master-ch", "master-sv"))
+        filenames = ((("master-ch-max", "master-sv-max"), ("master-ch-max-roll", "master-sv-max-roll")), (("master-ch", "master-sv"), ("master-ch-roll", "master-sv-roll")))
         for i in range(len(filetypes)): # loop controlling file type
             for j in range(len(maritime_data)):
                 for k in range(len(filenames[j])):
-                    if i % 2 == 0:
-                        create_xlsx_cache(maritime_data[j][k] + temps[j][k], filenames[j][k])
-                    else:
-                        create_csv_cache(maritime_data[j][k] + temps[j][k], filenames[j][k])
+                    for ii in range(len(filenames[j][k])):
+                        if i % 2 == 0:
+                            if ii % 2 == 0:
+                                create_xlsx_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # may be a more elegant and efficient way to do this...
+                            else:
+                                create_xlsx_cache(maritime_data[j][k], filenames[j][k][ii])
+                        else:
+                            if ii % 2 == 0:
+                                create_csv_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # concat may not be that expensive of an operation; still a potential area for optimization
+                            else:
+                                create_csv_cache(maritime_data[j][k], filenames[j][k][ii])
         for i in range(len(maritime_data[0])):
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
