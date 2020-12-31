@@ -63,7 +63,7 @@ def main():
                             if len(content):
                                 caches[i] = content
             if True in [isinstance(cache, type(None)) for cache in caches]:
-                log(logfile, "Empty/partial cache found: " + subdir)
+                log(logfile, "Empty/partial cache found: " + subdir + ".")
                 continue
             data_frames.append([caches[0], caches[1],
                                 pd.concat([caches[0], caches[1]]),
