@@ -212,16 +212,16 @@ def import_report(path):
                 sys.stderr.write("Error: Undefined vessel class and transit combination...\n")
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
-        stats_res = ports[i]
-
-        for row in range(len(stats_res)):
-            if (stats_res.loc[row, "WSPD mph"] >= 30) or (stats_res.loc[row, "Transit"] == "Two Way Transit"):
-                stats_res.loc[row, "Condition"] = "Adverse Condition"
-            elif (stats_res.loc[row, "WSPD mph"] < 30) or (stats_res.loc[row, "Transit"] == "One Way Transit"):
-                stats_res.loc[row, "Condition"] = "Non-adverse Condition"
+        for row in range(len(ports[i])):
+            if (ports[i].loc[row, "WSPD mph"] >= 30) or (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+                ports[i].loc[row, "Condition"] = "Adverse Condition"
+            elif (ports[i].loc[row, "WSPD mph"] < 30) or (ports[i].loc[row, "Transit"] == "One Way Transit"):
+                ports[i].loc[row, "Condition"] = "Non-adverse Condition"
             else:
                 sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
-                stats_res.loc[row, "Condition"] = float("NaN")
+                ports[i].loc[row, "Condition"] = float("NaN")
+
+        stats_res = ports[i]
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
         if i % 2:
             stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]
@@ -242,7 +242,7 @@ def import_report(path):
                    "WSPD mph":[], "GST mph":[], "WDIR degT":[], "Beam ft":[],
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
                    "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
-                   "% Channel Occupied":[]}
+                   "% Channel Occupied":[], "Condition":[]}
         for key, value in d.items():
             for k in columns.keys():
                 columns[k].append(ports[i][(ports[i].Name == key[0]) &
@@ -257,7 +257,7 @@ def import_report(path):
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                    "Course", "Heading", "Course Behavior", "Yaw deg", "Effective Beam ft",
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
-                   "Longitude", "Transit", "% Channel Occupied"]]
+                   "Longitude", "Transit", "Condition", "% Channel Occupied"]]
 
         stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
                                 "Condition", "% Channel Occupied", "Yaw deg", "Effective Beam ft",

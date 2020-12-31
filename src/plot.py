@@ -9,16 +9,12 @@ def check_wind_outages(df, df_dropna):
         return True
     return False
 
-def generate_geo_plot(df, zoom, size, heatmap_enabled, token):
+def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
     fig = None
-    _hover_data = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
-                   "Mean Speed kn", "WSPD mph", "Transit", "Condition",
-                   "Vessel Class", "LOA ft", "Beam ft", "Yaw deg",
-                   "Effective Beam ft", "% Channel Occupied", "Location"]
     if not heatmap_enabled:
         fig = px.scatter_mapbox(df, hover_name="Name",
                                 lat="Latitude", lon="Longitude",
-                                hover_data=_hover_data,
+                                hover_data=hover,
                                 color_discrete_sequence=["white"],
                                 zoom=zoom, height=size[0], width=size[1])
         fig.update_traces(marker_size=4)
@@ -26,7 +22,7 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, token):
         fig = px.density_mapbox(df, hover_name="Name",
                                 z="Max Speed kn", radius=5,
                                 lat="Latitude", lon="Longitude",
-                                hover_data=_hover_data,
+                                hover_data=hover,
                                 zoom=zoom, height=size[0], width=size[1])
     fig.update_layout(mapbox_accesstoken=token,
                       mapbox_style="satellite-streets", showlegend=False)

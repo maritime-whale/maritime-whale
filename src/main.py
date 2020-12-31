@@ -86,21 +86,14 @@ def main():
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
 
         filetypes = ["xlsx", "csv"]
-        filenames = ((("master-ch-max", "master-sv-max"), ("master-ch-max-roll", "master-sv-max-roll")), (("master-ch", "master-sv"), ("master-ch-roll", "master-sv-roll")))
+        filenames = (("master-ch-max", "master-sv-max"), ("master-ch", "master-sv"))
         for i in range(len(filetypes)): # loop controlling file type
             for j in range(len(maritime_data)):
                 for k in range(len(filenames[j])):
-                    for ii in range(len(filenames[j][k])):
-                        if i % 2 == 0:
-                            if ii % 2 == 0:
-                                create_xlsx_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # may be a more elegant and efficient way to do this...
-                            else:
-                                create_xlsx_cache(maritime_data[j][k], filenames[j][k][ii])
-                        else:
-                            if ii % 2 == 0:
-                                create_csv_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # concat may not be that expensive of an operation; still a potential area for optimization
-                            else:
-                                create_csv_cache(maritime_data[j][k], filenames[j][k][ii])
+                    if i % 2 == 0:
+                        create_xlsx_cache(maritime_data[j][k] + temps[j][k], filenames[j][k])
+                    else:
+                        create_csv_cache(maritime_data[j][k] + temps[j][k], filenames[j][k])
         for i in range(len(maritime_data[0])):
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
@@ -109,15 +102,25 @@ def main():
         heat = (False, False, False)
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geo_plots.keys()):
-            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], sizes[i], heat[i], token)
+            hover = []
+            if i <= 1:
+                hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
+                         "Mean Speed kn", "WSPD mph", "Transit", "Condition",
+                         "Vessel Class", "LOA ft", "Beam ft", "Yaw deg",
+                         "Effective Beam ft", "% Channel Occupied", "Location"]
+            else:
+                hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
+                         "Mean Speed kn", "WSPD mph"]
+
+            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], sizes[i], heat[i], hover, token)
         # output geo_plots in an interactive HTML format
         pio.write_html(geo_plots["lvl1"], file="../html/level_one.html", auto_open=False)
         pio.write_html(geo_plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
         pio.write_html(geo_plots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
 
         stats_data = [pd.concat(maritime_data[1][0]).reset_index(), pd.concat(maritime_data[1][1]).reset_index()]
-        stats_data.append(stats_data[0].dropna()) #stats_data[0].dropna()
-        stats_data.append(stats_data[1].dropna()) #stats_data[1].dropna()
+        stats_data.append(stats_data[0].dropna())
+        stats_data.append(stats_data[1].dropna())
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
