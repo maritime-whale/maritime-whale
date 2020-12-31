@@ -59,7 +59,9 @@ def main():
                 if filename.endswith(".csv"):
                     for i in range(len(names)):
                         if names[i] in filename:
-                            caches[i] = pd.read_csv(filename) # NEED A TRY CATCH HERE
+                            content = pd.read_csv(filename) # NEED A TRY CATCH HERE
+                            if len(content):
+                                caches[i] = content
             if True in [isinstance(cache, type(None)) for cache in caches]:
                 log(logfile, "Empty/partial cache found: " + subdir)
                 continue

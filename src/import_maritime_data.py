@@ -67,7 +67,6 @@ def import_report(path):
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
     df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
              "Longitude", "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
-
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340))
     channel_midpoint = ((-79.74169), (-80.78522)) # less than this value is nearshore, greater is offshore. both longitude values
@@ -78,6 +77,18 @@ def import_report(path):
     buoys = [{"41004":None, "41029":None}, {"41008":None, "41033":None}]
     for i in range(len(ports)):
         ports[i] = df[df.Latitude >= 32.033] if (i == 0) else df[df.Latitude < 32.033]
+        if not len(ports[i]):
+            ports[i] = [pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[], "Max Speed kn":[],
+                                      "Mean Speed kn":[], "LOA ft":[], "Beam ft":[], "Vessel Class":[], "AIS Type":[],
+                                      "Course":[], "Heading":[], "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[],
+                                      "WDIR degT":[], "WSPD mph":[], "GST mph":[], "Location":[], "Latitude":[],
+                                      "Longitude":[], "Transit":[], "Condition":[], "% Channel Occupied":[]}),
+                        pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[], "VSPD kn":[], "LOA ft":[],
+                                      "Beam ft":[], "Vessel Class":[], "AIS Type":[], "Course":[], "Heading":[],
+                                      "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[], "WDIR degT":[],
+                                      "WSPD mph":[], "GST mph":[], "Location":[], "Latitude":[],
+                                      "Longitude":[], "Transit":[], "Condition":[], "% Channel Occupied":[]})]
+            continue
         ports[i].loc[:, "Location"] = "Nearshore"
         ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "Offshore"
         # offshore: 41004 (ch), 41008 (sv)
