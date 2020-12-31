@@ -193,29 +193,29 @@ def import_report(path):
 
         mp = meetpass(ports[i])
         two_way = twoway(ports[i], mp)
-        ports[i]["Transit"] = "One Way Transit"
+        ports[i]["Transit"] = "One-way Transit"
         if not isinstance(two_way, type(None)):
-            ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two Way Transit"
+            ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two-way Transit"
 
         ports[i] = ports[i].reset_index()
         channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
         for row in range(len(ports[i])):
-            if (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "One Way Transit"):
+            if (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "One-way Transit"):
                 ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][0]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+            elif (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
                 ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][1]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "One Way Transit"):
+            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "One-way Transit"):
                 ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][2]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
                 ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][3]) * 100, 2)
             else:
                 sys.stderr.write("Error: Undefined vessel class and transit combination...\n")
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
         for row in range(len(ports[i])):
-            if (ports[i].loc[row, "WSPD mph"] >= 30) or (ports[i].loc[row, "Transit"] == "Two Way Transit"):
+            if (ports[i].loc[row, "WSPD mph"] >= 30) or (ports[i].loc[row, "Transit"] == "Two-way Transit"):
                 ports[i].loc[row, "Condition"] = "Adverse Condition"
-            elif (ports[i].loc[row, "WSPD mph"] < 30) or (ports[i].loc[row, "Transit"] == "One Way Transit"):
+            elif (ports[i].loc[row, "WSPD mph"] < 30) or (ports[i].loc[row, "Transit"] == "One-way Transit"):
                 ports[i].loc[row, "Condition"] = "Non-adverse Condition"
             else:
                 sys.stderr.write("Error: Undefined wind speed and transit combination...\n")

@@ -71,8 +71,8 @@ def generate_strip_plot(df):
                     color="Transit", hover_data=hover_dict, hover_name="Name", stripmode="overlay",
                     color_discrete_sequence=["#19336a", "green"], width=900, height=600, #darkslateblue, salmon
                     title= "<b>Vessel Speed Plot</b>" '<br>'
-                           "One Way Transits: " + str(round((df[df.Transit == "One Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
-                           "Two Way Transits: " + str(round((df[df.Transit == "Two Way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
+                           "One-way Transits: " + str(round((df[df.Transit == "One-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
+                           "Two-way Transits: " + str(round((df[df.Transit == "Two-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
                     line=dict(color="Red", dash="solid", width=1.5))
     fig.update_layout(xaxis_title_text = "",
