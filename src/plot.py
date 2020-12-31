@@ -170,7 +170,7 @@ def generate_line_plot(df):
     fig.update_layout(title="<b>Vessel Speed and Yaw Line Plot</b>" '<br>'
                              "VSPD-Yaw Correlation: " + str(round(df.dropna()[["VSPD kn", "Yaw deg"]].corr().iloc[0][1], 2)) + "<br>"
                              "Compliant VSPD mean Yaw: " + str(round(df[df["VSPD kn"] <= 10]["Yaw deg"].mean(), 2)) + " deg" + "<br>"
-                             "Non Compliant VSPD mean Yaw:  " + str(round(df[df["VSPD kn"] > 10]["Yaw deg"].mean(), 2)) + " deg",
+                             "Non-compliant VSPD mean Yaw:  " + str(round(df[df["VSPD kn"] > 10]["Yaw deg"].mean(), 2)) + " deg",
                       xaxis_title_text="AIS Positions",
                       yaxis_title_text="Degrees and Knots",
                       width=875,
