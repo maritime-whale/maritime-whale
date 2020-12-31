@@ -117,6 +117,7 @@ def generate_wspd_hist(df, df_dropna):
                                 "of Data Missing", showarrow=False, textangle=0, font=dict(color="black", size=20),
                         xref="paper", x=0.5, yref="paper", y=0.5)
         fig.update_layout(title="<b>Windspeed Histogram</b>",
+                          yaxis_title_text="Unique AIS Positions",
                           width=875,
                           height=600,
                           plot_bgcolor="#F1F1F1",
