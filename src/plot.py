@@ -146,10 +146,10 @@ def generate_wspd_vs_vspd(df, df_dropna):
                         line=dict(color="Red", dash="solid", width=1.5))
         fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
                         xref="x", x=10.15, yref="paper", y=1, hovertext="10 kn")
-        fig.add_shape(go.layout.Shape(type="line", xref="paper", yref="y",
-                                x0=0, y0=30, x1=1, y1=30, line={"dash": "solid", "width":1.5}))
-        fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=0, font=dict(color="black"),
-                        xref="paper", x=1, yref="y", y=30.6)
+        # fig.add_shape(go.layout.Shape(type="line", xref="paper", yref="y",
+        #                         x0=0, y0=30, x1=1, y1=30, line={"dash": "solid", "width":1.5}))
+        # fig.add_annotation(text="Adverse WSPD Threshold", showarrow=False, textangle=0, font=dict(color="black"),
+        #                 xref="paper", x=1, yref="y", y=30.6)
     else:
         fig = px.density_contour(pd.DataFrame({"WSPD mph":[], "VSPD kn":[]}), x="VSPD kn", y="WSPD mph")
         fig.add_annotation(text="Major Wind Outage<br>" + str(round(100 - len(df_dropna) / len(df) * 100, 2)) + "% " +
