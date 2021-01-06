@@ -1,7 +1,7 @@
 # maritime-whale
 # Description
 Monitors maritime vessel traffic in the ports of _Charleston, North Carolina_ & _Savannah, Georgia_.<br/>
-**_Maritime Whale Web App Engine_** - Fetches daily vessel movement reports and wind data. Imports, cleans, and caches data; perform statistical analysis on data and generates HTML plot files using Plotly -- pushing plot files, wrangled data files, and a vessel blacklist file to the https://github.com/riwhale/riwhale.github.io/ repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Plots and wrangled data files are embed within the www.maritimewhale.com website. Remote caching handled by the [secure-cache](https://github.com/riwhale/secure-cache) repo.
+**_Maritime Whale Web App Engine_** - Fetches daily vessel movement reports and wind data. Imports, cleans, and caches data; perform statistical analysis on data and generates HTML plot files using Plotly -- pushing plot files, wrangled data files, and a vessel blacklist file to the [riwhale.github.io](https://github.com/riwhale/riwhale.github.io/) repo. Hosted with live changes at https://riwhale.github.io via GitHub Pages. Plots and wrangled data files are embed within the www.maritimewhale.com website. Remote caching handled by the [secure-cache](https://github.com/riwhale/secure-cache) repo.
 
 # Key Features
 * Plots
