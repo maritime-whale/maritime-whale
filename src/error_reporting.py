@@ -75,7 +75,7 @@ def get_webapp_health_status():
 def main():
     creds = gmail_auth(ERR_LOGFILE)
     service = build("gmail", "v1", credentials=creds)
-    log(OUT_LOGFILE, "Google OAuth successfully.")
+    log(OUT_LOGFILE, "Google OAuth successful.")
     my_email = "vmr.riwhale@gmail.com"
     zip = "../temp/webapp_logs"
     shutil.make_archive(zip, "zip", "../logs/")

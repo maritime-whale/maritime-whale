@@ -88,7 +88,12 @@ if [ ! -d "$CACHE" ]; then
     mkdir $CACHE
 fi
 yes | cp -rf blacklist.txt ../../cache/blacklist.txt
-cd ../../src
+cd ../../cache
+SECURE_CACHE=secure-cache/
+if [ ! -d "$SECURE_CACHE" ]; then
+    git clone https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
+fi
+cd ../src
 MAIN_RET_VAL=1
 if [ $debug_mode == 0 ]; then
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
@@ -113,6 +118,15 @@ if [ $debug_mode == 0 ]; then
         git add level_one.html level_two_*.html vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* blacklist.txt 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git commit -am "upload plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        cd ../../cache
+        cd secure-cache
+        git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        cd ..
+        cp -rf [0-9]* secure-cache
+        cd secure-cache
+        git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "update cache file(s)" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         cd ../../src
         if [ $MAIN_RET_VAL == 0 ]; then
             python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
