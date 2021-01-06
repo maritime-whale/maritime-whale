@@ -93,13 +93,15 @@ SECURE_CACHE=secure-cache/
 if [ ! -d "$SECURE_CACHE" ]; then
     git clone https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
 fi
+cd secure-cache
+git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+cd ..
+cp -rf secure-cache/[0-9]* .
 cd ../src
 MAIN_RET_VAL=1
 if [ $debug_mode == 0 ]; then
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
     MAIN_RET_VAL=$?
-    # echo $MAIN_RET_VAL
-    # cat ../logs/vmr_*.log # (USE FOR TESTING WET RUN / NON-DEV)
 else
     python3 main.py
 fi
@@ -119,10 +121,7 @@ if [ $debug_mode == 0 ]; then
         git commit -am "upload plots, master XLSXs/CSVs, and blacklist" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         cd ../../cache
-        cd secure-cache
-        git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        cd ..
-        cp -rf [0-9]* secure-cache
+        cp -rnf [0-9]* secure-cache
         cd secure-cache
         git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
         git commit -am "update cache file(s)" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
@@ -130,11 +129,8 @@ if [ $debug_mode == 0 ]; then
         cd ../../src
         if [ $MAIN_RET_VAL == 0 ]; then
             python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
-            # cat ../logs/report_*.log # can remove in final script
         else
-            # WORST ERROR CASE
             echo "FATAL ERROR -- SILENT (NON-COMM) CASE" 2>> ../logs/report_err.log 1>> ../logs/report_out.log
-            # HAIL MARY
             python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
         fi
         cd ../html/riwhale.github.io
