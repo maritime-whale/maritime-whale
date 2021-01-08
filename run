@@ -96,7 +96,7 @@ fi
 cd secure-cache
 git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 cd ..
-cp -rf secure-cache/[0-9]* .
+cp -rf secure-cache/[0-9]* . > /dev/null 2>&1
 cd ../src
 MAIN_RET_VAL=1
 if [ $debug_mode == 0 ]; then
