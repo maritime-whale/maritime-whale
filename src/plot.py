@@ -29,6 +29,16 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
+# def generate_table(ch, sv):
+#     fig = None
+#     fig = ff.create_table([["Port", "Seasonal Compliance Rate", "Seasonal Mean VSPD"],
+#                      ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
+#                      ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
+#                     height_constant=15,
+#                     colorscale=[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
+#     fig.update_layout(title='test')
+#     return fig
+
 def generate_vspd_hist(df):
     fig = px.histogram(df, x="VSPD kn", nbins=20, color_discrete_sequence=["#19336a"])#"darkslateblue", "#ab63eb"])
     fig.update_layout(xaxis_title_text = "VSPD kn",
