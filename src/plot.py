@@ -63,7 +63,7 @@ def generate_vspd_hist(df):
     return fig
 
 def generate_strip_plot(df):
-    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Condition":True, "Transit":True, "% Channel Occupied":True,
+    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True, "% Channel Occupied":True,
                   "Vessel Class":True, "Course Behavior":True, "Yaw deg":True,
                   "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Date/Time UTC":True, "Name":False}
@@ -189,11 +189,11 @@ def generate_channel_occ(df):
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True, "Vessel Class":True, "Course Behavior":True,
                   "Yaw deg":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Name":False, "Date/Time UTC":True}
-    fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
+    fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Transit", color_discrete_sequence=["#19336a", "green"],
                hover_data=hover_dict, hover_name="Name",
                title="<b>Vessel Speed and Occupied Channel</b>" + "<br>"
-                     "Non-adverse Conditions: " + str(round(len(df[df.Condition == "Non-adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
-                     "Adverse Conditions: " + str(round(len(df[df.Condition == "Adverse Condition"]) / len(df) * 100, 2)) + "%")
+                     "One-way Transits: " + str(round((df[df.Transit == "One-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
+                     "Two-way Transits: " + str(round((df[df.Transit == "Two-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),

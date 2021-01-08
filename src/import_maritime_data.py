@@ -82,12 +82,12 @@ def import_report(path):
                                       "Mean Speed kn":[], "LOA ft":[], "Beam ft":[], "Vessel Class":[], "AIS Type":[],
                                       "Course":[], "Heading":[], "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[],
                                       "WDIR degT":[], "WSPD mph":[], "GST mph":[], "Location":[], "Latitude":[],
-                                      "Longitude":[], "Transit":[], "Condition":[], "% Channel Occupied":[]}),
+                                      "Longitude":[], "Transit":[], "% Channel Occupied":[]})]#"Condition":[], "% Channel Occupied":[]}),
                         pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[], "VSPD kn":[], "LOA ft":[],
                                       "Beam ft":[], "Vessel Class":[], "AIS Type":[], "Course":[], "Heading":[],
                                       "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[], "WDIR degT":[],
                                       "WSPD mph":[], "GST mph":[], "Location":[], "Latitude":[],
-                                      "Longitude":[], "Transit":[], "Condition":[], "% Channel Occupied":[]})]
+                                      "Longitude":[], "Transit":[], "% Channel Occupied":[]})]#"Condition":[], "% Channel Occupied":[]})]
             continue
         ports[i].loc[:, "Location"] = "Nearshore"
         ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "Offshore"
@@ -223,14 +223,27 @@ def import_report(path):
                 sys.stderr.write("Error: Undefined vessel class and transit combination...\n")
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
-        for row in range(len(ports[i])):
-            if (ports[i].loc[row, "WSPD mph"] >= 30) or (ports[i].loc[row, "Transit"] == "Two-way Transit"):
-                ports[i].loc[row, "Condition"] = "Adverse Condition"
-            elif (ports[i].loc[row, "WSPD mph"] < 30) or (ports[i].loc[row, "Transit"] == "One-way Transit"):
-                ports[i].loc[row, "Condition"] = "Non-adverse Condition"
-            else:
-                sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
-                ports[i].loc[row, "Condition"] = float("NaN")
+        # for row in range(len(ports[i])):
+        #     if (ports[i].loc[row, "WSPD mph"] >= 30) or (ports[i].loc[row, "Transit"] == "Two-way Transit"):
+        #         ports[i].loc[row, "Condition"] = "Adverse Condition"
+        #     elif (ports[i].loc[row, "WSPD mph"] < 30) or (ports[i].loc[row, "Transit"] == "One-way Transit"):
+        #         ports[i].loc[row, "Condition"] = "Non-adverse Condition"
+        #     else:
+        #         sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
+        #         ports[i].loc[row, "Condition"] = float("NaN")
+
+        # for row in range(len(ports[i])):
+        #     if (ports[i].loc[row, "WSPD mph"] >= 30) & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
+        #         ports[i].loc[row, "Condition"] = "Adverse Condition (Two-Way Transit and High Wind)"
+        #     elif (ports[i].loc[row, "WSPD mph"] >= 30) & (ports[i].loc[row, "Transit"] == "One-way Transit"):
+        #         ports[i].loc[row, "Condition"] =  "Adverse Condition (High Wind)" # "Adverse Condition (High Wind and One-Way Transit)"
+        #     elif (ports[i].loc[row, "WSPD mph"] < 30) & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
+        #         ports[i].loc[row, "Condition"] =  "Adverse Condition (Two-Way Transit)" # "Adverse Condition (Two-Way Transit and Low Wind)"
+        #     elif (ports[i].loc[row, "WSPD mph"] < 30) & (ports[i].loc[row, "Transit"] == "One-way Transit"):
+        #         ports[i].loc[row, "Condition"] =  "Non-adverse Condition (One-Way Transit)" # "Non-adverse Condition (One-Way Transit and Low Wind)"
+        #     else:
+        #         sys.stderr.write("Error: Undefined wind speed and transit combination...\n")
+        #         ports[i].loc[row, "Condition"] = float("NaN")
 
         stats_res = ports[i]
         ######BELOW WILL BE REMOVED ONCE YAW ALGORITHM HAS BEEN DEVELOPED########
@@ -253,7 +266,7 @@ def import_report(path):
                    "WSPD mph":[], "GST mph":[], "WDIR degT":[], "Beam ft":[],
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
                    "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
-                   "% Channel Occupied":[], "Condition":[]}
+                   "% Channel Occupied":[]}#, "Condition":[]}
         for key, value in d.items():
             for k in columns.keys():
                 columns[k].append(ports[i][(ports[i].Name == key[0]) &
@@ -268,10 +281,11 @@ def import_report(path):
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                    "Course", "Heading", "Course Behavior", "Yaw deg", "Effective Beam ft",
                    "WDIR degT", "WSPD mph", "GST mph", "Location", "Latitude",
-                   "Longitude", "Transit", "Condition", "% Channel Occupied"]]
+                   "Longitude", "Transit", "% Channel Occupied"]]#"Condition", "% Channel Occupied"]]
 
         stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
-                                "Condition", "% Channel Occupied", "Yaw deg", "Effective Beam ft",
+                                # "Condition",
+                                "% Channel Occupied", "Yaw deg", "Effective Beam ft",
                                 "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
                                 "Course", "Heading", "Course Behavior",
                                 "WDIR degT", "GST mph",
