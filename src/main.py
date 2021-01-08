@@ -87,23 +87,19 @@ def main():
                     else:
                         temps[i // 3][i % 3].append(df[i])
         log(logfile, "Loaded the last " + str(span) + " days for level two plots.")
-
-        filetypes = ["xlsx", "csv"]
-        filenames = ((("master-ch-max", "master-sv-max"), ("master-ch-max-roll", "master-sv-max-roll")), (("master-ch", "master-sv"), ("master-ch-roll", "master-sv-roll")))
-        for i in range(len(filetypes)): # loop controlling file type
-            for j in range(len(maritime_data)):
-                for k in range(len(filenames[j])):
-                    for ii in range(len(filenames[j][k])):
-                        if i % 2 == 0:
-                            if k % 2 == 0:
-                                create_xlsx_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # may be a more elegant and efficient way to do this...
-                            else:
-                                create_xlsx_cache(maritime_data[j][k], filenames[j][k][ii])
-                        else:
-                            if k % 2 == 0:
-                                create_csv_cache(maritime_data[j][k] + temps[j][k], filenames[j][k][ii]) # concat may not be that expensive of an operation; still a potential area for optimization
-                            else:
-                                create_csv_cache(maritime_data[j][k], filenames[j][k][ii])
+        filenames = ("master-ch", "master-sv")
+        for i in range(len(temps)):
+            for j in range(len(temps[i])):
+                if i % 2 == 0:
+                    create_csv_cache(maritime_data[i][j] + temps[i][j], filenames[j] + "-max")
+                    create_xlsx_cache(maritime_data[i][j] + temps[i][j], filenames[j] + "-max")
+                    create_csv_cache(maritime_data[i][j], filenames[j] + "-max-roll")
+                    create_xlsx_cache(maritime_data[i][j], filenames[j] + "-max-roll")
+                else:
+                    create_csv_cache(maritime_data[i][j] + temps[i][j], filenames[j])
+                    create_xlsx_cache(maritime_data[i][j] + temps[i][j], filenames[j])
+                    create_csv_cache(maritime_data[i][j], filenames[j] + "-roll")
+                    create_xlsx_cache(maritime_data[i][j], filenames[j] + "-roll")
         for i in range(len(maritime_data[0])):
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
