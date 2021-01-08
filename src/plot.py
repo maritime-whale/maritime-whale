@@ -29,6 +29,16 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
+# def generate_table(ch, sv):
+#     fig = None
+#     fig = ff.create_table([["Port", "Compliance Rate", "Mean VSPD"],
+#                      ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
+#                      ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
+#                     height_constant=15,
+#                     colorscale=[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
+#     fig.update_layout(title='test')
+#     return fig
+
 def generate_vspd_hist(df):
     fig = px.histogram(df, x="VSPD kn", nbins=20, color_discrete_sequence=["#19336a"])#"darkslateblue", "#ab63eb"])
     fig.update_layout(xaxis_title_text = "VSPD kn",
@@ -63,7 +73,7 @@ def generate_vspd_hist(df):
     return fig
 
 def generate_strip_plot(df):
-    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Condition":True, "Transit":True, "% Channel Occupied":True,
+    hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True, "% Channel Occupied":True,
                   "Vessel Class":True, "Course Behavior":True, "Yaw deg":True,
                   "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Date/Time UTC":True, "Name":False}
@@ -189,11 +199,11 @@ def generate_channel_occ(df):
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True, "Vessel Class":True, "Course Behavior":True,
                   "Yaw deg":True, "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Name":False, "Date/Time UTC":True}
-    fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Condition", color_discrete_sequence=["#19336a", "green"],
+    fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Transit", color_discrete_sequence=["#19336a", "green"],
                hover_data=hover_dict, hover_name="Name",
                title="<b>Vessel Speed and Occupied Channel</b>" + "<br>"
-                     "Non-adverse Conditions: " + str(round(len(df[df.Condition == "Non-adverse Condition"]) / len(df) * 100, 2)) + "%" + "<br>"
-                     "Adverse Conditions: " + str(round(len(df[df.Condition == "Adverse Condition"]) / len(df) * 100, 2)) + "%")
+                     "One-way Transits: " + str(round((df[df.Transit == "One-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%" "<br>"
+                     "Two-way Transits: " + str(round((df[df.Transit == "Two-way Transit"].shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                     line=dict(color="Red", dash="solid", width=1.5))
     fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),

@@ -124,6 +124,8 @@ def main():
         pio.write_html(geo_plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
         pio.write_html(geo_plots["lvl2_SV"], file="../html/level_two_savannah.html", auto_open=False)
 
+        # pio.write_html(generate_table(ch, sv), file="../html/seasonal_table.html", auto_open=False)
+
         stats_data = [pd.concat(maritime_data[1][0]).reset_index(), pd.concat(maritime_data[1][1]).reset_index()]
         stats_data.append(stats_data[0].dropna())
         stats_data.append(stats_data[1].dropna())
