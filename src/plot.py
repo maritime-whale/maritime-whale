@@ -31,7 +31,7 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
 
 # def generate_table(ch, sv):
 #     fig = None
-#     fig = ff.create_table([["Port", "Seasonal Compliance Rate", "Seasonal Mean VSPD"],
+#     fig = ff.create_table([["Port", "Compliance Rate", "Mean VSPD"],
 #                      ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
 #                      ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
 #                     height_constant=15,
