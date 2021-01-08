@@ -82,7 +82,7 @@ def import_report(path):
                                       "Mean Speed kn":[], "LOA ft":[], "Beam ft":[], "Vessel Class":[], "AIS Type":[],
                                       "Course":[], "Heading":[], "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[],
                                       "WDIR degT":[], "WSPD mph":[], "GST mph":[], "Location":[], "Latitude":[],
-                                      "Longitude":[], "Transit":[], "% Channel Occupied":[]})],#"Condition":[], "% Channel Occupied":[]}),
+                                      "Longitude":[], "Transit":[], "% Channel Occupied":[]}),#"Condition":[], "% Channel Occupied":[]}),
                         pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[], "VSPD kn":[], "LOA ft":[],
                                       "Beam ft":[], "Vessel Class":[], "AIS Type":[], "Course":[], "Heading":[],
                                       "Course Behavior":[], "Yaw deg":[], "Effective Beam ft":[], "WDIR degT":[],
