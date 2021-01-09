@@ -1,5 +1,6 @@
 # NOTES:
 # https://plotly.com/python/mapbox-layers/ (example used)
+import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
