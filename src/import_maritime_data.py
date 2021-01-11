@@ -74,7 +74,7 @@ def import_report(path):
     course_behavior = ("Outbound", "Inbound")
     ports = [None, None] # ch, sv
     # [{ch_off, ch_near}, {sv_off, sv_near}]
-    buoys = [{"41004":None, "41029":None}, {"41008":None, "41033":None}]
+    buoys = [{"41004":None, "fbis1":None}, {"41008":None, "41033":None}]
     for i in range(len(ports)):
         ports[i] = df[df.Latitude >= 32.033] if (i == 0) else df[df.Latitude < 32.033]
         if not len(ports[i]):
@@ -92,7 +92,7 @@ def import_report(path):
         ports[i].loc[:, "Location"] = "Nearshore"
         ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "Offshore"
         # offshore: 41004 (ch), 41008 (sv)
-        # nearshore: 41029 (ch), 41033 (sv)
+        # nearshore: fbis1 (ch), 41033 (sv)
         year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
         month = ports[i]["Date/Time UTC"].iloc[0].strftime("%m")
         day = ports[i]["Date/Time UTC"].iloc[0].strftime("%d")
@@ -136,7 +136,7 @@ def import_report(path):
             buoys[i][id] = data[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
             # do windspeed matching here
             # offshore: 41004 (ch), 41008 (sv)
-            # nearshore: 41029 (ch), 41033 (sv)
+            # nearshore: fbis1 (ch), 41033 (sv)
             input_times = None
             wind_data = buoys[i][id]
             target_times = list(wind_data["Date/Time UTC"])

@@ -71,9 +71,9 @@ fi
 # USEFUL SENSOR INFO (DO NOT DELETE):
 # 41004 ch off 32.501 /  -79.099
 # 41008 sv off 31.400 / -80.866
-# 41029 ch near 32.803 /  -79.624
+# fbis1 ch near 32.803 /  -79.624
 # 41033 sv near 32.279 / -80.406
-BUOYS="41004 41029 41033"
+BUOYS="41004 fbis1 41033"
 for BUOY in $BUOYS; do
     curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
