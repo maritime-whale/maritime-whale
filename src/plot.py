@@ -35,8 +35,9 @@ def generate_table(ch, sv):
     fig = ff.create_table([["Port", "Compliance Rate", "Mean VSPD"],
                      ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
                      ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
-                    height_constant=15,
-                    colorscale=[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
+                    height_constant=5,
+                    colorscale=[[0, '#ffffff'],[.5, '#ffffff'],[1, '#ffffff']],
+                    font_colors=['#000000']) #[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
     return fig
 
 def generate_vspd_hist(df):

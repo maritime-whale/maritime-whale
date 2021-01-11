@@ -97,6 +97,24 @@ def effective_beam(yaw, beam, loa):
 
 effective_beam(10, 150, 1100)
 effective_beam(10, 160, 1000)
+
+
+"Compliance Rate: " + str(round(sum(ch["VSPD kn"] <= 10) / ch.shape[0] * 100, 2)) + "%"
+"Mean VSPD: " + str(round(ch["VSPD kn"].mean(), 2)) + " kn"
+
+def generate_table(ch, sv):
+    fig = None
+    fig = ff.create_table([["Port", "Seasonal Compliance Rate", "Seasonal Mean VSPD"],
+                     ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
+                     ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
+                    height_constant=5,
+                    colorscale=[[0, '#ffffff'],[.5, '#ffffff'],[1, '#ffffff']]) #[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
+    return fig
+
+pio.write_html(generate_table(ch, sv), file="../html/seasonal_table.html", auto_open=False)
+generate_table(ch, sv)
+
+
 ##################Stats findings graph for website###############################
 fig1 = px.histogram(ch, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
 fig1.update_layout(barmode="overlay",
@@ -250,13 +268,13 @@ fig4.update_layout(xaxis_title_text = "VSPD kn", title="WSPD-VSPD Correlation: "
                    hoverlabel=dict(bgcolor="white", font_size=13),
                    font=dict(size=11))
 ########################################################################
-t1 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["VSPD kn"], mode="lines", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
-t2 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["Yaw"], mode="lines", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
+t1 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["VSPD kn"], mode="markers", name="VSPD kn", line=dict(width=1.5, color="#19336a"), hoverinfo="skip")
+t2 = go.Scatter(x=ch.index, y=ch.sort_values("VSPD kn")["Yaw deg"], mode="markers", name="Yaw deg", line=dict(width=1.5, color="green"), hoverinfo="skip")
 data = [t1, t2]
 fig5 = go.Figure(data=data)#, layout=layout)
-fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD kn", "Yaw"]].corr().iloc[0][1], 2)) + "<br>"
-                         "Compliant Yaw (Mean): " + str(round(ch[ch["VSPD kn"] <= 10].Yaw.mean(), 2)) + " deg" + "<br>"
-                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch["VSPD kn"] > 10].Yaw.mean(), 2)) + " deg",
+fig5.update_layout(title="VSPD-Yaw Correlation: " + str(round(ch.dropna()[["VSPD kn", "Yaw deg"]].corr().iloc[0][1], 2)) + "<br>"
+                         "Compliant Yaw (Mean): " + str(round(ch[ch["VSPD kn"] <= 10]['Yaw deg'].mean(), 2)) + " deg" + "<br>"
+                         "Non Compliant Yaw (Mean):  " + str(round(ch[ch["VSPD kn"] > 10]['Yaw deg'].mean(), 2)) + " deg",
                   xaxis_title_text="Unique AIS Positions",
                   width=900,
                   height=500,
