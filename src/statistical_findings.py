@@ -107,13 +107,90 @@ def generate_table(ch, sv):
     fig = ff.create_table([["Port", "Compliance Rate", "Mean VSPD"],
                      ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
                      ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
-                    height_constant=5,
+                    height_constant=0,
                     colorscale=[[0, '#ffffff'],[.5, '#ffffff'],[1, '#ffffff']],
                     font_colors=['#000000']) #[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
     return fig
 
-pio.write_html(generate_table(ch, sv), file="../html/seasonal_table.html", auto_open=False)
+# pio.write_html(generate_table(ch, sv), file="../html/table.html", auto_open=False)
 generate_table(ch, sv)
+
+def generate_table(ch, sv):
+    fig = None
+    data = go.Table(header=dict(fill_color="#ffffff"),
+                    cells=dict(values=[["Charleston:", "Savannah:"],
+                                       [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%" + " Compliance Rate, ", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%" + " Compliance Rate, "],
+                                       [str(round(ch["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD", str(round(sv["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD"]],
+                               fill_color="#ffffff", align='left'))
+    fig = go.Figure([data])
+    fig.update_layout(height=300, width=724)
+
+    return fig
+
+generate_table(ch, sv)
+pio.write_html(generate_table(ch, sv), file="../html/table.html", auto_open=False)
+# pio.write_image(generate_table(ch, sv), file="../html/table.png")
+
+
+MainBuoyPath = "../../WindBuoys/CharlestonNearshore/*main.txt"
+AlternateBuoyPath = "../../WindBuoys/CharlestonNearshore/*alternate.txt"
+
+main = []
+alternate = []
+for filename in glob.glob(MainBuoyPath):
+    main.append(pd.read_csv(filename, delim_whitespace=True).drop(0))
+
+for filename in glob.glob(AlternateBuoyPath):
+    alternate.append(pd.read_csv(filename, delim_whitespace=True).drop(0))
+
+for df in main:
+    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df["#YY"] + df["MM"] + df["DD"] + df["hh"] + df["mm"],
+                                         infer_datetime_format=True)
+    df.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
+    # df = df[(df["WDIR degT"] != "MM") &
+    #             (df["WSPD m/s"] != "MM") &
+    #             (df["GST m/s"] != "MM")]
+    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD m/s"].astype("float") * 2.237
+    df.loc[:, "GST mph"] = df.loc[:, "GST m/s"].astype("float") * 2.237
+    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD mph"].round(2)
+    df.loc[:, "GST mph"] = df.loc[:, "GST mph"].round(2)
+    # df[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+
+for df in alternate:
+    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df["#YY"] + df["MM"] + df["DD"] + df["hh"] + df["mm"],
+                                         infer_datetime_format=True)
+    df.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
+    # df = df[(df["WDIR degT"] != "MM") &
+    #             (df["WSPD m/s"] != "MM") &
+    #             (df["GST m/s"] != "MM")]
+    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD m/s"].astype("float") * 2.237
+    df.loc[:, "GST mph"] = df.loc[:, "GST m/s"].astype("float") * 2.237
+    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD mph"].round(2)
+    df.loc[:, "GST mph"] = df.loc[:, "GST mph"].round(2)
+    # df[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+
+main_2018 = main[1][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+main_2019 = main[0][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+alternate_2018 = alternate[0][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+alternate_2019 = alternate[1][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+
+main_2018.shape
+alternate_2018.shape
+main_2018['WSPD mph'].mean()
+alternate_2018['WSPD mph'].mean()
+main_2018['WSPD mph'].median()
+alternate_2018['WSPD mph'].median()
+main_2018[main_2018['WSPD mph'] >= 30].shape
+alternate_2018[alternate_2018['WSPD mph'] >= 30].shape
+
+main_2019.shape
+alternate_2019.shape
+main_2019['WSPD mph'].mean()
+alternate_2019['WSPD mph'].mean()
+main_2019['WSPD mph'].median()
+alternate_2019['WSPD mph'].median()
+main_2019[main_2019['WSPD mph'] >= 30].shape
+alternate_2019[alternate_2019['WSPD mph'] >= 30].shape
 
 
 ##################Stats findings graph for website###############################
