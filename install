@@ -1,7 +1,11 @@
 #!/bin/sh
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # ...
-    echo "(linux) OS not supported."
+    # echo "(linux) OS not supported."
+    sudo yum install python3
+    sudo easy_install pip
+    sudo pip3 install pip-upgrader # https://github.com/simion/pip-upgrader
+    pip-upgrade --skip-virtualenv-check -p all
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
     # echo "darwin"
