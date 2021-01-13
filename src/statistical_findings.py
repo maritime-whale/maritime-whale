@@ -131,68 +131,6 @@ generate_table(ch, sv)
 pio.write_html(generate_table(ch, sv), file="../html/table.html", auto_open=False)
 # pio.write_image(generate_table(ch, sv), file="../html/table.png")
 
-
-MainBuoyPath = "../../WindBuoys/CharlestonNearshore/*main.txt"
-AlternateBuoyPath = "../../WindBuoys/CharlestonNearshore/*alternate.txt"
-
-main = []
-alternate = []
-for filename in glob.glob(MainBuoyPath):
-    main.append(pd.read_csv(filename, delim_whitespace=True).drop(0))
-
-for filename in glob.glob(AlternateBuoyPath):
-    alternate.append(pd.read_csv(filename, delim_whitespace=True).drop(0))
-
-for df in main:
-    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df["#YY"] + df["MM"] + df["DD"] + df["hh"] + df["mm"],
-                                         infer_datetime_format=True)
-    df.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
-    # df = df[(df["WDIR degT"] != "MM") &
-    #             (df["WSPD m/s"] != "MM") &
-    #             (df["GST m/s"] != "MM")]
-    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD m/s"].astype("float") * 2.237
-    df.loc[:, "GST mph"] = df.loc[:, "GST m/s"].astype("float") * 2.237
-    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD mph"].round(2)
-    df.loc[:, "GST mph"] = df.loc[:, "GST mph"].round(2)
-    # df[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-
-for df in alternate:
-    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df["#YY"] + df["MM"] + df["DD"] + df["hh"] + df["mm"],
-                                         infer_datetime_format=True)
-    df.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
-    # df = df[(df["WDIR degT"] != "MM") &
-    #             (df["WSPD m/s"] != "MM") &
-    #             (df["GST m/s"] != "MM")]
-    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD m/s"].astype("float") * 2.237
-    df.loc[:, "GST mph"] = df.loc[:, "GST m/s"].astype("float") * 2.237
-    df.loc[:, "WSPD mph"] = df.loc[:, "WSPD mph"].round(2)
-    df.loc[:, "GST mph"] = df.loc[:, "GST mph"].round(2)
-    # df[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-
-main_2018 = main[1][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-main_2019 = main[0][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-alternate_2018 = alternate[0][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-alternate_2019 = alternate[1][["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
-
-main_2018.shape
-alternate_2018.shape
-main_2018['WSPD mph'].mean()
-alternate_2018['WSPD mph'].mean()
-main_2018['WSPD mph'].median()
-alternate_2018['WSPD mph'].median()
-main_2018[main_2018['WSPD mph'] >= 30].shape
-alternate_2018[alternate_2018['WSPD mph'] >= 30].shape
-
-main_2019.shape
-alternate_2019.shape
-main_2019['WSPD mph'].mean()
-alternate_2019['WSPD mph'].mean()
-main_2019['WSPD mph'].median()
-alternate_2019['WSPD mph'].median()
-main_2019[main_2019['WSPD mph'] >= 30].shape
-alternate_2019[alternate_2019['WSPD mph'] >= 30].shape
-
-
 ##################Stats findings graph for website###############################
 fig1 = px.histogram(ch, x="VSPD kn", color="Transit", nbins=20, color_discrete_sequence=["darkslateblue", "salmon"])
 fig1.update_layout(barmode="overlay",
