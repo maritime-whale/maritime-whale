@@ -20,11 +20,18 @@ def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
                                 zoom=zoom, height=size[0], width=size[1])
         fig.update_traces(marker_size=4)
     else:
-        fig = px.density_mapbox(df, hover_name="Name",
-                                z="Max Speed kn", radius=5,
+        fig = px.scatter_mapbox(df, hover_name="Name",
                                 lat="Latitude", lon="Longitude",
                                 hover_data=hover,
+                                color="Max Speed kn",
+                                color_continuous_scale="ylorrd",
                                 zoom=zoom, height=size[0], width=size[1])
+        fig.update_traces(marker_size=5, marker_opacity=1.0)
+        # fig = px.density_mapbox(df, hover_name="Name",
+        #                         z="Max Speed kn", radius=5,
+        #                         lat="Latitude", lon="Longitude",
+        #                         hover_data=hover,
+        #                         zoom=zoom, height=size[0], width=size[1])
     fig.update_layout(mapbox_accesstoken=token,
                       mapbox_style="satellite-streets", showlegend=False)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
