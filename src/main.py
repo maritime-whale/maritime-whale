@@ -135,7 +135,7 @@ def main():
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
                           keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
 
-        dash.to_csv("../html/dashboard.csv", mode="w", index=False)
+        dash.to_csv("../html/dashboard.csv", mode="w", index=True)
 
         pio.write_html(generate_table(charleston, savannah), file="../html/seasonal_table.html", auto_open=False)
 
