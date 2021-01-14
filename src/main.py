@@ -1,5 +1,6 @@
 from import_maritime_data import *
 from fetch_vessel_data import *
+from dashboard import *
 from cache import *
 from plot import *
 from util import *
@@ -128,9 +129,16 @@ def main():
         stats_data.append(stats_data[0].dropna())
         stats_data.append(stats_data[1].dropna())
 
-        pio.write_html(generate_table(pd.concat([stats_data[0], pd.concat(temps[1][0]).reset_index()]),
-                                      pd.concat([stats_data[1], pd.concat(temps[1][1]).reset_index()])),
-                                      file="../html/seasonal_table.html", auto_open=False)
+        charleston = pd.concat([stats_data[0], pd.concat(temps[1][0]).reset_index()])
+        savannah = pd.concat([stats_data[1], pd.concat(temps[1][1]).reset_index()])
+
+        dash = pd.concat([dashboard(charleston), dashboard(savannah)],
+                          keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
+
+        dash.to_csv("../html/dashboard.csv", mode="w", index=False)
+        pd.concat(data_frames).to_csv("../cache/" + id + ".csv", mode="w", index=False)
+
+        pio.write_html(generate_table(charleston, savannah, file="../html/seasonal_table.html", auto_open=False)
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)

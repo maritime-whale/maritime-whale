@@ -29,35 +29,35 @@ ch = ch.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 sv = pd.concat(sv_agg)
 sv = sv.sort_values("Date/Time UTC").reset_index().drop(["index"], axis=1)
 
-def stat_dashboard(ch, sv):
-
-    dat = {"Compliance Rate":[str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
-                              str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
-
-           "Mean VSPD":[str(round(ch["VSPD kn"].mean(), 2)) + " kn",
-                        str(round(sv["VSPD kn"].mean(), 2)) + " kn"],
-
-          "Nearshore Median VSPD":[str(round(ch[ch["Location"] == "Nearshore"]["VSPD kn"].median(),2)) + " kn",
-                                    str(round(sv[sv["Location"] == "Nearshore"]["VSPD kn"].median(),2)) + " kn"],
-
-          "Offshore Median VSPD":[str(round(ch[ch["Location"] == "Offshore"]["VSPD kn"].median(),2)) + " kn",
-                                   str(round(sv[sv["Location"] == "Offshore"]["VSPD kn"].median(),2)) + " kn"],
-
-          "Inbound Median VSPD":[str(round(ch[ch["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)) + " kn",
-                                  str(round(sv[sv["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)) + " kn"],
-
-          "Outbound Median VSPD":[str(round(ch[ch["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)) + " kn",
-                                   str(round(sv[sv["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)) + " kn"],
-
-          "VSPD-WSPD Correlation":[str(round(ch.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
-                                   str(round(sv.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))]
-           }
-
-    index = ["Charleston", "Savannah"]
-
-    return pd.DataFrame(dat, index)
-
-stat_dashboard(ch, sv)
+# def stat_dashboard(ch, sv):
+#
+#     dat = {"Compliance Rate":[str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
+#                               str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
+#
+#            "Mean VSPD":[str(round(ch["VSPD kn"].mean(), 2)) + " kn",
+#                         str(round(sv["VSPD kn"].mean(), 2)) + " kn"],
+#
+#           "Nearshore Median VSPD":[str(round(ch[ch["Location"] == "Nearshore"]["VSPD kn"].median(),2)) + " kn",
+#                                     str(round(sv[sv["Location"] == "Nearshore"]["VSPD kn"].median(),2)) + " kn"],
+#
+#           "Offshore Median VSPD":[str(round(ch[ch["Location"] == "Offshore"]["VSPD kn"].median(),2)) + " kn",
+#                                    str(round(sv[sv["Location"] == "Offshore"]["VSPD kn"].median(),2)) + " kn"],
+#
+#           "Inbound Median VSPD":[str(round(ch[ch["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)) + " kn",
+#                                   str(round(sv[sv["Course Behavior"] == "Inbound"]["VSPD kn"].median(),2)) + " kn"],
+#
+#           "Outbound Median VSPD":[str(round(ch[ch["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)) + " kn",
+#                                    str(round(sv[sv["Course Behavior"] == "Outbound"]["VSPD kn"].median(),2)) + " kn"],
+#
+#           "VSPD-WSPD Correlation":[str(round(ch.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
+#                                    str(round(sv.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))]
+#            }
+#
+#     index = ["Charleston", "Savannah"]
+#
+#     return pd.DataFrame(dat, index)
+#
+# stat_dashboard(ch, sv)
 
 def dashboard(df):
 
@@ -98,7 +98,10 @@ def dashboard(df):
 
     return pd.DataFrame(dat, index)
 
-pd.concat([dashboard(ch), dashboard(sv)], 
+
+
+
+df = pd.concat([dashboard(ch), dashboard(sv)],
           keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
 
 # ch_compliant = ch[ch["VSPD kn"] <= 10]
