@@ -136,9 +136,8 @@ def main():
                           keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
 
         dash.to_csv("../html/dashboard.csv", mode="w", index=False)
-        pd.concat(data_frames).to_csv("../cache/" + id + ".csv", mode="w", index=False)
 
-        pio.write_html(generate_table(charleston, savannah, file="../html/seasonal_table.html", auto_open=False)
+        pio.write_html(generate_table(charleston, savannah, file="../html/seasonal_table.html", auto_open=False))
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
