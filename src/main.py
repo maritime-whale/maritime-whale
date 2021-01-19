@@ -1,3 +1,7 @@
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.txt', which is part of this source code package.
+#
 from import_maritime_data import *
 from fetch_vessel_data import *
 from dashboard import *
@@ -105,21 +109,25 @@ def main():
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = (10.5, 11, 8)
-        sizes = ((431, 707), (431, 707), (431, 707))
-        heat = (False, False, False)
+        centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753, lon=-80.78728), dict())
+        show_scale = (True, True, True)
+        sizes = ([431, 707], [431, 707], [431, 707])
+        for i, show in enumerate(show_scale):
+            if show:
+                sizes[i][1] += 112
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geo_plots.keys()):
             hover = []
             if i <= 1:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
-                         "Mean Speed kn", "WSPD mph", "Transit",
+                         "Mean Speed kn", "WSPD mph", "Buoy Source", "Transit",
                          "Vessel Class", "LOA ft", "Beam ft", "Yaw deg",
                          "Effective Beam ft", "% Channel Occupied", "Location"]
             else:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
-                         "Mean Speed kn", "WSPD mph"]
+                         "Mean Speed kn", "WSPD mph", "Buoy Source"]
 
-            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], sizes[i], heat[i], hover, token)
+            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], centers[i], sizes[i], show_scale[i], hover, token)
         # output geo_plots in an interactive HTML format
         pio.write_html(geo_plots["lvl1"], file="../html/level_one.html", auto_open=False)
         pio.write_html(geo_plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)

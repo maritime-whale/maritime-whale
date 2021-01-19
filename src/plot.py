@@ -1,39 +1,46 @@
 # NOTES:
 # https://plotly.com/python/mapbox-layers/ (example used)
+from util import *
+
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 
 def check_wind_outages(df, df_dropna):
-    if 1 - len(df_dropna) / len(df) >= 0.5:
+    if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:
         return True
     return False
 
-def generate_geo_plot(df, zoom, size, heatmap_enabled, hover, token):
+def generate_geo_plot(df, zoom, center, size, show_scale, hover, token):
     fig = None
-    if not heatmap_enabled:
-        fig = px.scatter_mapbox(df, hover_name="Name",
-                                lat="Latitude", lon="Longitude",
-                                hover_data=hover,
-                                color_discrete_sequence=["white"],
-                                zoom=zoom, height=size[0], width=size[1])
-        fig.update_traces(marker_size=4)
-    else:
-        fig = px.scatter_mapbox(df, hover_name="Name",
-                                lat="Latitude", lon="Longitude",
-                                hover_data=hover,
-                                color="Max Speed kn",
-                                color_continuous_scale="ylorrd",
-                                zoom=zoom, height=size[0], width=size[1])
-        fig.update_traces(marker_size=5, marker_opacity=1.0)
-        # fig = px.density_mapbox(df, hover_name="Name",
-        #                         z="Max Speed kn", radius=5,
+    # if not heatmap_enabled:
+        # fig = px.scatter_mapbox(df, hover_name="Name",
         #                         lat="Latitude", lon="Longitude",
         #                         hover_data=hover,
+        #                         color_discrete_sequence=["white"],
         #                         zoom=zoom, height=size[0], width=size[1])
+        # fig.update_traces(marker_size=4)
+    # else:
+    fig = px.scatter_mapbox(df, hover_name="Name",
+                            lat="Latitude", lon="Longitude",
+                            hover_data=hover,
+                            color="Max Speed kn",
+                            color_continuous_scale="ylorrd",
+                            zoom=zoom, height=size[0], width=size[1])
+    fig.update_traces(marker_size=5, marker_opacity=1.0)
+    # fig = px.density_mapbox(df, hover_name="Name",
+    #                         z="Max Speed kn", radius=5,
+    #                         lat="Latitude", lon="Longitude",
+    #                         hover_data=hover,
+    #                         zoom=zoom, height=size[0], width=size[1])
+    # fig.update_coloraxes(colorscale="ylorrd_r")
     fig.update_layout(mapbox_accesstoken=token,
                       mapbox_style="satellite-streets", showlegend=False)
+    if center:
+        fig.update_layout(mapbox_center=center)
+    if not show_scale:
+        fig.update_layout(coloraxis_showscale=False)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 

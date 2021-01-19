@@ -2,7 +2,7 @@ numpy==1.19.5
 scipy==1.6.0
 pandas==1.2.0
 plotly==4.14.3
-openpyxl==3.0.5
+openpyxl==3.0.6
 func-timeout==4.3.5
 google-api-python-client==1.12.8
 google-auth-httplib2==0.0.4
