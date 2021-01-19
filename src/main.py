@@ -134,8 +134,12 @@ def main():
         stats_data.append(stats_data[0].dropna())
         stats_data.append(stats_data[1].dropna())
 
-        charleston = pd.concat([stats_data[0], pd.concat(temps[1][0]).reset_index()])
-        savannah = pd.concat([stats_data[1], pd.concat(temps[1][1]).reset_index()])
+        charleston = stats_data[0]
+        savannah = stats_data[1]
+        if temps[1][0] != []:
+            charleston = pd.concat([stats_data[0], pd.concat(temps[1][0]).reset_index()])
+        if temps[1][1] != []:
+            savannah = pd.concat([stats_data[1], pd.concat(temps[1][1]).reset_index()])
 
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
                           keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
