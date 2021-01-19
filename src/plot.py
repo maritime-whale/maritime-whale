@@ -12,7 +12,7 @@ def check_wind_outages(df, df_dropna):
         return True
     return False
 
-def generate_geo_plot(df, zoom, center, size, show_scale, hover, token):
+def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
     fig = None
     # if not heatmap_enabled:
         # fig = px.scatter_mapbox(df, hover_name="Name",
@@ -26,9 +26,10 @@ def generate_geo_plot(df, zoom, center, size, show_scale, hover, token):
                             lat="Latitude", lon="Longitude",
                             hover_data=hover,
                             color="Max Speed kn",
-                            color_continuous_scale="ylorrd",
+                            range_color=[8, 22],
+                            color_continuous_scale="ylorrd_r",
                             zoom=zoom, height=size[0], width=size[1])
-    fig.update_traces(marker_size=5, marker_opacity=1.0)
+    fig.update_traces(marker_size=5, marker_opacity=opacity) # marker_cmin=10.0, marker_cmid=15.0, marker_cmax=20.0
     # fig = px.density_mapbox(df, hover_name="Name",
     #                         z="Max Speed kn", radius=5,
     #                         lat="Latitude", lon="Longitude",
@@ -39,8 +40,8 @@ def generate_geo_plot(df, zoom, center, size, show_scale, hover, token):
                       mapbox_style="satellite-streets", showlegend=False)
     if center:
         fig.update_layout(mapbox_center=center)
-    if not show_scale:
-        fig.update_layout(coloraxis_showscale=False)
+    # if not show_scale:
+    #     fig.update_layout(coloraxis_showscale=False)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 

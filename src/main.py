@@ -110,11 +110,8 @@ def main():
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = (10.5, 11, 8)
         centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753, lon=-80.78728), dict())
-        show_scale = (True, True, True)
-        sizes = ([431, 707], [431, 707], [431, 707])
-        for i, show in enumerate(show_scale):
-            if show:
-                sizes[i][1] += 112
+        opacity = (0.6, 0.6, 0.6)
+        sizes = ([431, 819], [431, 819], [431, 819])
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geo_plots.keys()):
             hover = []
@@ -127,7 +124,7 @@ def main():
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
                          "Mean Speed kn", "WSPD mph", "Buoy Source"]
 
-            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], centers[i], sizes[i], show_scale[i], hover, token)
+            geo_plots[level] = generate_geo_plot(maritime_data[0][i], zooms[i], centers[i], sizes[i], opacity[i], hover, token)
         # output geo_plots in an interactive HTML format
         pio.write_html(geo_plots["lvl1"], file="../html/level_one.html", auto_open=False)
         pio.write_html(geo_plots["lvl2_CH"], file="../html/level_two_charleston.html", auto_open=False)
