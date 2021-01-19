@@ -90,7 +90,7 @@ def generate_vspd_hist(df):
                        yaxis_title_text = "Unique AIS Positions",
                        title = "<b>Vessel Speed Histogram</b>" "<br>"
                                "Compliance Rate: " + str(round(sum(df["VSPD kn"] <= 10) / df.shape[0] * 100, 2)) + "%" "<br>"
-                               "Mean VSPD (Panamax and Post Panamax): " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
+                               "Mean VSPD: " + str(round(df["VSPD kn"].mean(), 2)) + " kn",
                        showlegend = True, hoverlabel=dict(bgcolor="white",
                                          font_size=13),
                        legend_title_text="",
