@@ -46,12 +46,29 @@ def generate_geo_plot(df, zoom, center, size, show_scale, hover, token):
 
 def generate_table(ch, sv):
     fig = None
-    fig = ff.create_table([["Port", "Compliance Rate", "Mean VSPD"],
-                     ["Charleston", str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%", str(round(ch["VSPD kn"].mean(), 2)) + " kn"],
-                     ["Savannah", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%", str(round(sv["VSPD kn"].mean(), 2)) + " kn"]],
-                    height_constant=3,
-                    colorscale=[[0, '#ffffff'],[.5, '#ffffff'],[1, '#ffffff']],
-                    font_colors=['#000000']) #[[0, '#4793a3'],[.5, '#e1eff2'],[1, '#ffffff']])
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=["<b>Port</b>", "<b>Compliance Rate</b>", "<b>Mean VSPD</b>"],
+                    line_color="white",
+                    fill_color="#ffffff",
+                    align="left",
+                    font_color="black",
+                    font_size=12,
+                    height=10),
+        cells=dict(values=[["Charleston", "Savannah"],
+                           [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
+                            str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
+                            [str(round(ch["VSPD kn"].mean(), 2)) + " kn",
+                             str(round(sv["VSPD kn"].mean(), 2)) + " kn"]
+                            ],
+                   line_color="white",
+                   fill_color="#ffffff",
+                   align="left",
+                   font_color="black",
+                   font_size=12,
+                   height=20))
+    ])
+
+    fig.update_layout(height=75, width=600, margin=dict(l=0, r=0, t=0, b=0))
     return fig
 
 # def generate_table(ch, sv):

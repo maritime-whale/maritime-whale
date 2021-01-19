@@ -145,7 +145,8 @@ def main():
 
         dash.to_csv("../html/dashboard.csv", mode="w", index=True)
 
-        pio.write_html(generate_table(charleston, savannah), file="../html/seasonal_table.html", auto_open=False)
+        pio.write_image(generate_table(charleston, savannah), file="../html/seasonal_table.png", format="png", scale=5, engine="kaleido")
+        # pio.write_html(generate_table(charleston, savannah), file="../html/seasonal_table.html", auto_open=False)
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
