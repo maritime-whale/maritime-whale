@@ -194,6 +194,10 @@ def import_report(path):
                                 if count == 0:
                                     source_buoy.append(str(alt_id))
                                 final_winds[k].append(alt_data[k].iloc[alt_min_timedelta_index])
+                            else:
+                                if count == 0:
+                                    source_buoy.append("N/A")
+                                final_winds[k].append(float("NaN"))
             for k in final_winds:
                 ports[i].loc[:, k] = final_winds[k]
             ports[i].loc[:, "Buoy Source"] = source_buoy
