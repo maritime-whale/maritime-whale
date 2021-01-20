@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+# Copyright 2020 The Maritime Whale Authors. All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be
+# found in the LICENSE.txt file.
+
 import pandas as pd
 
 def dashboard(df):
-
     dat = {"Proportion<br> of Transits":[str(round(sum(df["Vessel Class"] == "Panamax") / len(df) * 100, 2)) + "%",
                                      str(round(sum(df["Vessel Class"] == "Post-Panamax") / len(df) * 100, 2)) + "%",
                                      "100%"],
@@ -34,7 +38,5 @@ def dashboard(df):
                                    str(round(df[df["Vessel Class"] == "Post-Panamax"].dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2)),
                                    str(round(df.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))]
                                    }
-
     index = ["Panamax", "Post-Panamax", "Combined"]
-
     return pd.DataFrame(dat, index)

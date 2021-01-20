@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# Copyright 2020 The Maritime Whale Authors. All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be
+# found in the LICENSE.txt file.
+
 # NOTES:
 # https://plotly.com/python/mapbox-layers/ (example used)
 from util import *
