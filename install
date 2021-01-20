@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env sh
+# Copyright 2020 The Maritime Whale Authors. All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be
+# found in the LICENSE.txt file.
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # ...
     # echo "(linux) OS not supported."
