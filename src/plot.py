@@ -45,32 +45,51 @@ def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
-def generate_table(ch, sv):
+def generate_ticker(ch, sv):
     fig = None
     fig = go.Figure(data=[go.Table(
-        header=dict(values=["<b>Port</b>", "<b>Compliance Rate</b>", "<b>Mean VSPD</b>"],
-                    line_color="white",
-                    fill_color="#ffffff",
-                    align="left",
-                    font_color="black",
-                    font_size=12,
-                    height=10),
-        cells=dict(values=[["Charleston", "Savannah"],
-                           [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
-                            str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
-                            [str(round(ch["VSPD kn"].mean(), 2)) + " kn",
-                             str(round(sv["VSPD kn"].mean(), 2)) + " kn"]
-                            ],
-                   line_color="white",
-                   fill_color="#ffffff",
-                   align="left",
-                   font_color="black",
-                   font_size=12,
-                   height=20))
-    ])
+        header=dict(values=[""],
+                    line_color='white',
+                    fill_color='#ffffff',
+                    height=0),
+        cells=dict(values=[["<b>Charleston:</b> " + str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%" + " Compliance, " + str(round(ch["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD",
+                            "<b>Savannah:</b>  " + str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%" + " Compliance, " + str(round(sv["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD"]],
+                   line_color='white',
+                   fill_color='#ffffff',
+                   align='left',
+                   font_size=14,
+                   height=0))
+                   ])
 
-    fig.update_layout(height=75, width=600, margin=dict(l=0, r=0, t=0, b=0))
+    fig.update_layout(height=75, width=470, margin=dict(l=0, r=0, t=0, b=0))
     return fig
+
+# def generate_table(ch, sv):
+#     fig = None
+#     fig = go.Figure(data=[go.Table(
+#         header=dict(values=["<b>Port</b>", "<b>Compliance Rate</b>", "<b>Mean VSPD</b>"],
+#                     line_color="white",
+#                     fill_color="#ffffff",
+#                     align="left",
+#                     font_color="black",
+#                     font_size=12,
+#                     height=10),
+#         cells=dict(values=[["Charleston", "Savannah"],
+#                            [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
+#                             str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
+#                             [str(round(ch["VSPD kn"].mean(), 2)) + " kn",
+#                              str(round(sv["VSPD kn"].mean(), 2)) + " kn"]
+#                             ],
+#                    line_color="white",
+#                    fill_color="#ffffff",
+#                    align="left",
+#                    font_color="black",
+#                    font_size=12,
+#                    height=20))
+#     ])
+#
+#     fig.update_layout(height=75, width=600, margin=dict(l=0, r=0, t=0, b=0))
+#     return fig
 
 # def generate_table(ch, sv):
 #     fig = None
