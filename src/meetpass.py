@@ -2,10 +2,10 @@ from import_maritime_data import *
 from datetime import timedelta
 from util import *
 
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
+# import plotly.figure_factory as ff
+# import plotly.graph_objects as go
 #import matplotlib.pyplot as plt
-import plotly.express as px
+# import plotly.express as px
 #import seaborn as sns
 import pandas as pd
 import numpy as np
