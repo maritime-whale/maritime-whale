@@ -32,7 +32,7 @@ def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
                             hover_data=hover,
                             color="Max Speed kn",
                             range_color=[8, 22],
-                            color_continuous_scale="ylorrd_r",
+                            color_continuous_scale="ylorrd",
                             zoom=zoom, height=size[0], width=size[1])
     fig.update_traces(marker_size=5, marker_opacity=opacity) # marker_cmin=10.0, marker_cmid=15.0, marker_cmax=20.0
     # fig = px.density_mapbox(df, hover_name="Name",
