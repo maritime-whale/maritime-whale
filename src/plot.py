@@ -64,43 +64,6 @@ def generate_ticker(ch, sv):
     fig.update_layout(height=75, width=470, margin=dict(l=0, r=0, t=0, b=0))
     return fig
 
-# def generate_table(ch, sv):
-#     fig = None
-#     fig = go.Figure(data=[go.Table(
-#         header=dict(values=["<b>Port</b>", "<b>Compliance Rate</b>", "<b>Mean VSPD</b>"],
-#                     line_color="white",
-#                     fill_color="#ffffff",
-#                     align="left",
-#                     font_color="black",
-#                     font_size=12,
-#                     height=10),
-#         cells=dict(values=[["Charleston", "Savannah"],
-#                            [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%",
-#                             str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%"],
-#                             [str(round(ch["VSPD kn"].mean(), 2)) + " kn",
-#                              str(round(sv["VSPD kn"].mean(), 2)) + " kn"]
-#                             ],
-#                    line_color="white",
-#                    fill_color="#ffffff",
-#                    align="left",
-#                    font_color="black",
-#                    font_size=12,
-#                    height=20))
-#     ])
-#
-#     fig.update_layout(height=75, width=600, margin=dict(l=0, r=0, t=0, b=0))
-#     return fig
-
-# def generate_table(ch, sv):
-#     fig = None
-#     data = go.Table(header=dict(fill_color="#ffffff"),
-#                     cells=dict(values=[["Charleston:", "Savannah:"],
-#                                        [str(round(sum(ch["VSPD kn"] <= 10) / len(ch) * 100, 2)) + "%" + " Compliance Rate, ", str(round(sum(sv["VSPD kn"] <= 10) / len(sv) * 100, 2)) + "%" + " Compliance Rate, "],
-#                                        [str(round(ch["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD", str(round(sv["VSPD kn"].mean(), 2)) + " kn" + " Mean VSPD"]],
-#                                fill_color="#ffffff", align='left'))
-#     fig = go.Figure([data])
-#
-#     return fig
 
 def generate_vspd_hist(df):
     fig = px.histogram(df, x="VSPD kn", nbins=20, color_discrete_sequence=["#19336a"])#"darkslateblue", "#ab63eb"])
@@ -282,32 +245,11 @@ def generate_channel_occ(df):
     fig.update_traces(marker_size=6)
     return fig
 
-
-
-    # fig = px.scatter(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], x="VSPD kn", y="% Channel Occupied", hover_data=hover_dict,
-    #                          color_discrete_sequence=["darkslateblue", "salmon"], width=800, height=500,
-    #                          title="Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
-    # fig = px.density_contour(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)], x="VSPD kn", y="% Channel Occupied", width=800, height=500, hover_data=hover_dict,
-    #                          title= "VSPD-Occupied Channel Desntiy Plot" '<br>'
-    #                                 "Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
-    # df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]
-    # fig = px.density_heatmap(df, x="VSPD kn", y="% Channel Occupied",
-    #                         hover_data=hover_dict,
-    #                         color_continuous_scale="greens",
-    #                         nbinsx=20, nbinsy=20, #color_continuous_midpoint=20,
-    #                          title= "Vessel Speed and Occupied Channel Heatmap")# '<br>'
-                                    #"Non Adverse Conditions: " + str(round(len(df[(df["Transit"] == "One Way Transit") & (df["WSPD mph"] < 30)]) / len(df) * 100, 2)) + "%")
-    # fig.update_traces(contours_coloring = "fill", colorscale = "greens")
-    # fig.add_shape(type="line", x0=20, y0=0, x1=20, y1=1, xref="x", yref="paper",
-    #                 line=dict(color="Red", dash="solid", width=1.5))
-    # fig.add_shape(type="line", x0=0, y0=20, x1=1, y1=20, xref="paper", yref="y",
-    #                 line=dict(color="black", dash="solid", width=1.5))
-    # fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
-    #                 line=dict(color="Red", dash="solid", width=1.5))
-    # fig.add_annotation(text="Speed Limit", showarrow=False, textangle=90, font=dict(color="red"),
-    #                     xref="x", x=10.15, yref="paper", y=1)
-    # fig.update_layout(width=875,
-    #                   height=600,
-    #                   plot_bgcolor="#F1F1F1",
-    #                   font=dict(size=12),
-    #                   titlefont=dict(size=14))
+def generate_dashboard(df):
+    fig = None
+    fig = ff.create_table(df, index=True, index_title="Port", height_constant=20,
+                          colorscale=[[0, '#787878'],[.5, '#ffffff'],[1, '#ffffff']])
+    fig.update_layout(width=1000, height=500)
+    for i in range(len(fig.layout.annotations)):
+        fig.layout.annotations[i].font.size = 12
+    return fig

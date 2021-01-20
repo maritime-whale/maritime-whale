@@ -145,9 +145,9 @@ def main():
                           keys=['Charleston', 'Savannah'], axis=0).reset_index(level=1).rename({"level_1": "Vessel Class"}, axis=1)
 
         dash.to_csv("../html/dashboard.csv", mode="w", index=True)
+        pio.write_image(generate_dashboard(dash), file="../html/dashboard.pdf", format="pdf", engine="kaleido")
 
         pio.write_image(generate_ticker(charleston, savannah), file="../html/seasonal_ticker.png", format="png", scale=5, engine="kaleido")
-        # pio.write_html(generate_table(charleston, savannah), file="../html/seasonal_table.html", auto_open=False)
 
         pio.write_html(generate_vspd_hist(stats_data[0]), file="../html/vspd_hist_ch.html", auto_open=False)
         pio.write_html(generate_vspd_hist(stats_data[1]), file="../html/vspd_hist_sv.html", auto_open=False)
