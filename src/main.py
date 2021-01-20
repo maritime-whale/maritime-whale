@@ -110,7 +110,7 @@ def main():
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
         zooms = (10.5, 11, 8)
         centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753, lon=-80.78728), dict())
-        opacity = (0.6, 0.6, 0.6)
+        opacity = (0.75, 0.75, 0.6)
         sizes = ([431, 819], [431, 819], [431, 819])
         token = open("../conf/.mapbox_token").read()
         for i, level in enumerate(geo_plots.keys()):
