@@ -23,7 +23,7 @@ First, we recommend that you review the [web app structure diagram](docs/webapp-
 &nbsp;&nbsp;&nbsp;&nbsp;`./run debug` should produce the following message:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;`Config directory not found. Creating directory: ./conf .`<br/>
 4. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` and _skip_ steps 5-7).<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;If there is no `.token.pickle` present in the `conf`dir, then one will need to be generated.
+&nbsp;&nbsp;&nbsp;&nbsp;If there is no `.token.pickle` present in the `conf` directory, then one will need to be generated.
 5. Make sure you are logged in to Gmail on the special VMR account (see the [web app diagram](docs/webapp-diagram.png) for more details).
 6. Run `./run debug` again.
 7. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser). Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
