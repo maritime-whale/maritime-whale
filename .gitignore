@@ -1,9 +1,10 @@
 logs
 html
 temp
-cache
-tests
 conf
+tests
+cache/*
 *__pycache__
 */.token.pickle
 !tests/sample.zip
+!cache
