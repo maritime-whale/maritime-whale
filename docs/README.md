@@ -8,7 +8,7 @@ This directory contains maritime-whale project documentation.
 
 ## Set Up
 
-Before diving in, we recommend that you review the [web app architecture diagram](diagrams/webapp-diagram.png) to get a better understanding of how this web app interacts with and utilizes various technologies such as GitHub, GitHub Pages, Gmail, MapBox, and VesselFinder.
+Before diving in, we recommend that you review the [web app architecture diagram](diagrams/web-app-diagram.pdf) to get a better understanding of how this web app interacts with and utilizes various technologies such as GitHub, GitHub Pages, Gmail, MapBox, and VesselFinder.
 
 ### Installation
 1. Clone this repo.
@@ -24,7 +24,7 @@ Before diving in, we recommend that you review the [web app architecture diagram
 &nbsp;&nbsp;&nbsp;&nbsp;`Config directory not found. Creating directory: ./conf .`<br/>
 4. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` and _skip_ steps 5-7).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;If there is no `.token.pickle` present in the `conf` directory, then one will need to be generated.
-5. Make sure you are logged in to Gmail on the special VMR account (see the [web app diagram](diagrams/webapp-diagram.png) for more details).
+5. Make sure you are logged in to Gmail on the special VMR account (see the [web app diagram](diagrams/web-app-diagram.pdf) for more details).
 6. Run `./run debug` again.
 7. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser).<br/>
 Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
