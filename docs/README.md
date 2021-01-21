@@ -32,7 +32,7 @@ Authorization must be complete within 45 seconds or `.token.pickle` won't get ge
 ### Using the `debug` Flag
 * Execute the `run` script with `debug` mode enabled: `./run debug`.
 
-* _**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences ([get in touch](mailto:dev.riwhale+help@gmail.com) with the dev team for more information).<br/>
+* _**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences ([get in touch with the dev team](mailto:dev.riwhale+help@gmail.com) for more information).<br/>
 Execute the `run` script with `debug` mode disabled: `./run`.
 
 ## Testing
