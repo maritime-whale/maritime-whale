@@ -28,17 +28,16 @@ Do **NOT** run without `debug` if this is your first time running the `run` scri
 &nbsp;&nbsp;&nbsp;&nbsp;If this is your first time running the `run` script follow the steps below...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;`./run debug` should produce the following message:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;`Config directory not found. Creating directory: ./conf .`<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;_Don't worry **this is normal**..._<br/>
 5. Move a valid `credentials.json` and `riwhale.config` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` too).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;If there is no `.token.pickle` present in the `conf`dir, then one will need to be generated.
 6. Make sure you are logged in to Gmail on the special VMR account (see documentation).
 7. Run `./run debug` again.
-8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser) -- must complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
+8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser). Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
-# How to Use (`debug` mode *ENABLED*)
+# How to Use (_debug_ mode _ENABLED_)
 Execute the `run` script with `debug` mode **_ENABLED_**: `./run debug`.
 
-# How to Use (`debug` mode *DISABLED*)
+# How to Use (_debug_ mode _DISABLED_)
 **WARNING!** Do **NOT** run without `debug` unless you know the consequences.*<br/>
 Execute the `run` script with `debug` mode **_DISABLED_**: `./run`.
 
