@@ -3,7 +3,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 
-debug_mode=0
+debug_mode=0 # init debug flag to FALSE
+# for 
 for arg in "$@"; do
     if [ "$arg" == "debug" ]; then
         echo "Running in debug mode..."
