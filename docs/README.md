@@ -27,6 +27,7 @@ This directory contains maritime-whale project documentation.
 
 ### Using the `debug` Flag
 Execute the `run` script with `debug` mode disabled: `./run`.
+
 _**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences (check with the dev team for more information).*<br/>
 Execute the `run` script with `debug` mode disabled: `./run`.
 
