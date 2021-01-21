@@ -26,9 +26,9 @@ This directory contains maritime-whale project documentation.
 7. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser). Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
 ### Using the `debug` Flag
-Execute the `run` script with `debug` mode disabled: `./run`.
+* Execute the `run` script with `debug` mode enabled: `./run debug`.
 
-_**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences (check with the dev team for more information).*<br/>
+* _**WARNING!**_<br/>Do _NOT_ run without `debug` unless you know the consequences (check with the dev team for more information).*<br/>
 Execute the `run` script with `debug` mode disabled: `./run`.
 
 ## Installation (Cloud)
