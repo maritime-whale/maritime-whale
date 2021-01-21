@@ -7,4 +7,4 @@ cache/*
 *__pycache__
 */.token.pickle
 !tests/sample.zip
-!cache
+!cache/.gitkeep
