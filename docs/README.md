@@ -18,7 +18,7 @@ This web app fetches daily vessel movement reports and wind data. Data is import
 4. Ensure the `install` script has the correct permissions by running `chmod a+x install`.
 5. Run the `./install` command.
 
-# First-time Use & Validation
+### First-time Use & Validation (Local)
 1. Open a terminal session.
 2. Navigate to the root directory of the repo.
 3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
@@ -34,10 +34,10 @@ Do **NOT** run without `debug` if this is your first time running the `run` scri
 7. Run `./run debug` again.
 8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser). Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
-# How to Use (_debug_ mode _ENABLED_)
+### How to Use (_debug_ mode _ENABLED_)
 Execute the `run` script with `debug` mode **_ENABLED_**: `./run debug`.
 
-# How to Use (_debug_ mode _DISABLED_)
+### How to Use (_debug_ mode _DISABLED_)
 **WARNING!** Do **NOT** run without `debug` unless you know the consequences.*<br/>
 Execute the `run` script with `debug` mode **_DISABLED_**: `./run`.
 
