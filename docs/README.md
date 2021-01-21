@@ -6,8 +6,9 @@ This directory contains maritime-whale project documentation.
 
 * Documentation still in progress...
 
-## Installation
+## Set Up
 
+### Installation
 1. Clone this repo.
 2. Open a terminal session.
 3. Navigate to the root directory of the repo.
