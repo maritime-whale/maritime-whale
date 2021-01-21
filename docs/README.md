@@ -8,7 +8,7 @@ This directory contains maritime-whale project documentation.
 
 ## Set Up
 
-Before diving in, we recommend that you review the [web app architecture diagram](diagrams/web-app-diagram.pdf) to get a better understanding of how this web app interacts with and utilizes various technologies such as GitHub, GitHub Pages, Gmail, MapBox, and VesselFinder.
+Before diving in, we recommend that you review the [web app architecture diagram](diagrams/web-app-diagram.pdf) to get a better understanding of how this web app interacts with and utilizes various technologies such as Amazon Web Services, GitHub, Gmail, and Wix.
 
 ### Installation
 1. Clone this repo.
