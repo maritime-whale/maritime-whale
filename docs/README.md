@@ -18,7 +18,7 @@ This directory contains maritime-whale project documentation.
 1. Open a terminal session.
 2. Navigate to the root directory of the repo.
 3. Ensure the `run` script has the correct permissions by running `chmod a+x run`.<br/>
-4. Execute the `run` script with `debug` mode **_ENABLED_**: `./run debug`.<br/>
+4. Execute the `run` script with `debug` mode ENABLED: `./run debug`.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;`./run debug` should produce the following message:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;`Config directory not found. Creating directory: ./conf .`<br/>
 5. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the newly-created `conf` directory (if you have a valid `.token.pickle` move that to `conf` too).<br/>
@@ -27,12 +27,12 @@ This directory contains maritime-whale project documentation.
 7. Run `./run debug` again.
 8. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser). Authorization must be complete within 45 seconds or `.token.pickle` won't get generated and an error is produced.
 
-### How to Use (_debug_ mode _ENABLED_)
-Execute the `run` script with `debug` mode **_ENABLED_**: `./run debug`.
+### How to Use (_debug_ mode ENABLED)
+Execute the `run` script with `debug` mode ENABLED: `./run debug`.
 
-### How to Use (_debug_ mode _DISABLED_)
-**WARNING!** Do **NOT** run without `debug` unless you know the consequences (check with the dev team for more information).*<br/>
-Execute the `run` script with `debug` mode **_DISABLED_**: `./run`.
+### How to Use (_debug_ mode DISABLED)
+_**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences (check with the dev team for more information).*<br/>
+Execute the `run` script with `debug` mode DISABLED: `./run`.
 
 ## Installation (Cloud)
 
