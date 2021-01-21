@@ -6,7 +6,7 @@ This directory contains maritime-whale project documentation.
 
 * Documentation still in progress...
 
-## Installation (Local)
+## Installation
 
 1. Clone this repo.
 2. Open a terminal session.
@@ -30,10 +30,6 @@ This directory contains maritime-whale project documentation.
 
 * _**WARNING!**_ Do _NOT_ run without `debug` unless you know the consequences ([get in touch](mailto:dev.riwhale+help@gmail.com) with the dev team for more information).<br/>
 Execute the `run` script with `debug` mode disabled: `./run`.
-
-## Installation (Cloud)
-
-* Documentation still in progress...
 
 ## Testing
 
