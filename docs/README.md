@@ -2,10 +2,6 @@
 
 This directory contains maritime-whale project documentation.
 
-## General Development
-
-* Documentation still in progress...
-
 ## Set Up
 
 Before diving in, we recommend that you review the [web app architecture diagram](diagrams/web-app-diagram.pdf) to get a better understanding of how this web app interacts with and utilizes various technologies such as Amazon Web Services, GitHub, Gmail, and Wix.
