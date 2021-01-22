@@ -17,7 +17,7 @@ Before diving in, we recommend that you review the [web app architecture diagram
 3. Make sure you are logged in to Gmail on the special VMR account (see [this diagram](diagrams/web-app-diagram.pdf) for more details).
 4. Run `./run debug`.
 5. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser).<br/>
-Authorization must be complete within 45 seconds or `.token.pickle` doesn't get generated and an error is produced.
+Authorization must be complete within 45 seconds otherwise `.token.pickle` won't get generated and an error is produced.
 
 ### Using the `debug` Flag
 * Execute the `run` script with `debug` mode enabled: `./run debug`.
