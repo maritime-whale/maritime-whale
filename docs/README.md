@@ -12,11 +12,10 @@ Before diving in, we recommend that you review the [web app architecture diagram
 3. Run `./install`.
 
 ### First-time Use & Validation
-1. Set your current working directory to the root directory of the repo.
-2. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the `conf` directory (if you have a valid `.token.pickle` move that to `conf` and _skip_ steps 3-5).
-3. Make sure you are logged in to Gmail on the special VMR account (see [this diagram](diagrams/web-app-diagram.pdf) for more details).
-4. Run `./run debug`.
-5. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser).<br/>
+1. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the `conf` directory (if you have a valid `.token.pickle` move that to `conf` and _skip_ steps 2-4).
+2. Make sure you are logged in to Gmail on the special VMR account (see [this diagram](diagrams/web-app-diagram.pdf) for more details).
+3. Set your current working directory to the root directory of the repo and run `./run debug`.
+4. Validate and authorize app permissions with Gmail using special VMR email (will open new tab in web browser).<br/>
 Authorization must be complete within 45 seconds otherwise `.token.pickle` won't get generated and an error is produced.
 
 ### Using the `debug` Flag
