@@ -173,4 +173,5 @@ def main():
     else:
         log(logfile, "No new vessel movement reports. Caches already up-to-date.")
 
-main()
+if __name__ == '__main__':
+    main()
