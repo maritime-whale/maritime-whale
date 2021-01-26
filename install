@@ -3,7 +3,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Simple script to install necessary project dependencies.
+# Simple script to install necessary project dependencies. OS specific.
+# Currently, only supporting Linux and macOS.
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sudo yum install python3

@@ -47,7 +47,7 @@ def main():
     #                   (date + "/ch", date + "/sv"))
     #         for i in range(len(caches)):
     #             for j in range(len(last_seven_days[i])):
-    #                 create_csv_cache([last_seven_days[i][j]], caches[i][j])
+    #                 create_cache([last_seven_days[i][j]], caches[i][j], "csv")
     #         log(logfile, "Created cache for " + date_str + ".")
     #     else:
     #         # latest data already exists in cache
@@ -108,25 +108,15 @@ def main():
         for i in range(len(rest_of_season)):
             for j in range(len(rest_of_season[i])):
                 if i % 2 == 0:
-                    create_csv_cache(last_seven_days[i][j] +
-                                     rest_of_season[i][j], filenames[j] +
-                                     "-max")
-                    create_xlsx_cache(last_seven_days[i][j] +
-                                      rest_of_season[i][j], filenames[j] +
-                                      "-max")
-                    create_csv_cache(last_seven_days[i][j], filenames[j] +
-                                     "-max-roll")
-                    create_xlsx_cache(last_seven_days[i][j], filenames[j] +
-                                      "-max-roll")
+                    create_cache(last_seven_days[i][j] + rest_of_season[i][j],
+                                 filenames[j] + "-max", "all")
+                    create_cache(last_seven_days[i][j], filenames[j] +
+                                 "-max-roll", "all")
                 else:
-                    create_csv_cache(last_seven_days[i][j] +
-                                     rest_of_season[i][j], filenames[j])
-                    create_xlsx_cache(last_seven_days[i][j] +
-                                      rest_of_season[i][j], filenames[j])
-                    create_csv_cache(last_seven_days[i][j], filenames[j] +
-                                     "-roll")
-                    create_xlsx_cache(last_seven_days[i][j], filenames[j] +
-                                      "-roll")
+                    create_cache(last_seven_days[i][j] +
+                                     rest_of_season[i][j], filenames[j], "all")
+                    create_cache(last_seven_days[i][j], filenames[j] +
+                                     "-roll", "all")
         for i in range(len(last_seven_days[0])):
             last_seven_days[0][i] = pd.concat(
                     last_seven_days[0][i]).reset_index().drop("index", axis=1)
