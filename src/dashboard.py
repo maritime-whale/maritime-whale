@@ -3,10 +3,19 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# 
+# Generate season-to-date dashboard from DataFrame. Easily view the most current
+# high-level statistics.
 
 import pandas as pd
 
+"""Description...
+
+Args:
+    df:
+
+Returns:
+    ...
+"""
 def dashboard(df):
     dat = {"Proportion<br> of Transits":[str(round(sum(df["Vessel Class"] == "Panamax") / len(df) * 100, 2)) + "%",
                                      str(round(sum(df["Vessel Class"] == "Post-Panamax") / len(df) * 100, 2)) + "%",
