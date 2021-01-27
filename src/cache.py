@@ -16,7 +16,7 @@ Args:
 """
 def create_cache(data_frames, filename, extension):
     cache_ext = extension.lower()
-    if cache_ext in ["csv", "xlsx", "all"]
+    if cache_ext in ["csv", "xlsx", "all"]:
         res = pd.concat(data_frames)
         if cache_ext == "csv":
             res.to_csv("../cache/" + filename + ".csv", mode="w", index=False)

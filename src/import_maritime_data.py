@@ -15,7 +15,7 @@ import sys
 
 # TODO(omrinewman): break import_report into smaller functions
 # TODO: choose better naming when processing winds (i.e. "data" and "alt_data")
-# TODO: change stats_res and lvl_res to movements and crushed_movements (or something like that)
+# TODO: change all_res and geo_res to movements and crushed_movements (or something like that)
 
 
 def validate_vmr(df):
@@ -299,7 +299,7 @@ def import_report(path):
         beam = ports[i]["Beam ft"].values
         yaw = ports[i]["Yaw deg"].values
         for l in range(ports[i].shape[0]):
-            # effective beam formula derived using trigonometry and geometery
+            # effective beam formula derived using trigonometry and geometry
             # of vessel positions
             EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
 
@@ -325,26 +325,40 @@ def import_report(path):
         # create % channel occupancy column for each vessel position based on
         # effective beam, transit, and corresponding channel width
         for row in range(len(ports[i])):
-            if (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "One-way Transit"):
-                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][0]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Post-Panamax") & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
-                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][1]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "One-way Transit"):
-                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][2]) * 100, 2)
-            elif (ports[i].loc[row, "Vessel Class"] == "Panamax") & (ports[i].loc[row, "Transit"] == "Two-way Transit"):
-                ports[i].loc[row, "% Channel Occupied"] = round((ports[i].loc[row, "Effective Beam ft"] / channel_width[i][3]) * 100, 2)
+            vessel_class = ports[i].loc[row, "Vessel Class"]
+            transit_type = ports[i].loc[row, "Transit"]
+            eff_beam = ports[i].loc[row, "Effective Beam ft"]
+            if ((vessel_class == "Post-Panamax") &
+                (transit_type == "One-way Transit")):
+                occ = (eff_beam / channel_width[i][0]) * 100
+                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+            elif ((vessel_class == "Post-Panamax") &
+                  (transit_type == "Two-way Transit")):
+                occ = (eff_beam / channel_width[i][1]) * 100
+                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+            elif ((vessel_class == "Panamax") &
+                  (transit_type == "One-way Transit")):
+                occ = (eff_beam / channel_width[i][2]) * 100
+                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+            elif ((vessel_class == "Panamax") &
+                  (transit_type == "Two-way Transit")):
+                occ = (eff_beam / channel_width[i][3]) * 100
+                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
             else:
-                sys.stderr.write("Error: Undefined vessel class and transit combination...\n")
+                sys.stderr.write("Error: Undefined vessel class and " +
+                                 "transit combination...\n")
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
 
-        # save current format of data as stats_res to be used for all positions
-        stats_res = ports[i]
+        # save current format of data as all_res to be used for all positions
+        all_res = ports[i]
 
         # remove sections of channel where ships turn
         if i % 2:
-            stats_res = stats_res[(stats_res.Latitude <= 32.02838) & (stats_res.Latitude >= 31.9985) | (stats_res.Latitude <= 31.99183)]
+            all_res = all_res[(all_res.Latitude <= 32.02838) &
+                                  (all_res.Latitude >= 31.9985) |
+                                  (all_res.Latitude <= 31.99183)]
         else:
-            stats_res = stats_res[stats_res.Latitude >= 32.667473]
+            all_res = all_res[all_res.Latitude >= 32.667473]
 
         # compute mean speed and identify max speed per vessel
         mean = pd.DataFrame(
@@ -361,6 +375,7 @@ def import_report(path):
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
                    "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
                    "% Channel Occupied":[]}
+
         # grab remaining data based on max speed position
         for key, value in max_dict.items():
             for k in columns.keys():
@@ -371,10 +386,10 @@ def import_report(path):
         merged_speeds = merged_speeds.reset_index()
 
         # save result to variable and sort on max speeds
-        lvl_res = merged_speeds
-        lvl_res.sort_values("Max Speed kn", ascending=False, inplace=True)
+        geo_res = merged_speeds
+        geo_res.sort_values("Max Speed kn", ascending=False, inplace=True)
         # return max and mean positional data in specified order
-        lvl_res = lvl_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
+        geo_res = geo_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
                    "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class",
                    "AIS Type", "Course", "Heading", "Course Behavior",
                    "Yaw deg", "Effective Beam ft", "WDIR degT", "WSPD mph",
@@ -382,7 +397,7 @@ def import_report(path):
                    "Longitude", "Transit", "% Channel Occupied"]]
 
         # return positional data in specified order
-        stats_res = stats_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
+        all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
                                 "% Channel Occupied", "Yaw deg",
                                 "Effective Beam ft", "LOA ft", "Beam ft",
                                 "Vessel Class", "AIS Type", "Course", "Heading",
@@ -392,6 +407,6 @@ def import_report(path):
 
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vesel speed positions
-        ports[i] = [lvl_res, stats_res]
+        ports[i] = [geo_res, all_res]
 
     return ports[0], ports[1] # ch, sv
