@@ -92,9 +92,9 @@ def import_report(path):
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
                "SPEED": "VSPD kn", "COURSE": "Course", "HEADING": "Heading",
                "AIS TYPE": "AIS Type"}, axis=1, inplace=True)
-    df["LOA ft"] = (df["A"] + df["B"]) * 3.28
+    df["LOA ft"] = (df["A"] + df["B"]) * M_TO_FT
     df["LOA ft"] = df["LOA ft"].round(0)
-    df["Beam ft"] = (df["C"] + df["D"]) * 3.28
+    df["Beam ft"] = (df["C"] + df["D"]) * M_TO_FT
     df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
@@ -117,7 +117,9 @@ def import_report(path):
     alt_buoys = [{"41008":None}, {"41004":None}] # alternate wind buoys
     # split data into Charleston and Savannah DataFrames based on latitude
     for i in range(len(ports)):
-        ports[i] = df[df.Latitude >= 32.033] if (i == 0) else df[df.Latitude < 32.033]
+        ch_df = (df.Latitude >= LAT_THRESHOLD)
+        sv_df = (df.Latitude < LAT_THRESHOLD)
+        ports[i] = df[ch_df] if (i == 0) else df[sv_df]
         # if there is no vessel data on a given day (e.g. major holidays)
         # return empty DataFrames
         if not len(ports[i]):
@@ -138,10 +140,11 @@ def import_report(path):
                         "Latitude":[], "Longitude":[], "Transit":[],
                         "% Channel Occupied":[]})]
             continue
-        # initialize location column to Nearshore, and update based on Offshore
-        # channel values to minimize computation
+        # initialize location column to Nearshore; compute Offshore locations
         ports[i].loc[:, "Location"] = "Nearshore"
-        ports[i].loc[:, "Location"][ports[i].index.isin(ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index)] = "Offshore"
+        off_locs = ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index
+        offshore_indices = ports[i].index.isin(off_locs)
+        ports[i].loc[:, "Location"][offshore_indices] = "Offshore"
 
         # capture datetime info to be used for wind buoy matching
         year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
@@ -152,12 +155,16 @@ def import_report(path):
         for buoy_set in [buoys, alt_buoys]:
             for buoy in buoy_set[i].keys():
                 try:
-                    buoy_set[i][buoy] = pd.read_csv("../temp/" + buoy + ".txt", delim_whitespace=True).drop(0)
+                    buoy_set[i][buoy] = pd.read_csv("../temp/" + buoy + ".txt",
+                                                    delim_whitespace=True
+                                                    ).drop(0)
                 except FileNotFoundError:
-                    sys.stderr.write("Error: Wind data not found for buoy with ID: " + buoy + "...\n")
+                    sys.stderr.write("Error: Wind data not found for buoy " +
+                                     "with ID: " + buoy + "...\n")
                     continue
                 except:
-                    sys.stderr.write("Error: Could not load wind data for buoy with ID: " + buoy + "...\n")
+                    sys.stderr.write("Error: Could not load wind data for " +
+                                     "buoy with ID: " + buoy + "...\n")
                     continue
 
         for buoy, alt_buoy in zip(buoys[i].items(), alt_buoys[i].items()):
@@ -169,15 +176,18 @@ def import_report(path):
             alt_id = alt_buoy[0] # alternate buoy ID
             alt_data = alt_buoy[1] # alternate buoy data
             # handle wind outages
-            if (isinstance(data, type(None)) or data.shape[0] == 0) and (isinstance(alt_data, type(None)) or alt_data.shape[0] == 0):
+            if ((isinstance(data, type(None)) or data.shape[0] == 0) and
+                (isinstance(alt_data, type(None)) or alt_data.shape[0] == 0)):
                 sys.stderr.write("Error: Wind data not found for " +
                                  str(year) + "-" + str(month) + "-" +
                                  str(day) + " for buoy with ID: " +
                                  id + "...\n")
-                ports[i].loc[:, "WDIR degT"] = [float("NaN") for ii in range(len(ports[i]))]
-                ports[i].loc[:, "WSPD mph"] = [float("NaN") for ii in range(len(ports[i]))]
-                ports[i].loc[:, "GST mph"] = [float("NaN") for ii in range(len(ports[i]))]
-                ports[i].loc[:, "Buoy Source"] = ["N/A" for ii in range(len(ports[i]))]
+                nans = [float("NaN") for ii in range(len(ports[i]))]
+                outage = ["N/A" for ii in range(len(ports[i]))]
+                ports[i].loc[:, "WDIR degT"] = nans
+                ports[i].loc[:, "WSPD mph"] = nans
+                ports[i].loc[:, "GST mph"] = nans
+                ports[i].loc[:, "Buoy Source"] = outage
                 continue
             # if no data exists for main buoy, switch to alternate
             elif isinstance(data, type(None)) or data.shape[0] == 0:
@@ -186,37 +196,65 @@ def import_report(path):
             data = data[(data["#YY"] == year) &
                         (data["MM"] == month) &
                         (data["DD"] == day)]
-            data.loc[:, "Date/Time UTC"] = pd.to_datetime(data["#YY"] + data["MM"] + data["DD"] + data["hh"] + data["mm"],
-                                                 infer_datetime_format=True)
-            data.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
+            converted_times = pd.to_datetime(data["#YY"] +
+                                             data["MM"] +
+                                             data["DD"] +
+                                             data["hh"] +
+                                             data["mm"],
+                                             infer_datetime_format=True)
+            data.loc[:, "Date/Time UTC"] = converted_times
+            data.rename({"WDIR":"WDIR degT",
+                         "WSPD":"WSPD m/s",
+                         "GST":"GST m/s"}, axis=1, inplace=True)
+
             # remove missing points from buoy data
             data = data[(data["WDIR degT"] != "MM") &
                         (data["WSPD m/s"] != "MM") &
                         (data["GST m/s"] != "MM")]
-            data.loc[:, "WSPD mph"] = data.loc[:, "WSPD m/s"].astype("float") * 2.237
-            data.loc[:, "GST mph"] = data.loc[:, "GST m/s"].astype("float") * 2.237
+            # convert from m/s to mph and round
+            data.loc[:, "WSPD mph"] = (data.loc[:, "WSPD m/s"].
+                                       astype("float") * MPS_TO_MPH)
+            data.loc[:, "GST mph"] = (data.loc[:, "GST m/s"].
+                                      astype("float") * MPS_TO_MPH)
             data.loc[:, "WSPD mph"] = data.loc[:, "WSPD mph"].round(2)
             data.loc[:, "GST mph"] = data.loc[:, "GST mph"].round(2)
-            buoys[i][id] = data[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+            buoys[i][id] = data[["Date/Time UTC", "WDIR degT", "WSPD mph",
+                                 "GST mph"]]
 
             # ensure alternate buoy data is not empty
             if not (isinstance(alt_data, type(None)) or alt_data.shape[0] == 0):
                 # filter buoy data for current day
                 alt_data = alt_data[(alt_data["#YY"] == year) &
-                            (alt_data["MM"] == month) &
-                            (alt_data["DD"] == day)]
-                alt_data.loc[:, "Date/Time UTC"] = pd.to_datetime(alt_data["#YY"] + alt_data["MM"] + alt_data["DD"] + alt_data["hh"] + alt_data["mm"],
-                                                     infer_datetime_format=True)
-                alt_data.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s", "GST":"GST m/s"}, axis=1, inplace=True)
+                                    (alt_data["MM"] == month) &
+                                    (alt_data["DD"] == day)]
+                alt_data.loc[:, "Date/Time UTC"] = pd.to_datetime(
+                                                   alt_data["#YY"] +
+                                                   alt_data["MM"] +
+                                                   alt_data["DD"] +
+                                                   alt_data["hh"] +
+                                                   alt_data["mm"],
+                                                   infer_datetime_format=True)
+                alt_data.rename({"WDIR":"WDIR degT",
+                                 "WSPD":"WSPD m/s",
+                                 "GST":"GST m/s"}, axis=1, inplace=True)
                 # remove missing points from buoy data
                 alt_data = alt_data[(alt_data["WDIR degT"] != "MM") &
                             (alt_data["WSPD m/s"] != "MM") &
                             (alt_data["GST m/s"] != "MM")]
-                alt_data.loc[:, "WSPD mph"] = alt_data.loc[:, "WSPD m/s"].astype("float") * 2.237
-                alt_data.loc[:, "GST mph"] = alt_data.loc[:, "GST m/s"].astype("float") * 2.237
-                alt_data.loc[:, "WSPD mph"] = alt_data.loc[:, "WSPD mph"].round(2)
-                alt_data.loc[:, "GST mph"] = alt_data.loc[:, "GST mph"].round(2)
-                alt_buoys[i][alt_id] = alt_data[["Date/Time UTC", "WDIR degT", "WSPD mph", "GST mph"]]
+                # convert from m/s to mph and round
+                alt_data.loc[:, "WSPD mph"] = (alt_data.
+                                               loc[:, "WSPD m/s"].
+                                               astype("float") * MPS_TO_MPH)
+                alt_data.loc[:, "GST mph"] = (alt_data.
+                                              loc[:, "GST m/s"].
+                                              astype("float") * MPS_TO_MPH)
+                alt_data.loc[:, "WSPD mph"] = (alt_data.
+                                               loc[:, "WSPD mph"].round(2))
+                alt_data.loc[:, "GST mph"] = (alt_data.
+                                              loc[:, "GST mph"].
+                                              round(2))
+                alt_buoys[i][alt_id] = alt_data[["Date/Time UTC", "WDIR degT",
+                                                 "WSPD mph", "GST mph"]]
 
             # match windspeed timestamp with closest vessel position timestamps
             input_times = None
@@ -235,15 +273,18 @@ def import_report(path):
                             min_timedelta_index = jj
                     else:
                         continue
-                if min_timedelta < timedelta(hours=WIND_TIME_TOL) and min_timedelta_index != -1:
+                if (min_timedelta < timedelta(hours=WIND_TIME_TOL) and
+                    min_timedelta_index != -1):
                     for count, k in enumerate(final_winds.keys()):
                         if count == 0:
                             source_buoy.append(str(id))
-                        final_winds[k].append(wind_data[k].iloc[min_timedelta_index])
+                        nearest_reading = wind_data[k].iloc[min_timedelta_index]
+                        final_winds[k].append(nearest_reading)
                 else:
                     # handle missing wind vals
                     for count, k in enumerate(final_winds.keys()):
-                        if (isinstance(alt_data, type(None)) or alt_data.shape[0] == 0):
+                        if (isinstance(alt_data, type(None)) or
+                            alt_data.shape[0] == 0):
                             if count == 0:
                                 source_buoy.append("N/A")
                             final_winds[k].append(float("NaN"))
@@ -252,17 +293,22 @@ def import_report(path):
                             alt_min_timedelta = timedelta(hours=WIND_TIME_TOL)
                             alt_min_timedelta_index = -1
                             for jj in range(len(alt_target_times)):
-                                delta = abs(input_times[ii] - alt_target_times[jj])
+                                delta = abs(input_times[ii] -
+                                            alt_target_times[jj])
                                 if delta <= timedelta(hours=WIND_TIME_TOL):
                                     if alt_min_timedelta > delta:
                                         alt_min_timedelta = delta
                                         alt_min_timedelta_index = jj
                                 else:
                                     continue
-                            if alt_min_timedelta < timedelta(hours=WIND_TIME_TOL) and alt_min_timedelta_index != -1:
+                            if (alt_min_timedelta <
+                                timedelta(hours=WIND_TIME_TOL) and
+                                alt_min_timedelta_index != -1):
                                 if count == 0:
                                     source_buoy.append(str(alt_id))
-                                final_winds[k].append(alt_data[k].iloc[alt_min_timedelta_index])
+                                nearest_reading = alt_data[k].iloc[
+                                                  alt_min_timedelta_index]
+                                final_winds[k].append(nearest_reading)
                             else:
                                 if count == 0:
                                     source_buoy.append("N/A")
@@ -284,14 +330,18 @@ def import_report(path):
             upper_bound = course_range[1]
             for j in range(lower_bound, upper_bound + 1):
                 courses[j] = behavior
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course Behavior"].replace(courses).astype("str")
+        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
+                                             "Course Behavior"].replace(
+                                             courses).astype("str")
 
         # initialize Vessel Class column to Panamax, and update based on
         # Post-Panamax LOA ft values to minimize computation
         ports[i].loc[:, "Vessel Class"] = "Panamax"
-        ports[i].loc[:, "Vessel Class"][ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)] = "Post-Panamax"
+        post_pan = ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)
+        ports[i].loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
         # create yaw column based on difference between course and heading
-        ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] - ports[i].loc[:, "Heading"])
+        ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] -
+                                         ports[i].loc[:, "Heading"])
 
         # compute effective beam based on vessel beam, loa, and yaw
         EB = []
@@ -301,21 +351,26 @@ def import_report(path):
         for l in range(ports[i].shape[0]):
             # effective beam formula derived using trigonometry and geometry
             # of vessel positions
-            EB.append(round((math.cos(math.radians(90-yaw[l]))*loa[l]) + (math.cos(math.radians(yaw[l]))*beam[l])))
+            EB.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
+                            (math.cos(math.radians(yaw[l])) * beam[l])))
 
         ports[i].loc[:, "Effective Beam ft"] = EB
-        ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:, "Effective Beam ft"].round(0)
+        ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
+                                               "Effective Beam ft"].round(0)
         # remove unwanted blacklist vessels
         ports[i] = filter_blacklisters(ports[i], blacklist)
         # create rounded datetime column for meetpass analysis
-        ports[i].loc[:, "rounded date"] = [ports[i].loc[:, "Date/Time UTC"].iloc[ii].floor("Min") for ii in range(len(ports[i].loc[:, "Date/Time UTC"]))]
+        stamps = len(ports[i].loc[:, "Date/Time UTC"]) # number of timestamps
+        round_times = ports[i].loc[:, "Date/Time UTC"].iloc[ii].floor("Min")
+        ports[i].loc[:, "rounded date"] = [round_times for ii in range(stamps)]
 
         # run meetpass analysis and create Transit column based on results
         mp = meetpass(ports[i])
         two_way = twoway(ports[i], mp)
         ports[i]["Transit"] = "One-way Transit"
         if not isinstance(two_way, type(None)):
-            ports[i]["Transit"][ports[i].index.isin(two_way.index)] = "Two-way Transit"
+            two_way_indices = ports[i].index.isin(two_way.index)
+            ports[i]["Transit"][two_way_indices] = "Two-way Transit"
 
         # reset index to clear previous pandas manipulations
         ports[i] = ports[i].reset_index()

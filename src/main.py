@@ -84,8 +84,8 @@ def main():
                                 pd.concat([caches[0], caches[1]]),
                                 caches[2], caches[3],
                                 pd.concat([caches[2], caches[3]])])
-        # [[flattened_ch, flattened_sv, flattened_agg],
-        #  [all_ch, all_sv, all_agg]]
+        # [[flattened_ch, flattened_sv, flattened_agg], [all_ch, all_sv,
+        #                                                all_agg]]
         last_seven_days = [[[], [], []], [[], [], []]]
         span = 0
         # [[rest_of_season_ch, rest_of_season_sv], [rest_of_season_ch_all,
@@ -141,7 +141,7 @@ def main():
             geo_plots[level] = generate_geo_plot(last_seven_days[0][i],
                                                  zooms[i], centers[i], sizes[i],
                                                  opacity[i], hover, token)
-        # output geo_plots in an interactive HTML format
+        # output plots in an interactive HTML format
         pio.write_html(geo_plots["lvl1"], file="../html/level_one.html",
                        auto_open=False)
         pio.write_html(geo_plots["lvl2_CH"],

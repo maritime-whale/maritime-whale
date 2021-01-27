@@ -7,31 +7,20 @@ from import_maritime_data import *
 from datetime import timedelta
 from util import *
 
-# import plotly.figure_factory as ff
-# import plotly.graph_objects as go
-#import matplotlib.pyplot as plt
-# import plotly.express as px
-#import seaborn as sns
 import pandas as pd
 import numpy as np
 import scipy
 
-# # use "2020-10-06.csv" path for testing
-# path = "../tests/2020-10-06.csv"
-# out = import_report(path, STATS)
-# ch = out[0]
-# sv = out[1]
-#
-# print(meetpass(ch))
 
+def calc_naut_dist(lat1, long1, lat2, long2):
+    return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
+
+
+"""    df: cleaned VMR from import_report
+This function takes in a cleaned up entry channel dataframe plus desired time_tolerance (int),
+and returns potential meeting/passing positions from the entry channel"""
 def meetpass_helper(df, time_tolerance):
-    """    df: cleaned VMR from import_report
-    This function takes in a cleaned up entry channel dataframe plus desired time_tolerance (int),
-       and returns potential meeting/passing positions from the entry channel"""
-
-    # THE LINE BELOW MAY BE UNNECESSARY -- CONSIDER REMOVING...
-
-    #sorts the time stamp such that entry channel data is in chronological order
+    # sorts the time stamp such that entry channel data is in chronological order
     times = df.sort_values("Date/Time UTC")
 
     mmsi = list(times.MMSI)
@@ -51,13 +40,11 @@ def meetpass_helper(df, time_tolerance):
     res = times[times["Date/Time UTC"].isin(potential_times)]
     return res
 
-def calc_naut_dist(lat1, long1, lat2, long2):
-    return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
+"""
+df: cleaned VMR from import_report
+"""
 def meetpass(df):
-    """
-    df: cleaned VMR from import_report
-    """
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
     flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
@@ -104,12 +91,10 @@ def meetpass(df):
                             if key not in true_encs:
                                 # create new entry
                                 true_encs[key] = (this_time, dist)
-                                # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
                             else:
                                 # minimize distance (update)
                                 if true_encs[key][1] > dist:
                                     true_encs[key] = (this_time, dist)
-                                    # true_encs[key] = (this_time, dist, this_wspd.copy(), that_wspd.copy())
             multiindex = cur_val.delete(0)
             cur_val = multiindex
             i += 1
@@ -126,8 +111,6 @@ def twoway(df, true_encs):
         enc_time = true_encs[key][0]
         two_way.append(twoway_helper(df, this_mmsi, this_course, enc_time))
         two_way.append(twoway_helper(df, that_mmsi, that_course, enc_time))
-        # two_way.append(pd.concat([twoway_helper(df, this_mmsi, this_course, enc_time),
-        #                           twoway_helper(df, that_mmsi, that_course, enc_time)]))
     if two_way == []:
         return None
     return pd.concat(two_way)
@@ -137,14 +120,3 @@ def twoway_helper(df, mmsi, course, enc_time):
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res
-# use "2020-10-06.csv" path for testing
-# path = "../tests/2020-11-16.csv"
-# out = import_report(path, STATS)
-# ch = out[0]
-# sv = out[1]
-
-# show edge case to jon at 12:23 where there's nearshore and offshore meetpass instance
-# ch[(ch["MMSI"] == 232013520) | (ch["MMSI"] == 255806004)]
-
-# print(meetpass(ch))
-# print(len(meetpass(ch)))
