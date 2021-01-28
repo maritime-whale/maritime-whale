@@ -69,7 +69,7 @@ def filter_blacklisters(df, blacklist):
             new_blacklisters.append(df.iloc[j].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
         contents = [str(mmsi) for mmsi in new_blacklisters]
-        if contents != []:
+        if contents:
             f.write("\n".join(contents) + "\n")
     df = df[~df.MMSI.isin(new_blacklisters)]
     return df

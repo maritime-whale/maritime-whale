@@ -160,11 +160,11 @@ def main():
 
         charleston = all_data[0]
         savannah = all_data[1]
-        if rest_of_season[1][0] != []:
+        if rest_of_season[1][0]:
             charleston = pd.concat([all_data[0],
                                     pd.concat(
                                     rest_of_season[1][0]).reset_index()])
-        if rest_of_season[1][1] != []:
+        if rest_of_season[1][1]:
             savannah = pd.concat([all_data[1],
                        pd.concat(rest_of_season[1][1]).reset_index()])
 
