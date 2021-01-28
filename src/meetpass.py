@@ -133,7 +133,6 @@ def meetpass(df):
             i += 1
     return true_encs
 
-
 def twoway(df, true_encs):
     """Identifies ship positions subject to two way transit conditions.
 
@@ -157,7 +156,6 @@ def twoway(df, true_encs):
     if two_way == []:
         return None
     return pd.concat(two_way)
-
 
 def twoway_helper(df, mmsi, course, enc_time):
     """Description...
