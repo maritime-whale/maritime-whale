@@ -26,17 +26,6 @@ import os
 # TODO: document subfunctions
 
 def main():
-    """Description...
-
-    Args:
-        df:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     days = fetch_latest_reports(logfile)
