@@ -40,11 +40,10 @@ def meetpass_helper(df, time_tolerance):
     res = times[times["Date/Time UTC"].isin(potential_times)]
     return res
 
-
-"""
-df: cleaned VMR from import_report
-"""
 def meetpass(df):
+    """
+    df: cleaned VMR from import_report
+    """
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
     flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
@@ -100,7 +99,6 @@ def meetpass(df):
             i += 1
     return true_encs
 
-
 def twoway(df, true_encs):
     two_way = []
     for key in true_encs:
@@ -114,7 +112,6 @@ def twoway(df, true_encs):
     if two_way == []:
         return None
     return pd.concat(two_way)
-
 
 def twoway_helper(df, mmsi, course, enc_time):
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &

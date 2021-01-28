@@ -165,7 +165,7 @@ def main():
                        pd.concat(rest_of_season[1][1]).reset_index()])
 
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
-                          keys=['Charleston', 'Savannah'],
+                          keys=["Charleston", "Savannah"],
                           axis=0).reset_index(level=1).rename(
                           {"level_1": "Vessel Class"}, axis=1)
 
@@ -215,5 +215,5 @@ def main():
         log(logfile,
             "No new vessel movement reports. Caches already up-to-date.")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
