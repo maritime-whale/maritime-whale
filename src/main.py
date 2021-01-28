@@ -21,6 +21,10 @@ import datetime
 import glob
 import os
 
+# TODO: more inline comments
+# TODO: break into subfunctions (still belong in main)
+# TODO: document subfunctions
+
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
@@ -36,12 +40,12 @@ def main():
             if not sync_required:
                 sync_required = True
             input_filename = day.strftime("%Y-%m-%d.csv")
-            maritime_report = import_report("../temp/" + input_filename)
+            report = import_report("../temp/" + input_filename)
             log(logfile, "Importing data from " + input_filename + "...")
             os.makedirs(os.path.dirname("../cache/" + date + "/"),
                         exist_ok=True)
-            last_seven_days = [[port[0] for port in maritime_report],
-                             [port[1] for port in maritime_report]]
+            last_seven_days = [[port[0] for port in report],
+                               [port[1] for port in report]]
             caches = ((date + "/ch-max", date + "/sv-max"),
                       (date + "/ch", date + "/sv"))
             for i in range(len(caches)):
