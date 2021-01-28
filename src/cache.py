@@ -7,14 +7,19 @@
 
 import pandas as pd
 
-"""Writes a cache file with the specified data, filename, and extension.
-
-Args:
-    data_frames: List of DataFrames to be concatenated and written to file.
-
-    filename: Cache file name.
-"""
 def create_cache(data_frames, filename, extension):
+    """Writes a cache file with the specified data, filename, and extension.
+
+    Args:
+        data_frames: List of DataFrames.
+
+        filename: Cache file name.
+
+        extension: Desired file type (csv, xlsx, etc.)
+
+    Returns:
+        Concatenated data from data_frames written as specified file type.
+    """
     cache_ext = extension.lower()
     if cache_ext in ["csv", "xlsx", "all"]:
         res = pd.concat(data_frames)

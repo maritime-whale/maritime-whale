@@ -13,13 +13,30 @@ import scipy
 MEET_PASS_TIME_TOL = 1 # in hours
 
 def calc_naut_dist(lat1, long1, lat2, long2):
+    """Computes Euclidean distance between two points.
+
+    Args:
+        lat1: Latitude corresponding to first point as float.
+        long1: Longitude corresponding to first point as float.
+        lat2: Latitude corresponding to second point as float.
+        long2: Longitude corresponding to second point as float.
+
+    Returns:
+        Euclidean distance as float.
+    """
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
-
-"""    df: cleaned VMR from import_report
-This function takes in a cleaned up entry channel dataframe plus desired time_tolerance (int),
-and returns potential meeting/passing positions from the entry channel"""
 def meetpass_helper(df, time_tolerance):
+    """This function takes in a cleaned up entry channel dataframe plus desired
+    time tolerance and returns potential meet/pass positions.
+
+    Args:
+        df: pandas DataFrame of vessel data for a single day.
+        time_tolerance: Integer value used for comparing difference in times.
+
+    Returns:
+        pandas Datafrmae of Position reports for potential meet/pass instances.
+    """
     # sorts the time stamp such that entry channel data is in chronological order
     times = df.sort_values("Date/Time UTC")
 
@@ -41,8 +58,15 @@ def meetpass_helper(df, time_tolerance):
     return res
 
 def meetpass(df):
-    """
-    df: cleaned VMR from import_report
+    """Parses single days worth of vessel data and returns confirmed meeting
+    and passing instances between two ships at their moment of closest approach
+    in time and space, utilizing nautical distance and meet/pass time tolerance.
+
+    Args:
+        df: pandas DataFrame of vessel data for a single day.
+
+    Returns:
+        Dictionary of meeting and passing instances.
     """
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
@@ -99,7 +123,18 @@ def meetpass(df):
             i += 1
     return true_encs
 
+
 def twoway(df, true_encs):
+    """Identifies ship positions subject to two way transit conditions.
+
+    Args:
+        df: pandas DataFrame of vessel data for a single day.
+        true_encs: Dictionary of meet/pass encounters from meetpass function.
+
+    Returns:
+        pandas DataFrame of positions up to and including meeting and passing
+        for all ships involved in two way transit conditions.
+    """
     two_way = []
     for key in true_encs:
         this_mmsi = key[0]
@@ -113,7 +148,20 @@ def twoway(df, true_encs):
         return None
     return pd.concat(two_way)
 
+
 def twoway_helper(df, mmsi, course, enc_time):
+    """Description...
+
+    Args:
+        df: pandas DataFrame of vessel data for a single day.
+        mmsi: Integer ship MMSI.
+        course: Str course behavior (Inbound/Outbound).
+        enc_time: Timestamp output from true encounter dicionary.
+
+    Returns:
+        pandas DataFrame of positions up to and including time of meeting and
+        passing for a given ship.
+    """
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res

@@ -23,6 +23,17 @@ SCOPES = [
 ]
 
 def gmail_auth(logfile):
+    """Description...
+
+    Args:
+        logfile:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     creds = None
     # the file .token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
