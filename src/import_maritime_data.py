@@ -46,7 +46,7 @@ def validate_vmr(df):
     df = df[~df.index.isin(df[df["Heading"] == 511].index)]
     df = df[~df.index.isin(df[df["VSPD kn"] >= 40].index)]
     df = df[~df.MMSI.isin(
-            df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
+             df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
     return df
 
 def filter_blacklisters(df, blacklist):
@@ -71,7 +71,6 @@ def filter_blacklisters(df, blacklist):
         contents = [str(mmsi) for mmsi in new_blacklisters]
         if contents != []:
             f.write("\n".join(contents) + "\n")
-
     df = df[~df.MMSI.isin(new_blacklisters)]
     return df
 
