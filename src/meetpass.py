@@ -23,11 +23,11 @@ def meetpass_helper(df, time_tolerance):
     time tolerance and returns potential meet/pass positions.
 
     Args:
-        df: pandas DataFrame of vessel data for a single day.
+        df: Pandas DataFrame of vessel data for a single day.
         time_tolerance: Integer value used for comparing difference in times.
 
     Returns:
-        pandas Datafrmae of Position reports for potential meet/pass instances.
+        Pandas DataFrame of Position reports for potential meet/pass instances.
     """
     # sorts timestamps such that entry channel data is in chronological order
     times = df.sort_values("Date/Time UTC")
@@ -56,7 +56,7 @@ def meetpass(df):
     in time and space, utilizing nautical distance and meet/pass time tolerance.
 
     Args:
-        df: pandas DataFrame of vessel data for a single day.
+        df: Pandas DataFrame of vessel data for a single day.
 
     Returns:
         Dictionary of meeting and passing instances.
@@ -134,14 +134,14 @@ def meetpass(df):
     return true_encs
 
 def twoway(df, true_encs):
-    """Identifies ship positions subject to two way transit conditions.
+    """Identifies instances of two way transit conditions.
 
     Args:
-        df: pandas DataFrame of vessel data for a single day.
+        df: Pandas DataFrame of vessel data for a single day.
         true_encs: Dictionary of meet/pass encounters from meetpass function.
 
     Returns:
-        pandas DataFrame of positions up to and including meeting and passing
+        Pandas DataFrame of positions up to and including meeting and passing
         for all ships involved in two way transit conditions.
     """
     two_way = []
@@ -158,16 +158,16 @@ def twoway(df, true_encs):
     return pd.concat(two_way)
 
 def twoway_helper(df, mmsi, course, enc_time):
-    """Description...
+    """Helper function to two way transit detection function
 
     Args:
-        df: pandas DataFrame of vessel data for a single day.
+        df: Pandas DataFrame of vessel data for a single day.
         mmsi: Integer ship MMSI.
-        course: Str course behavior (Inbound/Outbound).
+        course: String of course behavior (Inbound/Outbound).
         enc_time: Timestamp output from true encounter dicionary.
 
     Returns:
-        pandas DataFrame of positions up to and including time of meeting and
+        Pandas DataFrame of positions up to and including time of meeting and
         passing for a given ship.
     """
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &

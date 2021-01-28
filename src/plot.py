@@ -19,7 +19,7 @@ def check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day.
 
     Args:
-        df: pandas DataFrame of vessel data for a single day.
+        df: Pandas DataFrame of vessel data for a single day.
 
     Returns:
         Boolean value indicating major wind outage.
@@ -32,13 +32,13 @@ def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
     """Generates geo plot.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
         zoom: Float of desired zoom level.
         center: Dictionary lat long points of desired map center.
         size: List of floats corresponding to pixel height and width.
         opacity: Float of desired opacity for plot points.
         hover: List of df column names to show up in the hover feature.
-        token: Unique mapbox token.
+        token: Unique MapBox token.
 
     Returns:
         Plotly figure.
@@ -64,8 +64,8 @@ def generate_ticker(ch, sv):
     speed.
 
     Args:
-        ch: pandas DataFrame of vessel data at Charleston.
-        sv: pandas DataFrame of vessel data Savannah.
+        ch: Pandas DataFrame of vessel data at Charleston.
+        sv: Pandas DataFrame of vessel data Savannah.
 
     Returns:
         Plotly figure.
@@ -96,7 +96,7 @@ def generate_vspd_hist(df):
     """Generates vessel speed histogram.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -129,7 +129,7 @@ def generate_strip_plot(df):
     """Generates vessel strip plot.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -165,7 +165,7 @@ def generate_wspd_hist(df, df_dropna):
     """Generates windspeed histogram.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -216,7 +216,7 @@ def generate_wspd_vs_vspd(df, df_dropna):
     """Generates vessel speed and wind speed density plot.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -261,7 +261,7 @@ def generate_line_plot(df):
     """Generates vessel speed and yaw line plot.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -297,7 +297,7 @@ def generate_channel_occ(df):
     """Generates channel occupancy and vessel speed scatter plot.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.
@@ -332,7 +332,7 @@ def generate_dashboard(df):
     """Generates dashboard.
 
     Args:
-        df: pandas DataFrame of vessel data.
+        df: Pandas DataFrame of vessel data.
 
     Returns:
         Plotly figure.

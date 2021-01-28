@@ -17,8 +17,6 @@
 # git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
 # 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 
-
-
 debug_mode=0 # init debug flag to FALSE
 # loop through arguments passed to the script from the command line
 for arg in "$@"; do

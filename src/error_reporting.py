@@ -136,4 +136,5 @@ def main():
     if msg:
         send_message(service, "me", msg)
 
-main()
+if __name__ == "__main__":
+    main()

@@ -6,18 +6,7 @@
 # Handle log writing.
 
 def log(filename, msg):
-    """Description...
-
-    Args:
-        filename:
-        msg:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
+    """Append message to specified logfile"""
     f = open(filename, "a")
     f.write(msg + "\n")
     f.close()
