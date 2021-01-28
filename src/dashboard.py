@@ -3,8 +3,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Generate season-to-date dashboard from DataFrame. Easily view the most current
-# high-level statistics.
+# Generate season-to-date dashboard from DataFrame. Centralized view for
+# statistics of interest.
 
 import pandas as pd
 
@@ -65,11 +65,10 @@ def dashboard(df):
            str(round(df[outbound]["VSPD kn"].median(), 2)) + " kn"
            ],
            "VSPD-WSPD <br>Correlation":[
-           str(round(df[panamax].dropna()[["VSPD kn",
-                                           "WSPD mph"]].corr().iloc[0][1], 2)),
-           str(round(df[post_panamax].dropna()[["VSPD kn",
-                                                "WSPD mph"]].corr().iloc[0][1],
-               2)),
+           str(round(df[panamax].dropna()[["VSPD kn", "WSPD mph"]].corr()
+           .iloc[0][1], 2)),
+           str(round(df[post_panamax].dropna()[["VSPD kn", "WSPD mph"]].corr()
+           .iloc[0][1], 2)),
            str(round(df.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))
            ]
           }

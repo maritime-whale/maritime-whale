@@ -2,6 +2,8 @@
 # Copyright 2020 The Maritime Whale Authors. All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
+#
+# Send a health report via specialized Gmail account.
 
 from email.mime.multipart import MIMEMultipart
 from googleapiclient.discovery import build
@@ -21,9 +23,9 @@ import os
 
 ERR_LOGFILE = "../logs/report_err.log"
 OUT_LOGFILE = "../logs/report_out.log"
+VMR_EMAIL_ADDRESS = "vmr.riwhale@gmail.com"
 
-def create_message_with_attachment(
-    sender, to, subject, message_text, file):
+def create_message_with_attachment(sender, to, subject, message_text, file):
     """Description...
 
     Args:
@@ -89,13 +91,15 @@ def send_message(service, user_id, message):
     try:
         message = (service.users().messages().send(userId=user_id, body=message)
                    .execute())
-        # WON'T SEE THIS IN HEALTH REPORT (SENT BEFORE THIS IS WRITTEN)
-        log(OUT_LOGFILE, "Health message sent successfully.")
-        return message
     except errors.HttpError as error:
         log(ERR_LOGFILE, "An error occurred: " + str(error))
         exit(1)
+    log(OUT_LOGFILE, "Health message sent successfully.")
+    return message
 
+# TODO: finish (simple) health status logic
+# TODO: (potentially) implement a way to alert when (triggered by an error with
+# SCP? for AWS; check that health emails were sent? for Gmail)
 def get_webapp_health_status():
     # grab the most recent 6 logfiles:
     # vmr_out.log, vmr_err.log, sync_out.log, sync_err.log,
@@ -120,12 +124,14 @@ def main():
     creds = gmail_auth(ERR_LOGFILE)
     service = build("gmail", "v1", credentials=creds)
     log(OUT_LOGFILE, "Google OAuth successful.")
-    my_email = "vmr.riwhale@gmail.com"
     zip = "../temp/webapp_logs"
     shutil.make_archive(zip, "zip", "../logs/")
-    msg = create_message_with_attachment(my_email, my_email,
+    # send the health report email to self and use email filtering to
+    # auto-forward health report to dev team (better privacy)
+    msg = create_message_with_attachment(VMR_EMAIL_ADDRESS, VMR_EMAIL_ADDRESS,
                                          "Maritime Whale Web App Health Report",
-                                         "Status: " + get_webapp_health_status(),
+                                         "Status: " +
+                                         get_webapp_health_status(),
                                          zip + ".zip")
     if msg:
         send_message(service, "me", msg)

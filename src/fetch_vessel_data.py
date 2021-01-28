@@ -2,6 +2,8 @@
 # Copyright 2020 The Maritime Whale Authors. All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
+#
+# Fetch vessel data from unread emails in specifically configured Gmail inbox.
 
 from googleapiclient.discovery import build
 from apiclient import errors
@@ -79,7 +81,8 @@ def fetch_latest_reports(logfile):
     days = []
     service = build("gmail", "v1", credentials=creds)
     raw = service.users().messages().list(userId="me",
-                                          labelIds=["UNREAD", "INBOX"]).execute()
+                                          labelIds=["UNREAD",
+                                                    "INBOX"]).execute()
     if raw["resultSizeEstimate"] > 0:
         unread = [msg["id"] for msg in raw["messages"]]
         for msg_id in unread:

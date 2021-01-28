@@ -3,8 +3,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Fetch vessel movement reports from Gmail inbox. If new data is found, then
-# load cache into memory and generate new files.
+# If new data is ready to be fetched, load cache files into memory, generate
+# and write new ouput and cache files.
 
 from import_maritime_data import *
 from fetch_vessel_data import *
@@ -22,8 +22,8 @@ import glob
 import os
 
 # TODO: more inline comments
-# TODO: break into subfunctions (still belong in main)
-# TODO: document subfunctions
+# TODO: break into subfunctions? (still belong in main)
+# TODO: document subfunctions (depends on if we go through with above todo)
 
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
@@ -169,7 +169,7 @@ def main():
                        pd.concat(rest_of_season[1][1]).reset_index()])
 
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
-                          keys=['Charleston', 'Savannah'],
+                          keys=["Charleston", "Savannah"],
                           axis=0).reset_index(level=1).rename(
                           {"level_1": "Vessel Class"}, axis=1)
 
@@ -219,5 +219,5 @@ def main():
         log(logfile,
             "No new vessel movement reports. Caches already up-to-date.")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

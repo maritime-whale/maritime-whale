@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Processes wind and vessel data. Performs analysis.
+# Processes wind and vessel data. Performs simple analysis.
 
 from datetime import *
 from meetpass import *
@@ -242,16 +242,16 @@ def import_report(path):
                             (alt_data["WSPD m/s"] != "MM") &
                             (alt_data["GST m/s"] != "MM")]
                 # convert from m/s to mph and round
-                alt_data.loc[:, "WSPD mph"] = (alt_data.
-                                               loc[:, "WSPD m/s"].
-                                               astype("float") * MPS_TO_MPH)
-                alt_data.loc[:, "GST mph"] = (alt_data.
-                                              loc[:, "GST m/s"].
-                                              astype("float") * MPS_TO_MPH)
-                alt_data.loc[:, "WSPD mph"] = (alt_data.
-                                               loc[:, "WSPD mph"].round(2))
-                alt_data.loc[:, "GST mph"] = (alt_data.
-                                              loc[:, "GST mph"].round(2))
+                alt_data.loc[:, "WSPD mph"] = (alt_data
+                                               .loc[:, "WSPD m/s"]
+                                               .astype("float") * MPS_TO_MPH)
+                alt_data.loc[:, "GST mph"] = (alt_data
+                                              .loc[:, "GST m/s"]
+                                              .astype("float") * MPS_TO_MPH)
+                alt_data.loc[:, "WSPD mph"] = (alt_data
+                                               .loc[:, "WSPD mph"].round(2))
+                alt_data.loc[:, "GST mph"] = (alt_data
+                                              .loc[:, "GST mph"].round(2))
                 alt_buoys[i][alt_id] = alt_data[["Date/Time UTC", "WDIR degT",
                                                  "WSPD mph", "GST mph"]]
 
