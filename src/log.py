@@ -4,6 +4,18 @@
 # found in the LICENSE.txt file.
 
 def log(filename, msg):
+    """Description...
+
+    Args:
+        filename:
+        msg:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     f = open(filename, "a")
     f.write(msg + "\n")
     f.close()

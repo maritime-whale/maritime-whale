@@ -24,6 +24,21 @@ OUT_LOGFILE = "../logs/report_out.log"
 
 def create_message_with_attachment(
     sender, to, subject, message_text, file):
+    """Description...
+
+    Args:
+        sender:
+        to:
+        subject:
+        message_text:
+        file:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     message = MIMEMultipart()
     message["to"] = to
     message["from"] = sender
@@ -58,6 +73,19 @@ def create_message_with_attachment(
     return {"raw": base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 def send_message(service, user_id, message):
+    """Description...
+
+    Args:
+        service:
+        user_id:
+        message:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     try:
         message = (service.users().messages().send(userId=user_id, body=message)
                    .execute())
@@ -78,6 +106,17 @@ def get_webapp_health_status():
     return "UNKNOWN"
 
 def main():
+    """Description...
+
+    Args:
+        df:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     creds = gmail_auth(ERR_LOGFILE)
     service = build("gmail", "v1", credentials=creds)
     log(OUT_LOGFILE, "Google OAuth successful.")

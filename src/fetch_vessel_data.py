@@ -14,6 +14,20 @@ import os.path
 import base64
 
 def get_attachments(logfile, service, user_id, msg_id):
+    """Description...
+
+    Args:
+        logfile:
+        service:
+        user_id:
+        msg_id:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     try:
         message = service.users().messages().get(userId=user_id,
                                                  id=msg_id).execute()
@@ -49,6 +63,17 @@ def get_attachments(logfile, service, user_id, msg_id):
     return filenames
 
 def fetch_latest_reports(logfile):
+    """Description...
+
+    Args:
+        logfile:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     creds = gmail_auth(logfile)
     # call the Gmail API
     days = []

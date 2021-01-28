@@ -26,6 +26,17 @@ import os
 # TODO: document subfunctions
 
 def main():
+    """Description...
+
+    Args:
+        df:
+
+    Returns:
+        ...
+
+    Raises:
+        ...
+    """
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     days = fetch_latest_reports(logfile)
@@ -169,7 +180,7 @@ def main():
                        pd.concat(rest_of_season[1][1]).reset_index()])
 
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
-                          keys=["Charleston", "Savannah"],
+                          keys=['Charleston', 'Savannah'],
                           axis=0).reset_index(level=1).rename(
                           {"level_1": "Vessel Class"}, axis=1)
 
@@ -219,5 +230,5 @@ def main():
         log(logfile,
             "No new vessel movement reports. Caches already up-to-date.")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
