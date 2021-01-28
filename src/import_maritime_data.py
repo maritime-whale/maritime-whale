@@ -7,16 +7,26 @@
 
 from datetime import *
 from meetpass import *
-from util import *
 
 import pandas as pd
 import math
 import sys
 
+# vessel (AIS) types that should be automatically purged from analysis
+# https://api.vesselfinder.com/docs/ref-aistypes.html
+AUTO_BLACKLIST = [30, 31, 32, 33, 34, 35, 36, 37, 51, 52, 53, 55, 57, 58, 59]
+
+# thresholds and tolerances
+SUB_PANAMAX = 656 # in feet
+WIND_TIME_TOL = 3 # in hours
+
+# conversions
+MPS_TO_MPH = 2.237 # meters per sec to miles per hour
+M_TO_FT = 3.28 # meters to feet
+
 # TODO(omrinewman): break import_report into smaller functions
 # TODO: choose better naming when processing winds (i.e. "data" and "alt_data")
 # TODO: change all_res and geo_res to movements and crushed_movements (or something like that)
-
 
 def validate_vmr(df):
     """Validation function removes vessel positions with '511' error instances,
@@ -55,8 +65,7 @@ def filter_blacklisters(df, blacklist):
     df = df[~df.MMSI.isin(blacklist)]
     new_blacklisters = []
     for j in range(df.shape[0]):
-        if df.iloc[j]["AIS Type"] in [30, 31, 32, 33, 34, 35, 36, 37,
-                                       51, 52, 53, 55, 57, 58, 59]:
+        if df.iloc[j]["AIS Type"] in AUTO_BLACKLIST:
             new_blacklisters.append(df.iloc[j].MMSI)
     with open("../cache/blacklist.txt", "a") as f:
         contents = [str(mmsi) for mmsi in new_blacklisters]
@@ -99,7 +108,7 @@ def import_report(path):
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
     df = validate_vmr(df)
-    df = df[df["LOA ft"] >= 656] # filter out sub-panamax class vessels
+    df = df[df["LOA ft"] >= SUB_PANAMAX] # filter out sub-panamax class vessels
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
     df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
@@ -117,28 +126,22 @@ def import_report(path):
     alt_buoys = [{"41008":None}, {"41004":None}] # alternate wind buoys
     # split data into Charleston and Savannah DataFrames based on latitude
     for i in range(len(ports)):
-        ch_df = (df.Latitude >= LAT_THRESHOLD)
-        sv_df = (df.Latitude < LAT_THRESHOLD)
+        ch_df = (df.Latitude >= 32.033)
+        sv_df = (df.Latitude < 32.033)
         ports[i] = df[ch_df] if (i == 0) else df[sv_df]
         # if there is no vessel data on a given day (e.g. major holidays)
         # return empty DataFrames
         if not len(ports[i]):
-            ports[i] = [pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[],
-                        "Max Speed kn":[], "Mean Speed kn":[], "LOA ft":[],
-                        "Beam ft":[], "Vessel Class":[], "AIS Type":[],
-                        "Course":[], "Heading":[], "Course Behavior":[],
-                        "Yaw deg":[], "Effective Beam ft":[], "WDIR degT":[],
-                        "WSPD mph":[], "GST mph":[], "Buoy Source":[],
-                        "Location":[], "Latitude":[], "Longitude":[],
-                        "Transit":[], "% Channel Occupied":[]}),
-                        pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[],
-                        "VSPD kn":[], "LOA ft":[],  "Beam ft":[],
-                        "Vessel Class":[], "AIS Type":[], "Course":[],
-                        "Heading":[], "Course Behavior":[], "Yaw deg":[],
-                        "Effective Beam ft":[], "WDIR degT":[], "WSPD mph":[],
-                        "GST mph":[], "Buoy Source":[], "Location":[],
-                        "Latitude":[], "Longitude":[], "Transit":[],
-                        "% Channel Occupied":[]})]
+            empty = pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[],
+                                  "Max Speed kn":[], "Mean Speed kn":[],
+                                  "LOA ft":[], "Beam ft":[], "Vessel Class":[],
+                                  "AIS Type":[], "Course":[], "Heading":[],
+                                  "Course Behavior":[], "Yaw deg":[],
+                                  "Effective Beam ft":[], "WDIR degT":[],
+                                  "WSPD mph":[], "GST mph":[], "Buoy Source":[],
+                                  "Location":[], "Latitude":[], "Longitude":[],
+                                  "Transit":[], "% Channel Occupied":[]})
+            ports[i] = [empty, empty]
             continue
         # initialize location column to Nearshore; compute Offshore locations
         ports[i].loc[:, "Location"] = "Nearshore"
@@ -203,8 +206,7 @@ def import_report(path):
                                              data["mm"],
                                              infer_datetime_format=True)
             data.loc[:, "Date/Time UTC"] = converted_times
-            data.rename({"WDIR":"WDIR degT",
-                         "WSPD":"WSPD m/s",
+            data.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s",
                          "GST":"GST m/s"}, axis=1, inplace=True)
 
             # remove missing points from buoy data
@@ -234,8 +236,7 @@ def import_report(path):
                                                    alt_data["hh"] +
                                                    alt_data["mm"],
                                                    infer_datetime_format=True)
-                alt_data.rename({"WDIR":"WDIR degT",
-                                 "WSPD":"WSPD m/s",
+                alt_data.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s",
                                  "GST":"GST m/s"}, axis=1, inplace=True)
                 # remove missing points from buoy data
                 alt_data = alt_data[(alt_data["WDIR degT"] != "MM") &
@@ -251,8 +252,7 @@ def import_report(path):
                 alt_data.loc[:, "WSPD mph"] = (alt_data.
                                                loc[:, "WSPD mph"].round(2))
                 alt_data.loc[:, "GST mph"] = (alt_data.
-                                              loc[:, "GST mph"].
-                                              round(2))
+                                              loc[:, "GST mph"].round(2))
                 alt_buoys[i][alt_id] = alt_data[["Date/Time UTC", "WDIR degT",
                                                  "WSPD mph", "GST mph"]]
 
@@ -445,20 +445,20 @@ def import_report(path):
         geo_res.sort_values("Max Speed kn", ascending=False, inplace=True)
         # return max and mean positional data in specified order
         geo_res = geo_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
-                   "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class",
-                   "AIS Type", "Course", "Heading", "Course Behavior",
-                   "Yaw deg", "Effective Beam ft", "WDIR degT", "WSPD mph",
-                   "GST mph", "Buoy Source", "Location", "Latitude",
-                   "Longitude", "Transit", "% Channel Occupied"]]
+                           "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class",
+                           "AIS Type", "Course", "Heading", "Course Behavior",
+                           "Yaw deg", "Effective Beam ft", "WDIR degT",
+                           "WSPD mph", "GST mph", "Buoy Source", "Location",
+                           "Latitude", "Longitude", "Transit",
+                           "% Channel Occupied"]]
 
         # return positional data in specified order
         all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
-                                "% Channel Occupied", "Yaw deg",
-                                "Effective Beam ft", "LOA ft", "Beam ft",
-                                "Vessel Class", "AIS Type", "Course", "Heading",
-                                "Course Behavior", "WDIR degT", "GST mph",
-                                "Buoy Source", "Location", "Latitude",
-                                "Longitude", "Date/Time UTC"]]
+                           "% Channel Occupied", "Yaw deg", "Effective Beam ft",
+                           "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
+                           "Course", "Heading", "Course Behavior", "WDIR degT",
+                           "GST mph", "Buoy Source", "Location", "Latitude",
+                           "Longitude", "Date/Time UTC"]]
 
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vesel speed positions

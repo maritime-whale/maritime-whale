@@ -5,12 +5,12 @@
 
 from import_maritime_data import *
 from datetime import timedelta
-from util import *
 
 import pandas as pd
 import numpy as np
 import scipy
 
+MEET_PASS_TIME_TOL = 1 # in hours
 
 def calc_naut_dist(lat1, long1, lat2, long2):
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5

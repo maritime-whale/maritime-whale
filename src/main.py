@@ -11,7 +11,6 @@ from fetch_vessel_data import *
 from dashboard import *
 from cache import *
 from plot import *
-from util import *
 from log import *
 
 import plotly.graph_objects as go

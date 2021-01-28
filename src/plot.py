@@ -5,12 +5,13 @@
 
 # NOTES:
 # https://plotly.com/python/mapbox-layers/ (example used)
-from util import *
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+
+OUTAGE_THRESHOLD = 0.65 # ratio
 
 def check_wind_outages(df, df_dropna):
     if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:
