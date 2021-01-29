@@ -333,7 +333,6 @@ def import_report(path):
         # create yaw column based on difference between course and heading
         ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] -
                                          ports[i].loc[:, "Heading"])
-
         # compute effective beam based on vessel beam, loa, and yaw
         EB = []
         loa = ports[i]["LOA ft"].values
@@ -441,7 +440,6 @@ def import_report(path):
                            "Course", "Heading", "Course Behavior", "WDIR degT",
                            "GST mph", "Buoy Source", "Location", "Latitude",
                            "Longitude", "Date/Time UTC"]]
-
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vesel speed positions
         ports[i] = [geo_res, all_res]

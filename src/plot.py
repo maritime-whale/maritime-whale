@@ -198,7 +198,6 @@ def generate_wspd_hist(df, df_dropna):
                            xref="x", x=30.4, yref="paper", y=1)
         fig.data[0].marker.line.width = 0.5
         fig.data[0].marker.line.color = "black"
-
     else:
         fig = px.histogram(pd.DataFrame({"WSPD mph":[]}), x="WSPD mph")
         fig.add_annotation(text="Major Wind Outage<br>" +
