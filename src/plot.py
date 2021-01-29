@@ -14,36 +14,17 @@ import pandas as pd
 OUTAGE_THRESHOLD = 0.65 # ratio
 
 # TODO: document plotting design decisions and quirks in methodologies
-# TODO(davnajork): revise function headers
+# TODO(omrinewman): revise function headers
+# TODO: maybe some inline comments? don't really think we need to add many if we do at all
 
 def check_wind_outages(df, df_dropna):
-    """Checks for major wind outages on a given day.
-
-    Args:
-        df: Pandas DataFrame of vessel data for a single day.
-
-    Returns:
-        Boolean value indicating major wind outage.
-    """
+    """Checks for major wind outages on a given day."""
     if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:
         return True
     return False
 
 def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
-    """Generates geo plot.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-        zoom: Float of desired zoom level.
-        center: Dictionary lat long points of desired map center.
-        size: List of floats corresponding to pixel height and width.
-        opacity: Float of desired opacity for plot points.
-        hover: List of df column names to show up in the hover feature.
-        token: Unique MapBox token.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates geo plot using MapBox token."""
     fig = None
     fig = px.scatter_mapbox(df, hover_name="Name",
                             lat="Latitude", lon="Longitude",
@@ -61,16 +42,7 @@ def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
     return fig
 
 def generate_ticker(ch, sv):
-    """Generates seasonal ticker including port compliance and mean vessel
-    speed.
-
-    Args:
-        ch: Pandas DataFrame of vessel data at Charleston.
-        sv: Pandas DataFrame of vessel data Savannah.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates seasonal ticker for port compliance and mean vessel speed."""
     fig = None
     fig = go.Figure(data=[go.Table(
         header=dict(values=[""],
@@ -94,14 +66,7 @@ def generate_ticker(ch, sv):
     return fig
 
 def generate_vspd_hist(df):
-    """Generates vessel speed histogram.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates vessel speed histogram."""
     fig = px.histogram(df, x="VSPD kn", nbins=20,
                        color_discrete_sequence=["#19336A"])
     fig.update_layout(xaxis_title_text = "VSPD kn",
@@ -127,14 +92,7 @@ def generate_vspd_hist(df):
     return fig
 
 def generate_strip_plot(df):
-    """Generates vessel strip plot.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates vessel strip plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
                   "% Channel Occupied":True, "Vessel Class":True,
                   "Course Behavior":True, "Yaw deg":True, "LOA ft":True,
@@ -163,14 +121,7 @@ def generate_strip_plot(df):
     return fig
 
 def generate_wspd_hist(df, df_dropna):
-    """Generates windspeed histogram.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates windspeed histogram."""
     fig = None
     if not check_wind_outages(df, df_dropna):
         fig = px.histogram(df_dropna["WSPD mph"],
@@ -213,14 +164,7 @@ def generate_wspd_hist(df, df_dropna):
     return fig
 
 def generate_wspd_vs_vspd(df, df_dropna):
-    """Generates vessel speed and wind speed density plot.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates vessel speed and wind speed density plot."""
     fig = None
     if not check_wind_outages(df, df_dropna):
         fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
@@ -258,14 +202,7 @@ def generate_wspd_vs_vspd(df, df_dropna):
     return fig
 
 def generate_line_plot(df):
-    """Generates vessel speed and yaw line plot.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates vessel speed and yaw line plot."""
     t1 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn")["VSPD kn"],
                     mode="lines", name="VSPD kn", line=dict(width=1.5,
                     color="#19336A"), hoverinfo="skip")
@@ -294,14 +231,7 @@ def generate_line_plot(df):
     return fig
 
 def generate_channel_occ(df):
-    """Generates channel occupancy and vessel speed scatter plot.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates channel occupancy and vessel speed scatter plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
                   "Vessel Class":True, "Course Behavior":True, "Yaw deg":True,
                   "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
@@ -329,14 +259,7 @@ def generate_channel_occ(df):
     return fig
 
 def generate_dashboard(df):
-    """Generates dashboard.
-
-    Args:
-        df: Pandas DataFrame of vessel data.
-
-    Returns:
-        Plotly figure.
-    """
+    """Generates dashboard."""
     fig = None
     fig = ff.create_table(df, index=True, index_title="Port",
                           height_constant=20, colorscale=[[0.0, "#787878"],
