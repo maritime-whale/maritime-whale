@@ -23,8 +23,10 @@ WIND_TIME_TOL = 3 # in hours
 MPS_TO_MPH = 2.237 # meters per sec to miles per hour
 M_TO_FT = 3.28 # meters to feet
 
+# TODO(davnajork): revise function headers
 # TODO(omrinewman): break import_report into smaller functions
 # TODO: choose better naming when processing winds (i.e. "data" and "alt_data")
+# TODO: document wind speed matching design decisions and quirks in methodologies
 
 def validate_vmr(df):
     """Validation function removes vessel positions with '511' error instances,
@@ -93,7 +95,6 @@ def import_report(path):
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
-
     df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
                "SPEED": "VSPD kn", "COURSE": "Course", "HEADING": "Heading",
@@ -145,12 +146,10 @@ def import_report(path):
         off_locs = ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index
         offshore_indices = ports[i].index.isin(off_locs)
         ports[i].loc[:, "Location"][offshore_indices] = "Offshore"
-
         # capture datetime info to be used for wind buoy matching
         year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
         month = ports[i]["Date/Time UTC"].iloc[0].strftime("%m")
         day = ports[i]["Date/Time UTC"].iloc[0].strftime("%d")
-
         # read main and alternate wind buoy txt files as pandas DataFrames
         for buoy_set in [buoys, alt_buoys]:
             for buoy in buoy_set[i].keys():
@@ -166,7 +165,6 @@ def import_report(path):
                     sys.stderr.write("Error: Could not load wind data for " +
                                      "buoy with ID: " + buoy + "...\n")
                     continue
-
         for buoy, alt_buoy in zip(buoys[i].items(), alt_buoys[i].items()):
             # initialize dictionary to store wind direction, speed, and gust
             final_winds = {"WDIR degT":[], "WSPD mph":[], "GST mph":[]}
@@ -205,7 +203,6 @@ def import_report(path):
             data.loc[:, "Date/Time UTC"] = converted_times
             data.rename({"WDIR":"WDIR degT", "WSPD":"WSPD m/s",
                          "GST":"GST m/s"}, axis=1, inplace=True)
-
             # remove missing points from buoy data
             data = data[(data["WDIR degT"] != "MM") &
                         (data["WSPD m/s"] != "MM") &
@@ -219,7 +216,6 @@ def import_report(path):
             data.loc[:, "GST mph"] = data.loc[:, "GST mph"].round(2)
             buoys[i][id] = data[["Date/Time UTC", "WDIR degT", "WSPD mph",
                                  "GST mph"]]
-
             # ensure alternate buoy data is not empty
             if not (isinstance(alt_data, type(None)) or alt_data.shape[0] == 0):
                 # filter buoy data for current day
@@ -252,7 +248,6 @@ def import_report(path):
                                               .loc[:, "GST mph"].round(2))
                 alt_buoys[i][alt_id] = alt_data[["Date/Time UTC", "WDIR degT",
                                                  "WSPD mph", "GST mph"]]
-
             # match windspeed timestamp with closest vessel position timestamps
             input_times = None
             # set wind data based on the port and availability of main
@@ -330,7 +325,6 @@ def import_report(path):
         ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
                                              "Course Behavior"].replace(
                                              courses).astype("str")
-
         # initialize Vessel Class column to Panamax, and update based on
         # Post-Panamax LOA ft values to minimize computation
         ports[i].loc[:, "Vessel Class"] = "Panamax"
@@ -350,17 +344,15 @@ def import_report(path):
             # of vessel positions
             EB.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
                             (math.cos(math.radians(yaw[l])) * beam[l])))
-
         ports[i].loc[:, "Effective Beam ft"] = EB
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
                                                "Effective Beam ft"].round(0)
         # remove unwanted blacklist vessels
         ports[i] = filter_blacklisters(ports[i], blacklist)
-        # create rounded datetime column for meetpass analysis
+        # create rounded DateTime column for meetpass analysis
         stamps = len(ports[i].loc[:, "Date/Time UTC"]) # number of timestamps
         round_times = ports[i].loc[:, "Date/Time UTC"].iloc[ii].floor("Min")
         ports[i].loc[:, "rounded date"] = [round_times for ii in range(stamps)]
-
         # run meetpass analysis and create Transit column based on results
         mp = meetpass(ports[i])
         two_way = twoway(ports[i], mp)
@@ -368,7 +360,6 @@ def import_report(path):
         if not isinstance(two_way, type(None)):
             two_way_indices = ports[i].index.isin(two_way.index)
             ports[i]["Transit"][two_way_indices] = "Two-way Transit"
-
         # reset index to clear previous pandas manipulations
         ports[i] = ports[i].reset_index()
         # total channel width for CH and SV are 1000 and 600 ft respectively,
@@ -400,10 +391,8 @@ def import_report(path):
                 sys.stderr.write("Error: Undefined vessel class and " +
                                  "transit combination...\n")
                 ports[i].loc[row, "% Channel Occupied"] = float("NaN")
-
         # save current format of data as all_res to be used for all positions
         all_res = ports[i]
-
         # remove sections of channel where ships turn
         if i % 2:
             all_res = all_res[(all_res.Latitude <= 32.02838) &
@@ -411,7 +400,6 @@ def import_report(path):
                                   (all_res.Latitude <= 31.99183)]
         else:
             all_res = all_res[all_res.Latitude >= 32.667473]
-
         # compute mean speed and identify max speed per vessel
         mean = pd.DataFrame(
             ports[i].groupby(["Name", "MMSI"])["VSPD kn"].mean()).rename(
@@ -427,7 +415,6 @@ def import_report(path):
                    "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
                    "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
                    "% Channel Occupied":[]}
-
         # grab remaining data based on max speed position
         for key, value in max_dict.items():
             for k in columns.keys():
@@ -436,7 +423,6 @@ def import_report(path):
         for key in columns.keys():
             merged_speeds[key] = columns[key]
         merged_speeds = merged_speeds.reset_index()
-
         # save result to variable and sort on max speeds
         geo_res = merged_speeds
         geo_res.sort_values("Max Speed kn", ascending=False, inplace=True)
@@ -448,7 +434,6 @@ def import_report(path):
                            "WSPD mph", "GST mph", "Buoy Source", "Location",
                            "Latitude", "Longitude", "Transit",
                            "% Channel Occupied"]]
-
         # return positional data in specified order
         all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
                            "% Channel Occupied", "Yaw deg", "Effective Beam ft",
@@ -460,5 +445,4 @@ def import_report(path):
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vesel speed positions
         ports[i] = [geo_res, all_res]
-
     return ports[0], ports[1] # ch, sv

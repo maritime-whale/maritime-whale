@@ -21,7 +21,7 @@ import datetime
 import glob
 import os
 
-# TODO: more inline comments
+# TODO(davnajork): more inline comments
 # TODO: break into subfunctions? (still belong in main)
 # TODO: document subfunctions (depends on if we go through with above todo)
 

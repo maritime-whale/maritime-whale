@@ -2,8 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Detect meeting and passing instances between ships using a rudimentary
-# algorithm.
+# Detect meeting and passing instances between ships.
 
 from import_maritime_data import *
 from datetime import timedelta
@@ -14,56 +13,75 @@ import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
 
+# TODO: document meeting and passing algorithm design decisions and other quirks
+#       in methodologies
+#       (i.e.
+#        Q: why do we use a time threshold and not a distance threshold?
+#        A: because if we simply look for matching timestamps between distinct
+#        ships with opposing courses, both ships must be within the entrance
+#        channel -- either the ships are about to meet and pass or they already
+#        have; just keep track of how close the ships get to each other and mark
+#        those entries as an encounter
+#        Q: how do we know which entries to label as two way?
+#        A: until the ships finally pass each other, all the entries for that
+#        ship should be marked as two way because... don't be afraid to make
+#        use of more diagrams -- not necessarily UML)
+# TODO(omrinewman): revise function headers
+# TODO: rename "sub", "level", "fragments" etc
+# TODO: better inline documentation and (evidently) better naming will help
+#       improve the readability and discernibility
+
 def _calc_naut_dist(lat1, long1, lat2, long2):
     """Compute the nautical distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 def meetpass_helper(df, time_tolerance):
-    """This function takes in a cleaned up entry channel dataframe plus desired
-    time tolerance and returns potential meet/pass positions.
+    """Identifies potential instances of meeting and passing. If the timestamps
+    cooresponding to a pair of distinct data points -- with opposing courses --
+    are within the limit, then flag those particular movement entries.
 
     Args:
-        df: Pandas DataFrame of vessel data for a single day.
-        time_tolerance: Integer value used for comparing difference in times.
+        df: Vessel movement DataFrame.
+        time_tolerance: maximum (inclusive) acceptable time delta -- in minutes.
 
     Returns:
-        Pandas DataFrame of Position reports for potential meet/pass instances.
+        Vessel movement DataFrame containing only data points flagged as
+        potentially meeting and passing.
     """
     # sorts timestamps such that entry channel data is in chronological order
-    times = df.sort_values("Date/Time UTC")
-    mmsi = list(times.MMSI)
-    timestamp = list(times["Date/Time UTC"])
-    course = list(times["Course Behavior"])
+    chrono_df = df.sort_values("Date/Time UTC")
+    mmsi = list(chrono_df.MMSI)
+    timestamp = list(chrono_df["Date/Time UTC"])
+    course = list(chrono_df["Course Behavior"])
     potential_times = []
     for i in range(len(mmsi) - 1):
-            if mmsi[i] != mmsi[i + 1]:
-                if ((timestamp[i + 1] - timestamp[i]) <=
-                    timedelta(minutes=time_tolerance)):
-                    if course[i] != course[i + 1]:
-                        potential_times.append(timestamp[i])
-                        potential_times.append(timestamp[i + 1])
-                        sorted(potential_times)
-
-    res = times[times["Date/Time UTC"].isin(potential_times)]
+        if mmsi[i] != mmsi[i + 1]:
+            if ((timestamp[i + 1] - timestamp[i]) <=
+                timedelta(minutes=time_tolerance)):
+                if course[i] != course[i + 1]:
+                    potential_times.append(timestamp[i])
+                    potential_times.append(timestamp[i + 1])
+                    sorted(potential_times)
+    res = chrono_df[chrono_df["Date/Time UTC"].isin(potential_times)]
     return res
 
 def meetpass(df):
-    """Parses single days worth of vessel data and returns confirmed meeting
-    and passing instances between two ships at their moment of closest approach
-    in time and space, utilizing nautical distance and meet/pass time tolerance.
+    """Identifies instances of meeting and passing between ships. Records moment
+    of closest approach by comparing variations in timestamps as well as
+    nautical distances.
 
     Args:
-        df: Pandas DataFrame of vessel data for a single day.
+        df: Vessel movement DataFrame.
 
     Returns:
-        Dictionary of meeting and passing instances.
+        Dictionary of verified meeting and passing encounters.
     """
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
     flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
-            ["MMSI", "Course Behavior", pd.Grouper(
-                key="Date/Time UTC", freq="min")])[["Date/Time UTC"]].size()
-
+                             ["MMSI", "Course Behavior", pd.Grouper(
+                              key="Date/Time UTC", freq="min")])[[
+                              "Date/Time UTC"]].size()
     # sub should contain all the flagged times
     sub = {}
     for level in flagged.index.unique(0):
@@ -130,15 +148,16 @@ def meetpass(df):
     return true_encs
 
 def twoway(df, true_encs):
-    """Identifies instances of two way transit conditions.
+    """Identifies and labels two way transit condition within the data.
 
     Args:
-        df: Pandas DataFrame of vessel data for a single day.
-        true_encs: Dictionary of meet/pass encounters from meetpass function.
+        df: Vessel movement DataFrame.
+        true_encs: Dictionary of verified meeting and passing encounters.
 
     Returns:
-        Pandas DataFrame of positions up to and including meeting and passing
-        for all ships involved in two way transit conditions.
+        Vessel movement DataFrame containing only entries that should be
+        labelled as two way transit. (IMPORTANT) Preserves indices from original
+        DataFrame, df.
     """
     two_way = []
     for key in true_encs:
@@ -149,23 +168,12 @@ def twoway(df, true_encs):
         enc_time = true_encs[key][0]
         two_way.append(twoway_helper(df, this_mmsi, this_course, enc_time))
         two_way.append(twoway_helper(df, that_mmsi, that_course, enc_time))
-    if two_way == []:
+    if not two_way:
         return None
     return pd.concat(two_way)
 
 def twoway_helper(df, mmsi, course, enc_time):
-    """Helper function for two way transit detection function
-
-    Args:
-        df: Pandas DataFrame of vessel data for a single day.
-        mmsi: Integer ship MMSI.
-        course: String of course behavior (Inbound/Outbound).
-        enc_time: Timestamp output from true encounter dicionary.
-
-    Returns:
-        Pandas DataFrame of positions up to and including time of meeting and
-        passing for a given ship.
-    """
+    """Isolate entries based on specified MMSI, course, and encounter time."""
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res

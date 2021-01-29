@@ -13,6 +13,9 @@ import pandas as pd
 
 OUTAGE_THRESHOLD = 0.65 # ratio
 
+# TODO: document plotting design decisions and quirks in methodologies
+# TODO(davnajork): revise function headers
+
 def check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day.
 

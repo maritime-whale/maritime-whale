@@ -8,15 +8,7 @@
 import pandas as pd
 
 def dashboard(df):
-    """Computes relevant statistics for port entrance broken up by vessel class.
-
-    Args:
-        df: Pandas DataFrame with multiple days of vessel and wind data.
-
-    Returns:
-        Pandas DataFrame with vessel statistics.
-
-    """
+    """Generate DataFrame containing relevant port entrance statistics."""
     panamax = (df["Vessel Class"] == "Panamax")
     post_panamax = (df["Vessel Class"] == "Post-Panamax")
     nearshore = (df["Location"] == "Nearshore")
