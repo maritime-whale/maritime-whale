@@ -27,7 +27,6 @@ MEET_PASS_TIME_TOL = 1 # in hours
 #        ship should be marked as two way because... don't be afraid to make
 #        use of more diagrams -- not necessarily UML)
 # TODO(omrinewman): revise function headers
-# TODO: rename "sub", "level", "fragments" etc
 # TODO: better inline documentation and (evidently) better naming will help
 #       improve the readability and discernibility
 
@@ -82,16 +81,16 @@ def meetpass(df):
                              ["MMSI", "Course Behavior", pd.Grouper(
                               key="Date/Time UTC", freq="min")])[[
                               "Date/Time UTC"]].size()
-    # sub should contain all the flagged times
-    sub = {}
-    for level in flagged.index.unique(0):
-        sub[level] = flagged.xs(level, level=0).index
-    sub.items()
+    # potential_encs should contain all the flagged times
+    potential_encs = {}
+    for entry in flagged.index.unique(0):
+        potential_encs[entry] = flagged.xs(entry, level=0).index
+    potential_encs.items()
     true_encs = {}
     min_dist = 0.1
     # TODO: minimize comparison operations between timestamps
-    while len(sub):
-        item = sub.popitem()
+    while len(potential_encs):
+        item = potential_encs.popitem()
         cur_key = item[0]
         cur_val = item[1]
         i = 0
@@ -106,7 +105,7 @@ def meetpass(df):
                                    matching_times].Longitude.values[0].round(5)
             this_class = rounded_df[matching_keys &
                                     matching_times]["Vessel Class"].values[0]
-            for inner_key, inner_val in sub.items():
+            for inner_key, inner_val in potential_encs.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
                     that_time = that[1]
