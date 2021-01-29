@@ -28,7 +28,7 @@ M_TO_FT = 3.28 # meters to feet
 # TODO: choose better naming when processing winds (i.e. "data" and "alt_data")
 # TODO: document wind speed matching design decisions and quirks in methodologies
 
-def validate_vmr(df):
+def _validate_vmr(df):
     """Validation function removes vessel positions with '511' error instances,
     abnormally high speed due to reporting error, abnormally high vessel width,
     and vessels with only one recorded position report.
@@ -49,7 +49,7 @@ def validate_vmr(df):
              df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
     return df
 
-def filter_blacklisters(df, blacklist):
+def _filter_blacklisters(df, blacklist):
     """Blacklist filtering checks AIS types for unwanted vessels, removes them
     from the data, and updates the running blacklist.txt file with vessel
     MMSI's.
@@ -105,7 +105,7 @@ def import_report(path):
     df["Beam ft"] = df["Beam ft"].round(0)
     df["Latitude"] = df["Latitude"].round(5)
     df["Longitude"] = df["Longitude"].round(5)
-    df = validate_vmr(df)
+    df = _validate_vmr(df)
     df = df[df["LOA ft"] >= SUB_PANAMAX] # filter out sub-panamax class vessels
     df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
     df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
@@ -347,7 +347,7 @@ def import_report(path):
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
                                                "Effective Beam ft"].round(0)
         # remove unwanted blacklist vessels
-        ports[i] = filter_blacklisters(ports[i], blacklist)
+        ports[i] = _filter_blacklisters(ports[i], blacklist)
         # create rounded DateTime column for meetpass analysis
         stamps = len(ports[i].loc[:, "Date/Time UTC"]) # number of timestamps
         round_times = ports[i].loc[:, "Date/Time UTC"].iloc[ii].floor("Min")

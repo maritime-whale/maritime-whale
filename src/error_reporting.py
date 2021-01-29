@@ -71,7 +71,7 @@ def create_message_with_attachment(sender, to, subject, message_text, file):
     message.attach(msg)
     return {"raw": base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
-def send_message(service, user_id, message):
+def _send_message(service, user_id, message):
     """Sends health message via Gmail."""
     try:
         message = (service.users().messages().send(userId=user_id, body=message)
@@ -85,7 +85,7 @@ def send_message(service, user_id, message):
 # TODO: finish (simple) health status logic
 # TODO: (potentially) implement a way to alert when (triggered by an error with
 # SCP? for AWS; check that health emails were sent? for Gmail)
-def get_webapp_health_status():
+def _get_webapp_health_status():
     """To be implemented..."""
     # grab the most recent 6 logfiles:
     # vmr_out.log, vmr_err.log, sync_out.log, sync_err.log,
@@ -106,10 +106,10 @@ def main():
     msg = create_message_with_attachment(VMR_EMAIL_ADDRESS, VMR_EMAIL_ADDRESS,
                                          "Maritime Whale Web App Health Report",
                                          "Status: " +
-                                         get_webapp_health_status(),
+                                         _get_webapp_health_status(),
                                          zip + ".zip")
     if msg:
-        send_message(service, "me", msg)
+        _send_message(service, "me", msg)
 
 if __name__ == "__main__":
     main()

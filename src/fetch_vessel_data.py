@@ -14,8 +14,8 @@ import datetime
 import os.path
 import base64
 
-def get_attachments(logfile, service, user_id, msg_id):
-    """Extract and store email attachments from specific Gmail message."""
+def _get_attachments(logfile, service, user_id, msg_id):
+    """Extracts and stores email attachments from specific Gmail message."""
     try:
         message = service.users().messages().get(userId=user_id,
                                                  id=msg_id).execute()
@@ -51,7 +51,7 @@ def get_attachments(logfile, service, user_id, msg_id):
     return filenames
 
 def fetch_latest_reports(logfile):
-    """Retrieves the latest 'unread' attachments from the Gmail inbox."""
+    """Retrieves latest 'unread' attachments from the Gmail inbox."""
     creds = gmail_auth(logfile)
     # call the Gmail API
     days = []
@@ -62,7 +62,7 @@ def fetch_latest_reports(logfile):
     if raw["resultSizeEstimate"] > 0:
         unread = [msg["id"] for msg in raw["messages"]]
         for msg_id in unread:
-            days += get_attachments(logfile, service, "me", msg_id)
+            days += _get_attachments(logfile, service, "me", msg_id)
             service.users().messages().modify(userId="me", id=msg_id,
                                               body={"removeLabelIds":
                                               ["UNREAD"]}).execute()
