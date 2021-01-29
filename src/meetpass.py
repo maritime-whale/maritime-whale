@@ -158,7 +158,7 @@ def twoway(df, true_encs):
     return pd.concat(two_way)
 
 def twoway_helper(df, mmsi, course, enc_time):
-    """Helper function to two way transit detection function
+    """Helper function for two way transit detection function
 
     Args:
         df: Pandas DataFrame of vessel data for a single day.
