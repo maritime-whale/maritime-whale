@@ -31,13 +31,10 @@ def meetpass_helper(df, time_tolerance):
     """
     # sorts timestamps such that entry channel data is in chronological order
     times = df.sort_values("Date/Time UTC")
-
     mmsi = list(times.MMSI)
     timestamp = list(times["Date/Time UTC"])
     course = list(times["Course Behavior"])
-
     potential_times = []
-
     for i in range(len(mmsi) - 1):
             if mmsi[i] != mmsi[i + 1]:
                 if ((timestamp[i + 1] - timestamp[i]) <=
@@ -72,7 +69,6 @@ def meetpass(df):
     for level in flagged.index.unique(0):
         sub[level] = flagged.xs(level, level=0).index
     sub.items()
-
     true_encs = {}
     min_dist = 0.1
     # TODO: minimize comparison operations between timestamps
