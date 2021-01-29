@@ -12,7 +12,7 @@ import math
 import sys
 
 # vessel (AIS) types that should be automatically purged from analysis
-# https://api.vesselfinder.com/docs/ref-aistypes.html
+# see details at https://api.vesselfinder.com/docs/ref-aistypes.html
 AUTO_BLACKLIST = [30, 31, 32, 33, 34, 35, 36, 37, 51, 52, 53, 55, 57, 58, 59]
 
 # thresholds and tolerances
@@ -25,7 +25,6 @@ M_TO_FT = 3.28 # meters to feet
 
 # TODO(omrinewman): break import_report into smaller functions
 # TODO: choose better naming when processing winds (i.e. "data" and "alt_data")
-# TODO: change all_res and geo_res to movements and crushed_movements (or something like that)
 
 def validate_vmr(df):
     """Validation function removes vessel positions with '511' error instances,

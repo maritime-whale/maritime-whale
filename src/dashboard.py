@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Generate season-to-date dashboard from DataFrame. Centralized view for
+# Generates season-to-date dashboard from DataFrame. Centralized view for
 # statistics of interest.
 
 import pandas as pd

@@ -106,7 +106,7 @@ if [ ! -d "$TEMP" ]; then
     mkdir $TEMP # create the directory if it doesn't exist
 fi
 
-# some helpful links:
+# see details at
 # https://www.ndbc.noaa.gov/data/realtime2/
 # https://www.ndbc.noaa.gov/station_page.php?station=41004 (Charleston Buoy)
 # https://www.ndbc.noaa.gov/station_page.php?station=41008 (Savannah Buoy)

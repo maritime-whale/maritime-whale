@@ -2,8 +2,9 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Handle Gmail OAuth token validation, creation, and storage.
+# Handles Gmail OAuth token validation, creation, and storage.
 
+# see details at
 # https://developers.google.com/gmail/api/quickstart/python?authuser=2
 
 from func_timeout import func_timeout, FunctionTimedOut
@@ -23,17 +24,7 @@ SCOPES = [
 ]
 
 def gmail_auth(logfile):
-    """Description...
-
-    Args:
-        logfile:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
+    """Handles Gmail authorization via Gmail API."""
     creds = None
     # the file .token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first

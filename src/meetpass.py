@@ -2,7 +2,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Rudimentary algorithm to detect meeting and passing instances between ships.
+# Detect meeting and passing instances between ships using a rudimentary
+# algorithm.
 
 from import_maritime_data import *
 from datetime import timedelta

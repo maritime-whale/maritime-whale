@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Send a health report via specialized Gmail account.
+# Sends a health report via specialized Gmail account.
 
 from email.mime.multipart import MIMEMultipart
 from googleapiclient.discovery import build
@@ -26,20 +26,17 @@ OUT_LOGFILE = "../logs/report_out.log"
 VMR_EMAIL_ADDRESS = "vmr.riwhale@gmail.com"
 
 def create_message_with_attachment(sender, to, subject, message_text, file):
-    """Description...
+    """Sends a message and a payload via Gmail.
 
     Args:
-        sender:
-        to:
-        subject:
-        message_text:
+        sender: Email address of sender string.
+        to: Email address of recipient string.
+        subject: Subject line string.
+        message_text: Message body string.
         file:
 
     Returns:
-        ...
-
-    Raises:
-        ...
+        Dictionary containing raw byte encoding of message.
     """
     message = MIMEMultipart()
     message["to"] = to
@@ -75,19 +72,7 @@ def create_message_with_attachment(sender, to, subject, message_text, file):
     return {"raw": base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 def send_message(service, user_id, message):
-    """Description...
-
-    Args:
-        service:
-        user_id:
-        message:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
+    """Sends health message via Gmail."""
     try:
         message = (service.users().messages().send(userId=user_id, body=message)
                    .execute())
@@ -101,6 +86,7 @@ def send_message(service, user_id, message):
 # TODO: (potentially) implement a way to alert when (triggered by an error with
 # SCP? for AWS; check that health emails were sent? for Gmail)
 def get_webapp_health_status():
+    """To be implemented..."""
     # grab the most recent 6 logfiles:
     # vmr_out.log, vmr_err.log, sync_out.log, sync_err.log,
     # report_err.log, and YYYY_MM_DD_HH_mm_ss.log
@@ -110,17 +96,6 @@ def get_webapp_health_status():
     return "UNKNOWN"
 
 def main():
-    """Description...
-
-    Args:
-        df:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
     creds = gmail_auth(ERR_LOGFILE)
     service = build("gmail", "v1", credentials=creds)
     log(OUT_LOGFILE, "Google OAuth successful.")

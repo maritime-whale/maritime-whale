@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Fetch vessel data from unread emails in specifically configured Gmail inbox.
+# Fetches vessel data from unread emails in specifically configured Gmail inbox.
 
 from googleapiclient.discovery import build
 from apiclient import errors
@@ -15,20 +15,7 @@ import os.path
 import base64
 
 def get_attachments(logfile, service, user_id, msg_id):
-    """Description...
-
-    Args:
-        logfile:
-        service:
-        user_id:
-        msg_id:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
+    """Extract and store email attachments from specific Gmail message."""
     try:
         message = service.users().messages().get(userId=user_id,
                                                  id=msg_id).execute()
@@ -64,17 +51,7 @@ def get_attachments(logfile, service, user_id, msg_id):
     return filenames
 
 def fetch_latest_reports(logfile):
-    """Description...
-
-    Args:
-        logfile:
-
-    Returns:
-        ...
-
-    Raises:
-        ...
-    """
+    """Retrieves the latest 'unread' attachments from the Gmail inbox."""
     creds = gmail_auth(logfile)
     # call the Gmail API
     days = []

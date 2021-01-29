@@ -9,7 +9,7 @@
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sudo yum install python3
     sudo easy_install pip
-    sudo pip3 install pip-upgrader # https://github.com/simion/pip-upgrader
+    sudo pip3 install pip-upgrader # see https://github.com/simion/pip-upgrader
     pip-upgrade --skip-virtualenv-check -p all
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"

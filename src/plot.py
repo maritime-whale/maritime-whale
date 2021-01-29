@@ -2,10 +2,9 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Generate plots using Plotly and MapBox.
+# Generates plots using Plotly and MapBox.
 
-# NOTES:
-# https://plotly.com/python/mapbox-layers/ (example used)
+# see details at https://plotly.com/python/mapbox-layers/
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go

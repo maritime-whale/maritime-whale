@@ -3,8 +3,8 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# If new data is ready to be fetched, load cache files into memory, generate
-# and write new ouput and cache files.
+# If new data is ready to be fetched, loads cache files into memory, generates
+# and writes new ouput and cache files.
 
 from import_maritime_data import *
 from fetch_vessel_data import *
