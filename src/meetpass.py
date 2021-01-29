@@ -32,7 +32,7 @@ MEET_PASS_TIME_TOL = 1 # in hours
 #       improve the readability and discernibility
 
 def _calc_naut_dist(lat1, long1, lat2, long2):
-    """Compute the nautical distance between two geolocations"""
+    """Computes the nautical distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 def _meetpass_helper(df, time_tolerance):
@@ -148,7 +148,7 @@ def meetpass(df):
     return true_encs
 
 def _twoway_helper(df, mmsi, course, enc_time):
-    """Isolate entries based on specified MMSI, course, and encounter time."""
+    """Isolates entries based on specified MMSI, course, and encounter time."""
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res

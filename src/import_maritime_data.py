@@ -423,10 +423,10 @@ def import_report(path):
             merged_speeds[key] = columns[key]
         merged_speeds = merged_speeds.reset_index()
         # save result to variable and sort on max speeds
-        geo_res = merged_speeds
-        geo_res.sort_values("Max Speed kn", ascending=False, inplace=True)
+        fold_res = merged_speeds
+        fold_res.sort_values("Max Speed kn", ascending=False, inplace=True)
         # return max and mean positional data in specified order
-        geo_res = geo_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
+        fold_res = fold_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
                            "Mean Speed kn", "LOA ft", "Beam ft", "Vessel Class",
                            "AIS Type", "Course", "Heading", "Course Behavior",
                            "Yaw deg", "Effective Beam ft", "WDIR degT",
@@ -442,5 +442,5 @@ def import_report(path):
                            "Longitude", "Date/Time UTC"]]
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vesel speed positions
-        ports[i] = [geo_res, all_res]
+        ports[i] = [fold_res, all_res]
     return ports[0], ports[1] # ch, sv

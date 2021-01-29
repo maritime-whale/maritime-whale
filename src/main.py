@@ -22,8 +22,8 @@ import glob
 import os
 
 # TODO(davnajork): more inline comments
-# TODO: break into subfunctions? (still belong in main)
-# TODO: document subfunctions (depends on if we go through with above todo)
+# TODO: break into subfunctions (still belong in main)
+# TODO: document subfunctions
 
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
@@ -66,7 +66,7 @@ def main():
                       if f.is_dir()], reverse=True)
         for subdir in dirs:
             path = "../cache/" + subdir + "/*.csv"
-            # [flattened_ch, flattened_sv, all_ch, all_sv]
+            # [fold_ch, fold_sv, all_ch, all_sv]
             caches = [None, None, None, None]
             for filename in glob.glob(path):
                 if filename.endswith(".csv"):
@@ -87,12 +87,11 @@ def main():
                                 pd.concat([caches[0], caches[1]]),
                                 caches[2], caches[3],
                                 pd.concat([caches[2], caches[3]])])
-        # [[flattened_ch, flattened_sv, flattened_agg], [all_ch, all_sv,
-        #                                                all_agg]]
+        # [[fold_ch, fold_sv, fold_agg], [all_ch, all_sv, all_agg]]
         last_seven_days = [[[], [], []], [[], [], []]]
         span = 0
-        # [[rest_of_season_ch, rest_of_season_sv], [rest_of_season_ch_all,
-        #                                           rest_of_season_sv_all]]
+        # [[rest_of_season_ch, rest_of_season_sv],
+        #  [rest_of_season_ch_all, rest_of_season_sv_all]]
         rest_of_season = [[[], []], [[],[]]]
         for df in data_frames:
             if span < 7:
