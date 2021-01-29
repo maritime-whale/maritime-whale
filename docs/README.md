@@ -11,7 +11,7 @@ technologies such as Amazon Web Services, GitHub, Gmail, and Wix.
 
 ### Installation
 1. Clone this repo.
-2. Set your current working directory to the root directory of the repo.
+2. Set your current working directory to the root directory of this repo.
 3. Run `./install`.
 
 ### First-time use & validation
