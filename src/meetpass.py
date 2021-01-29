@@ -42,7 +42,7 @@ def meetpass_helper(df, time_tolerance):
 
     Args:
         df: Vessel movement DataFrame.
-        time_tolerance: maximum (inclusive) acceptable time delta -- in minutes.
+        time_tolerance: Maximum (inclusive) acceptable time delta -- in minutes.
 
     Returns:
         Vessel movement DataFrame containing only data points flagged as
