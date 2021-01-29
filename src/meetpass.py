@@ -35,7 +35,7 @@ def _calc_naut_dist(lat1, long1, lat2, long2):
     """Compute the nautical distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
-def meetpass_helper(df, time_tolerance):
+def _meetpass_helper(df, time_tolerance):
     """Identifies potential instances of meeting and passing. If the timestamps
     cooresponding to a pair of distinct data points -- with opposing courses --
     are within the limit, then flag those particular movement entries.
@@ -78,7 +78,7 @@ def meetpass(df):
     """
     rounded_df = df.copy()
     rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
-    flagged = meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
+    flagged = _meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
                              ["MMSI", "Course Behavior", pd.Grouper(
                               key="Date/Time UTC", freq="min")])[[
                               "Date/Time UTC"]].size()
@@ -147,6 +147,12 @@ def meetpass(df):
             i += 1
     return true_encs
 
+def _twoway_helper(df, mmsi, course, enc_time):
+    """Isolate entries based on specified MMSI, course, and encounter time."""
+    res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
+             (df["rounded date"] <= enc_time)]
+    return res
+
 def twoway(df, true_encs):
     """Identifies and labels two way transit condition within the data.
 
@@ -166,14 +172,8 @@ def twoway(df, true_encs):
         this_course = key[4]
         that_course = key[5]
         enc_time = true_encs[key][0]
-        two_way.append(twoway_helper(df, this_mmsi, this_course, enc_time))
-        two_way.append(twoway_helper(df, that_mmsi, that_course, enc_time))
+        two_way.append(_twoway_helper(df, this_mmsi, this_course, enc_time))
+        two_way.append(_twoway_helper(df, that_mmsi, that_course, enc_time))
     if not two_way:
         return None
     return pd.concat(two_way)
-
-def twoway_helper(df, mmsi, course, enc_time):
-    """Isolate entries based on specified MMSI, course, and encounter time."""
-    res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
-             (df["rounded date"] <= enc_time)]
-    return res
