@@ -6,7 +6,7 @@
 # If new data is ready to be fetched, loads cache files into memory, generates
 # and writes new ouput and cache files.
 
-from import_maritime_data import *
+from process_maritime_data import *
 from fetch_vessel_data import *
 from dashboard import *
 from cache import *
@@ -40,7 +40,7 @@ def main():
             if not sync_required:
                 sync_required = True
             input_filename = day.strftime("%Y-%m-%d.csv")
-            report = import_report("../temp/" + input_filename)
+            report = process_report("../temp/" + input_filename)
             log(logfile, "Importing data from " + input_filename + "...")
             os.makedirs(os.path.dirname("../cache/" + date + "/"),
                         exist_ok=True)

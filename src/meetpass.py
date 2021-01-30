@@ -4,7 +4,7 @@
 #
 # Detect meeting and passing instances between ships.
 
-from import_maritime_data import *
+from process_maritime_data import *
 from datetime import timedelta
 
 import pandas as pd
