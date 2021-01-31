@@ -31,7 +31,7 @@ MEET_PASS_TIME_TOL = 1 # in hours
 # TODO: decompose meetpass some more (?)
 
 def _calc_dist(lat1, long1, lat2, long2):
-    """Computes the distance between two geolocations"""
+    """Computes the Euclidean distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 def _meetpass_helper(df, time_tolerance):
