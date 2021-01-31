@@ -109,7 +109,7 @@ def main():
         for i in range(len(maritime_data[0])):
             maritime_data[0][i] = pd.concat(maritime_data[0][i]).reset_index().drop("index", axis=1)
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
-        zooms = (10.5, 11, 8)
+        zooms = (8.5, 9.25, 7)
         centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753, lon=-80.78728), dict())
         opacity = (0.75, 0.75, 0.6)
         sizes = ([431, 819], [431, 819], [431, 819])
