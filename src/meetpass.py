@@ -28,6 +28,7 @@ MEET_PASS_TIME_TOL = 1 # in hours
 #        use of more diagrams -- not necessarily UML)
 # TODO: better inline documentation and (evidently) better naming will help
 #       improve the readability and discernibility
+# TODO: decompose meetpass some more (?)
 
 def _calc_naut_dist(lat1, long1, lat2, long2):
     """Computes the nautical distance between two geolocations"""
