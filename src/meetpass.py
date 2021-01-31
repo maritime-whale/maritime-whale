@@ -30,8 +30,8 @@ MEET_PASS_TIME_TOL = 1 # in hours
 #       improve the readability and discernibility
 # TODO: decompose meetpass some more (?)
 
-def _calc_naut_dist(lat1, long1, lat2, long2):
-    """Computes the nautical distance between two geolocations"""
+def _calc_dist(lat1, long1, lat2, long2):
+    """Computes the distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 def _meetpass_helper(df, time_tolerance):
@@ -67,7 +67,7 @@ def _meetpass_helper(df, time_tolerance):
 def meetpass(df):
     """Identifies instances of meeting and passing between ships. Records moment
     of closest approach by comparing variations in timestamps as well as
-    minimizing nautical distances.
+    by minimizing distances.
 
     Args:
         df: Vessel movement DataFrame.
@@ -122,7 +122,7 @@ def meetpass(df):
                                            ]["Vessel Class"].values[0]
                     if ((this_time == that_time) and
                         (this_course != that_course)):
-                        dist = _calc_naut_dist(this_lat, this_long,
+                        dist = _calc_dist(this_lat, this_long,
                                               that_lat, that_long)
                         # check if true encounter (within minimum distance)
                         if min_dist >= dist:
