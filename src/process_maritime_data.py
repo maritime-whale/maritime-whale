@@ -187,7 +187,7 @@ def process_report(path):
                 ports[i].loc[:, "Buoy Source"] = outage
                 continue
             # if no data exists for main buoy, switch to alternate
-        elif isinstance(buoy_data, type(None)) or buoy_data.shape[0] == 0:
+            elif isinstance(buoy_data, type(None)) or buoy_data.shape[0] == 0:
                 buoy_data = alt_buoy_data
             # filter buoy data to correspond to the correct day
             buoy_data = buoy_data[(buoy_data["#YY"] == year) &
