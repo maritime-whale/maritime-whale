@@ -13,10 +13,6 @@ import pandas as pd
 
 OUTAGE_THRESHOLD = 0.65 # ratio
 
-# TODO: document plotting design decisions and quirks in methodologies
-# TODO(omrinewman): revise function headers
-# TODO: maybe some inline comments? don't really think we need to add many if we do at all
-
 def check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day."""
     if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:

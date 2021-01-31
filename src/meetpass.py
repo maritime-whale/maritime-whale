@@ -26,18 +26,21 @@ MEET_PASS_TIME_TOL = 1 # in hours
 #        A: until the ships finally pass each other, all the entries for that
 #        ship should be marked as two way because... don't be afraid to make
 #        use of more diagrams -- not necessarily UML)
-# TODO(omrinewman): revise function headers
 # TODO: better inline documentation and (evidently) better naming will help
 #       improve the readability and discernibility
 
+# Note from Omri - I think we should get rid of any mention of nautical distance
+# and simply refer to this as Euclidean distance because that's what it is.
+# Besides that everything here is fine. I noticed you removed 'pandas'. If you
+# want to stick with that, then we need to remove it from the other files as well...
 def _calc_naut_dist(lat1, long1, lat2, long2):
     """Computes the nautical distance between two geolocations"""
     return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
 
 def _meetpass_helper(df, time_tolerance):
     """Identifies potential instances of meeting and passing. If the timestamps
-    cooresponding to a pair of distinct data points -- with opposing courses --
-    are within the limit, then flag those particular movement entries.
+    cooresponding to a pair of distinct vessel positions are within the limit
+    and have opposing courses, then flag those particular movement entries.
 
     Args:
         df: Vessel movement DataFrame.
@@ -67,7 +70,7 @@ def _meetpass_helper(df, time_tolerance):
 def meetpass(df):
     """Identifies instances of meeting and passing between ships. Records moment
     of closest approach by comparing variations in timestamps as well as
-    nautical distances.
+    minimumizing nautical distances.
 
     Args:
         df: Vessel movement DataFrame.
@@ -147,13 +150,14 @@ def meetpass(df):
     return true_encs
 
 def _twoway_helper(df, mmsi, course, enc_time):
-    """Isolates entries based on specified MMSI, course, and encounter time."""
+    """Isolates entries up to and including encounter time, based on specified
+    vessel MMSI and course."""
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res
 
 def twoway(df, true_encs):
-    """Identifies and labels two way transit condition within the data.
+    """Identifies and labels two way transit conditions within the data.
 
     Args:
         df: Vessel movement DataFrame.
