@@ -23,7 +23,7 @@ import os
 
 # TODO(davnajork): more inline comments
 # TODO: break into subfunctions (still belong in main)
-# TODO: document subfunctions
+# TODO: document subfunctions (check if sync required, load cache, writing caches, writing HTML)
 
 def main():
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail

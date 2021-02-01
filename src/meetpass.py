@@ -12,23 +12,9 @@ import numpy as np
 import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
+MIN_DISTANCE = 0.1 # in degrees
 
-# TODO: document meeting and passing algorithm design decisions and other quirks
-#       in methodologies
-#       (i.e.
-#        Q: why do we use a time threshold and not a distance threshold?
-#        A: because if we simply look for matching timestamps between distinct
-#        ships with opposing courses, both ships must be within the entrance
-#        channel -- either the ships are about to meet and pass or they already
-#        have; just keep track of how close the ships get to each other and mark
-#        those entries as an encounter
-#        Q: how do we know which entries to label as two way?
-#        A: until the ships finally pass each other, all the entries for that
-#        ship should be marked as two way because... don't be afraid to make
-#        use of more diagrams -- not necessarily UML)
-# TODO: better inline documentation and (evidently) better naming will help
-#       improve the readability and discernibility
-# TODO: decompose meetpass some more (?)
+# TODO: add inline comments to meetpass
 
 def _calc_dist(lat1, long1, lat2, long2):
     """Computes the distance between two geolocations"""
@@ -87,7 +73,6 @@ def meetpass(df):
         potential_encs[entry] = flagged.xs(entry, level=0).index
     potential_encs.items()
     true_encs = {}
-    min_dist = 0.1
     # TODO: minimize comparison operations between timestamps
     while len(potential_encs):
         item = potential_encs.popitem()
@@ -123,9 +108,9 @@ def meetpass(df):
                     if ((this_time == that_time) and
                         (this_course != that_course)):
                         dist = _calc_dist(this_lat, this_long,
-                                              that_lat, that_long)
+                                          that_lat, that_long)
                         # check if true encounter (within minimum distance)
-                        if min_dist >= dist:
+                        if MIN_DISTANCE >= dist:
                             fragments = sorted([cur_key, inner_key])
                             if cur_key == fragments[0]:
                                 fragments += [this_class, that_class,
@@ -148,7 +133,8 @@ def meetpass(df):
 
 def _twoway_helper(df, mmsi, course, enc_time):
     """Isolates entries up to and including encounter time, based on specified
-    vessel MMSI and course."""
+    vessel MMSI and course.
+    """
     res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
              (df["rounded date"] <= enc_time)]
     return res
