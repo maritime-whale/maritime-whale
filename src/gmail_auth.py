@@ -42,7 +42,7 @@ def gmail_auth(logfile):
                 log(logfile, "Request was not completed within " + str(LIMIT) +
                              " seconds.")
                 exit(1)
-            except Exception as e:
+            except:
                 log(logfile, "Something unexpected happened when trying to " +
                              "refresh Google credentials.")
                 exit(1)
@@ -58,8 +58,7 @@ def gmail_auth(logfile):
                 log(logfile, "Authorization was not completed within " +
                               str(LIMIT) + " seconds.")
                 exit(1)
-            except Exception as e:
-                log(logfile, str(e))
+            except:
                 log(logfile, "Something unexpected happened when trying to " +
                              "load Google credentials.")
                 exit(1)

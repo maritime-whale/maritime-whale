@@ -19,35 +19,39 @@ def _get_attachments(logfile, service, user_id, msg_id):
     try:
         message = service.users().messages().get(userId=user_id,
                                                  id=msg_id).execute()
-        filenames = []
-        for part in message["payload"]["parts"]:
-            if part["filename"]:
-                if "data" in part["body"]:
-                    data = part["body"]["data"]
-                else:
-                    att_id = part["body"]["attachmentId"]
-                    att = service.users().messages().attachments().get(
-                          userId=user_id, messageId=msg_id,id=att_id).execute()
-                    data = att["data"]
-                payload = base64.urlsafe_b64decode(data.encode("UTF-8"))
-                new_file = part["filename"]
-                if not new_file.endswith(".csv"):
-                    continue
-                filepath = "../temp/temp.csv"
-                with open(filepath, "wb") as f:
-                    f.write(payload)
-                df = pd.read_csv(filepath)
-                new_file = None
-                try:
-                    new_file = pd.to_datetime(df["DATETIME (UTC)"][0])
-                except:
-                    continue
-                filenames.append(new_file)
-                filepath = os.path.join("../temp/",
-                                        new_file.strftime("%Y-%m-%d.csv"))
-                os.rename("../temp/temp.csv", filepath)
     except errors.HttpError as error:
         log(logfile, "An error occurred: " + str(error))
+        exit(1)
+    except:
+        log(ERR_LOGFILE, "An unexpected error occured.")
+        exit(1)
+    filenames = []
+    for part in message["payload"]["parts"]:
+        if part["filename"]:
+            if "data" in part["body"]:
+                data = part["body"]["data"]
+            else:
+                att_id = part["body"]["attachmentId"]
+                att = service.users().messages().attachments().get(
+                      userId=user_id, messageId=msg_id,id=att_id).execute()
+                data = att["data"]
+            payload = base64.urlsafe_b64decode(data.encode("UTF-8"))
+            new_file = part["filename"]
+            if not new_file.endswith(".csv"):
+                continue
+            filepath = "../temp/temp.csv"
+            with open(filepath, "wb") as f:
+                f.write(payload)
+            df = pd.read_csv(filepath)
+            new_file = None
+            try:
+                new_file = pd.to_datetime(df["DATETIME (UTC)"][0])
+            except:
+                continue
+            filenames.append(new_file)
+            filepath = os.path.join("../temp/",
+                                    new_file.strftime("%Y-%m-%d.csv"))
+            os.rename("../temp/temp.csv", filepath)
     return filenames
 
 def fetch_latest_reports(logfile):
