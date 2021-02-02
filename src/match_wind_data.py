@@ -15,7 +15,6 @@ def _wrangle_winds(buoys, buoy_data, i, id, year, month, day):
     """Grabs wind data for specified day, removes missing values, performs
     unit conversions, and rounds columns.
     """
-    # filter buoy data to correspond to the correct day
     buoy_data = buoy_data[(buoy_data["#YY"] == year) &
                           (buoy_data["MM"] == month) &
                           (buoy_data["DD"] == day)]
@@ -83,7 +82,6 @@ def add_wind(ports, i, buoys, alt_buoys):
     Returns:
         Vessel movement DataFrame enriched with wind data.
     """
-    # capture datetime info to be used for wind buoy matching
     year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
     month = ports[i]["Date/Time UTC"].iloc[0].strftime("%m")
     day = ports[i]["Date/Time UTC"].iloc[0].strftime("%d")
