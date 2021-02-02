@@ -77,7 +77,7 @@ def _load_cache(logfile, data_frames, span, names):
                         try:
                             content = pd.read_csv(filename)
                         except Exception as e:
-                            log(logfile, e.message)
+                            log(logfile, e.message + "\n Error reading cache.")
                             continue
                         if len(content):
                             caches[i] = content
