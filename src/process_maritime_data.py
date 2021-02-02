@@ -150,21 +150,19 @@ def _add_channel_occ(ports, i):
     return ports[i]
 
 def process_report(path):
-    """Reads, processes, and wrangles data from vessel movement reports.
-    Augments movement reports with wind data from sensor buoys as well as
-    meeting and passing analysis. Computes some simple statistics, which are
-    also added to the resulting DataFrames.
+    """Processes data from vessel movement report. Adds data from wind buoys,
+    performs meeting and passing analysis. Creates other relevant columns.
 
     Args:
         path: Relative path to raw vessel movement report (CSV).
 
     Returns:
-        Two pairs of DataFrames cooresponding to the filtered movement reports.
+        Two pairs of two DataFrames cooresponding to the movement report.
         The first pair of DataFrames contains all vessel movements belonging to
         Charleston and Savannah, respectively. The second pair of DataFrames
-        stores only the vessel movement entries at which each vessel achieved
-        its maximum speed (again the first DataFrame in the pair belongs to
-        Charleston and the second DataFrame belongs to Savannah).
+        stores the vessel movement entries at which each vessel achieved
+        its maximum speed. Again, the first DataFrame in the pair belongs to
+        Charleston and the second DataFrame belongs to Savannah.
     """
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]

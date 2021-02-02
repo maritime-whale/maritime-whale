@@ -43,18 +43,45 @@ def _wrangle_winds(buoys, buoy_data, i, id, year, month, day):
                               "GST mph"]]
     return buoys[i][id]
 
+def _find_nearest_entry(final_winds, ii, source_buoy, id, target_times,
+                        input_times, wind_data, found_nearest):
+    """Pairs wind buoy and vessel movement data by minimizing their difference
+    in time. Records cooresponding buoy source.
+    """
+    min_timedelta = timedelta(hours=WIND_TIME_TOL)
+    min_timedelta_index = -1
+    for jj in range(len(target_times)):
+        delta = abs(input_times[ii] - target_times[jj])
+        if delta <= timedelta(hours=WIND_TIME_TOL):
+            if min_timedelta > delta:
+                min_timedelta = delta
+                min_timedelta_index = jj
+        else:
+            continue
+    if (min_timedelta < timedelta(hours=WIND_TIME_TOL) and
+        min_timedelta_index != -1):
+        found_nearest = True
+        for count, k in enumerate(final_winds.keys()):
+            if count == 0:
+                source_buoy.append(str(id))
+            nearest_reading = wind_data[k].iloc[min_timedelta_index]
+            final_winds[k].append(nearest_reading)
+    return final_winds, source_buoy, found_nearest
 
 def add_wind(ports, i, buoys, alt_buoys):
-    """Holy fuck...
+    """Wrangles data from wind buoys and matches with vessel movement
+    entries based on time. Fills missing wind data with 'NaN'. Tracks source
+    buoy information in a column.
 
     Args:
-        ports: Vessel movement DataFrame?
-        i:
-        buoys:
-        alt_buots:
+        ports: List of vessel movement DataFrames.
+        i: Integer index specifying port entrance: Charleston (i = 0),
+           Savannah (i = 1).
+        buoys: List containing main buoy information (as a dictionary).
+        alt_buoys: List containing alternate buoy information (as a dictionary).
 
     Returns:
-        Vessel movement DataFrame with winds?
+        Vessel movement DataFrame enriched with wind data.
     """
     # capture datetime info to be used for wind buoy matching
     year = ports[i]["Date/Time UTC"].iloc[0].strftime("%Y")
@@ -115,24 +142,13 @@ def add_wind(ports, i, buoys, alt_buoys):
         target_times = list(wind_data["Date/Time UTC"]) # buoy timestamps
         input_times = list(ports[i]["Date/Time UTC"]) # vessel timestamps
         for ii in range(len(input_times)):
-            min_timedelta = timedelta(hours=WIND_TIME_TOL)
-            min_timedelta_index = -1
-            for jj in range(len(target_times)):
-                delta = abs(input_times[ii] - target_times[jj])
-                if delta <= timedelta(hours=WIND_TIME_TOL):
-                    if min_timedelta > delta:
-                        min_timedelta = delta
-                        min_timedelta_index = jj
-                else:
-                    continue
-            if (min_timedelta < timedelta(hours=WIND_TIME_TOL) and
-                min_timedelta_index != -1):
-                for count, k in enumerate(final_winds.keys()):
-                    if count == 0:
-                        source_buoy.append(str(id))
-                    nearest_reading = wind_data[k].iloc[min_timedelta_index]
-                    final_winds[k].append(nearest_reading)
-            else:
+            nearest = _find_nearest_entry(final_winds, ii, source_buoy, id,
+                                          target_times, input_times,
+                                          wind_data, False)
+            final_winds = nearest[0]
+            source_buoy = nearest[1]
+            found_nearest = nearest[2]
+            if not found_nearest:
                 # handle missing wind vals
                 for count, k in enumerate(final_winds.keys()):
                     if (isinstance(alt_buoy_data, type(None)) or
@@ -143,26 +159,16 @@ def add_wind(ports, i, buoys, alt_buoys):
                     else:
                         alt_target_times = list(
                                            alt_buoy_data["Date/Time UTC"])
-                        alt_min_timedelta = timedelta(hours=WIND_TIME_TOL)
-                        alt_min_timedelta_index = -1
-                        for jj in range(len(alt_target_times)):
-                            delta = abs(input_times[ii] -
-                                        alt_target_times[jj])
-                            if delta <= timedelta(hours=WIND_TIME_TOL):
-                                if alt_min_timedelta > delta:
-                                    alt_min_timedelta = delta
-                                    alt_min_timedelta_index = jj
-                            else:
-                                continue
-                        if (alt_min_timedelta <
-                            timedelta(hours=WIND_TIME_TOL) and
-                            alt_min_timedelta_index != -1):
-                            if count == 0:
-                                source_buoy.append(str(alt_id))
-                            nearest_reading = alt_buoy_data[k].iloc[
-                                              alt_min_timedelta_index]
-                            final_winds[k].append(nearest_reading)
-                        else:
+                        nearest_alt = _find_nearest_entry(final_winds, ii,
+                                                          source_buoy, alt_id,
+                                                          alt_target_times,
+                                                          input_times,
+                                                          alt_buoy_data,
+                                                          False)
+                        final_winds = nearest_alt[0]
+                        source_buoy = nearest_alt[1]
+                        found_nearest_alt = nearest_alt[2]
+                        if not found_nearest_alt:
                             if count == 0:
                                 source_buoy.append("N/A")
                             final_winds[k].append(float("NaN"))
