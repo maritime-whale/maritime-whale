@@ -88,9 +88,9 @@ def _filter_blacklisters(df, blacklist):
     return df
 
 def _fold_vmr(ports, i):
-    """Reduces movement report to a single entry for each vessel at the point
-    of it's maximum speed in the channel. Includes a column with the vessel's
-    mean speed.
+    """Reduces movement report to a DataFrame with a single entry for each
+    vessel at the point of it's maximum speed in the channel. Includes a column
+    with the vessel's mean speed.
     """
     mean = pd.DataFrame(ports[i].groupby(["Name", "MMSI"])["VSPD kn"]
            .mean()).rename({"VSPD kn": "Mean Speed kn"}, axis=1).round(1)
@@ -115,6 +115,39 @@ def _fold_vmr(ports, i):
     fold_res = merged_speeds
     fold_res.sort_values("Max Speed kn", ascending=False, inplace=True)
     return fold_res
+
+def _add_channel_occ(ports, i):
+    """Creates the channel occupancy column."""
+    # total channel width for CH and SV are 1000 and 600 ft respectively,
+    # but vary based on vessel class and transit condition
+    channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
+    # create % channel occupancy column for each vessel position based on
+    # effective beam, transit, and corresponding channel width
+    for row in range(len(ports[i])):
+        vessel_class = ports[i].loc[row, "Vessel Class"]
+        transit_type = ports[i].loc[row, "Transit"]
+        eff_beam = ports[i].loc[row, "Effective Beam ft"]
+        if ((vessel_class == "Post-Panamax") &
+            (transit_type == "One-way Transit")):
+            occ = (eff_beam / channel_width[i][0]) * 100
+            ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+        elif ((vessel_class == "Post-Panamax") &
+              (transit_type == "Two-way Transit")):
+            occ = (eff_beam / channel_width[i][1]) * 100
+            ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+        elif ((vessel_class == "Panamax") &
+              (transit_type == "One-way Transit")):
+            occ = (eff_beam / channel_width[i][2]) * 100
+            ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+        elif ((vessel_class == "Panamax") &
+              (transit_type == "Two-way Transit")):
+            occ = (eff_beam / channel_width[i][3]) * 100
+            ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
+        else:
+            sys.stderr.write("Error: Undefined vessel class and " +
+                             "transit combination...\n")
+            ports[i].loc[row, "% Channel Occupied"] = float("NaN")
+    return ports[i]
 
 def process_report(path):
     """Reads, processes, and wrangles data from vessel movement reports.
@@ -227,42 +260,14 @@ def process_report(path):
             ports[i]["Transit"][two_way_indices] = "Two-way Transit"
         # reset index to clear previous pandas manipulations
         ports[i] = ports[i].reset_index()
-        # total channel width for CH and SV are 1000 and 600 ft respectively,
-        # but vary based on vessel class and transit condition
-        channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
-        # create % channel occupancy column for each vessel position based on
-        # effective beam, transit, and corresponding channel width
-        for row in range(len(ports[i])):
-            vessel_class = ports[i].loc[row, "Vessel Class"]
-            transit_type = ports[i].loc[row, "Transit"]
-            eff_beam = ports[i].loc[row, "Effective Beam ft"]
-            if ((vessel_class == "Post-Panamax") &
-                (transit_type == "One-way Transit")):
-                occ = (eff_beam / channel_width[i][0]) * 100
-                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
-            elif ((vessel_class == "Post-Panamax") &
-                  (transit_type == "Two-way Transit")):
-                occ = (eff_beam / channel_width[i][1]) * 100
-                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
-            elif ((vessel_class == "Panamax") &
-                  (transit_type == "One-way Transit")):
-                occ = (eff_beam / channel_width[i][2]) * 100
-                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
-            elif ((vessel_class == "Panamax") &
-                  (transit_type == "Two-way Transit")):
-                occ = (eff_beam / channel_width[i][3]) * 100
-                ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
-            else:
-                sys.stderr.write("Error: Undefined vessel class and " +
-                                 "transit combination...\n")
-                ports[i].loc[row, "% Channel Occupied"] = float("NaN")
+        ports[i] = _add_channel_occ(ports, i)
         # save current format of data as all_res to be used for all positions
         all_res = ports[i]
         # remove sections of channel where ships turn
         if i % 2:
             all_res = all_res[(all_res.Latitude <= 32.02838) &
-                                  (all_res.Latitude >= 31.9985) |
-                                  (all_res.Latitude <= 31.99183)]
+                              (all_res.Latitude >= 31.9985) |
+                              (all_res.Latitude <= 31.99183)]
         else:
             all_res = all_res[all_res.Latitude >= 32.667473]
         fold_res = _fold_vmr(ports, i)

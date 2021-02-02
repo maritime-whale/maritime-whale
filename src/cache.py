@@ -5,6 +5,7 @@
 # Handles cache file creation.
 
 import pandas as pd
+import sys
 
 def create_cache(data_frames, filename, extension):
     """Writes a cache file with the specified data, filename, and extension.
@@ -14,7 +15,7 @@ def create_cache(data_frames, filename, extension):
 
         filename: Cache file name.
 
-        extension: Desired file type (csv, xlsx, etc.)
+        extension: Desired file type (CSV, XLSX, etc.)
 
     Returns:
         Concatenated data from data_frames written as specified file type.
@@ -32,4 +33,5 @@ def create_cache(data_frames, filename, extension):
             res.to_excel("../cache/" + filename + ".xlsx", sheet_name=filename,
                          index=False)
     else:
-        print("Error: Specified cache file type support not yet implemented...")
+        sys.stderr.write("Error: Specified cache file type support not yet " +
+                         "implemented...")
