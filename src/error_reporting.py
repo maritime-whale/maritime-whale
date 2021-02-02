@@ -79,12 +79,13 @@ def _send_message(service, user_id, message):
     except errors.HttpError as error:
         log(ERR_LOGFILE, "An error occurred: " + str(error))
         exit(1)
+    except:
+        log(ERR_LOGFILE, "An unexpected error occured.")
+        exit(1)
     log(OUT_LOGFILE, "Health message sent successfully.")
     return message
 
 # TODO: finish (simple) health status logic
-# TODO: (potentially) implement a way to alert when (triggered by an error with
-# SCP? for AWS; check that health emails were sent? for Gmail)
 def _get_webapp_health_status():
     """To be implemented..."""
     # grab the most recent 6 logfiles:
