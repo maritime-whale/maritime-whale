@@ -285,6 +285,6 @@ def process_report(path):
                            "GST mph", "Buoy Source", "Location", "Latitude",
                            "Longitude", "Date/Time UTC"]]
         # save two copies of daily vmr for each port, one for all vessel
-        # positions and one for maximum vesel speed positions
+        # positions and one for maximum vessel speed positions
         ports[i] = [fold_res, all_res]
     return ports[0], ports[1] # ch, sv
