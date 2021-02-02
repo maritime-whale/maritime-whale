@@ -72,7 +72,6 @@ else
     fi
 fi
 
-# TODO(davnajork): TEST with BAD GitHub token
 # use Personal Access Token (PAT) from riwhale.config for GitHub OAuth
 RIWHALE_GITHUB=github.com/riwhale/riwhale.github.io.git
 REPO=html/riwhale.github.io/

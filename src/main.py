@@ -34,8 +34,7 @@ def _fetch_latest_data(logfile):
     version of the data. Indicates whether backend files are up-to-date."""
     days = fetch_latest_reports(logfile)
     if not days:
-        log(logfile, "No new vessel movement reports.")
-        return
+        return False
     dates = (day.strftime("%Y_%m_%d") for day in days)
     date_strs = (day.strftime("%B %d %Y") for day in days)
     sync_required = False
