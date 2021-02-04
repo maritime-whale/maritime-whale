@@ -2,6 +2,11 @@
 
 This directory contains maritime-whale project documentation.
 
+## Methodologies
+
+### First subsection...
+
+
 ## Set Up
 
 Before diving in, we recommend that you review the
