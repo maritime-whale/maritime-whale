@@ -159,5 +159,5 @@ def twoway(df, true_encs):
         two_way.append(_twoway_helper(df, this_mmsi, this_course, enc_time))
         two_way.append(_twoway_helper(df, that_mmsi, that_course, enc_time))
     if not two_way:
-        return None
+        return
     return pd.concat(two_way)
