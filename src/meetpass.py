@@ -12,11 +12,11 @@ import numpy as np
 import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
-MIN_DISTANCE = 0.1 # in degrees
+MIN_DISTANCE = 500 # in feet
 
-def _calc_dist(lat1, long1, lat2, long2):
-    """Computes the distance between two geolocations"""
-    return ((lat1 - lat2)**2 + (long1 - long2)**2)**0.5
+def calc_dist(lat1, long1, lat2, long2):
+    """Computes the distance in feet between two geolocations"""
+    return ((364000 * abs(lat1 - lat2))**2 + (288200 * abs(long1 - long2))**2)**0.5
 
 def _meetpass_helper(df, time_tolerance):
     """Identifies potential instances of meeting and passing. If the timestamps
