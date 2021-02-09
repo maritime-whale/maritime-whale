@@ -16,7 +16,7 @@ MIN_DISTANCE = 20000 # in feet
 
 def _radians(num):
     """
-    Converts num to radians.
+    Converts number to radians.
     """
     return num * math.pi / 180
 
