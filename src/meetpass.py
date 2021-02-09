@@ -12,7 +12,7 @@ import numpy as np
 import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
-MIN_DISTANCE = 3500 # in feet
+MIN_DISTANCE = 20000 # in feet
 RADIUS = 6371e3 * 3.28 # radius of Earth in feet
 
 def radians(num):
