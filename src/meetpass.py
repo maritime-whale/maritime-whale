@@ -12,7 +12,7 @@ import numpy as np
 import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
-MIN_DISTANCE = 2500 # in feet
+MIN_DISTANCE = 3500 # in feet
 RADIUS = 6371e3 * 3.28 # radius of Earth in feet
 
 def radians(num):
@@ -23,7 +23,7 @@ def radians(num):
 
 def _calc_dist(lat1, long1, lat2, long2):
     """
-    Computes distance between two points using Pythagoras' theorem on an
+    Computes distance in feet between two points using Pythagoras' theorem on an
     equirectuangular projection of the Earth.
     """
     x = radians(long2 - long1) * math.cos(radians((lat1 + lat2)/2))
