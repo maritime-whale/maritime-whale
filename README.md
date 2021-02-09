@@ -7,7 +7,7 @@ Daily monitoring and analysis is made available at
 https://www.maritimewhale.com.
 
 This web app is designed to fetch vessel movement reports and wind data every
-day. The data is imported, cleaned, and cached. Statistical analyses is
+day. The data is imported, cleaned, and cached. Statistical analysis is
 performed and HTML plot files are generated using [Plotly](https://plotly.com/).
 The plot files, wrangled data files, and a vessel blacklist file get pushed to
 the [riwhale.github.io](https://github.com/riwhale/riwhale.github.io/) repo.
