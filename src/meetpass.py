@@ -14,11 +14,11 @@ import scipy
 MEET_PASS_TIME_TOL = 1 # in hours
 MIN_DISTANCE = 20000 # in feet
 
-def radians(num):
+def _radians(num):
     """
     Converts num to radians.
     """
-    return num * math.pi/180
+    return num * math.pi / 180
 
 def _calc_dist(lat1, long1, lat2, long2):
     """
@@ -26,8 +26,8 @@ def _calc_dist(lat1, long1, lat2, long2):
     equirectuangular projection of the Earth.
     """
     radius = 20902000 # radius of Earth in feet
-    x = radians(long2 - long1) * math.cos(radians((lat1 + lat2)/2))
-    y = radians(lat2 - lat1)
+    x = _radians(long2 - long1) * math.cos(_radians((lat1 + lat2) / 2))
+    y = _radians(lat2 - lat1)
     d = math.sqrt(x**2 + y**2) * radius
     return round(d, 2)
 
