@@ -13,7 +13,6 @@ import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
 MIN_DISTANCE = 20000 # in feet
-RADIUS = 6371e3 * 3.28 # radius of Earth in feet
 
 def radians(num):
     """
@@ -26,9 +25,10 @@ def _calc_dist(lat1, long1, lat2, long2):
     Computes distance in feet between two points using Pythagoras' theorem on an
     equirectuangular projection of the Earth.
     """
+    radius = 20896880 # radius of Earth in feet
     x = radians(long2 - long1) * math.cos(radians((lat1 + lat2)/2))
     y = radians(lat2 - lat1)
-    d = math.sqrt(x**2 + y**2) * RADIUS
+    d = math.sqrt(x**2 + y**2) * radius
     return round(d, 2)
 
 def _meetpass_helper(df, time_tolerance):
