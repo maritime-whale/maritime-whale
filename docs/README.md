@@ -23,7 +23,7 @@ One-way transits are channel conditions where there is no oncoming traffic for a
 Each vessel's max and mean speed are computed and recorded. Relative vessel location (nearshore or offshore) is specified by the channel's longitudinal midpoint. Buoy source IDs are added depending on wind data matching. One-way and two-way transits are assigned via `meetpass` analysis. Compute and add yaw, which is the absolute difference between course and heading.
 Vessel effective beam is calculated using the following formula:
 
-&nbsp;&nbsp;&nbsp;&nbsp;_effective beam = cos(90-yaw)\*loa + cos(yaw)\*beam_
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://render.githubusercontent.com/render/math?math=EB = cos(90-yaw)\*loa %2B cos(yaw)\*beam">
 
 where effective beam, LOA (length overall), and beam are all expressed in feet, yaw is in degrees.
 Channel occupancy is computed based on transit condition and effective beam. Vessels subject to two-way conditions can only navigate in half the channel width, while one-way conditions can navigate the full channel width. Higher yaw values translate to higher effective beams, yielding larger percentages of occupied channel. 
