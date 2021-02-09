@@ -12,11 +12,24 @@ import numpy as np
 import scipy
 
 MEET_PASS_TIME_TOL = 1 # in hours
-MIN_DISTANCE = 500 # in feet
+MIN_DISTANCE = 2500 # in feet
+RADIUS = 6371e3 * 3.28 # radius of Earth in feet
 
-def calc_dist(lat1, long1, lat2, long2):
-    """Computes the distance in feet between two geolocations"""
-    return ((364000 * abs(lat1 - lat2))**2 + (288200 * abs(long1 - long2))**2)**0.5
+def radians(num):
+    """
+    Converts num to radians.
+    """
+    return num * math.pi/180
+
+def _calc_dist(lat1, long1, lat2, long2):
+    """
+    Computes distance between two points using Pythagoras' theorem on an
+    equirectuangular projection of the Earth.
+    """
+    x = radians(long2 - long1) * math.cos(radians((lat1 + lat2)/2))
+    y = radians(lat2 - lat1)
+    d = math.sqrt(x**2 + y**2) * RADIUS
+    return round(d, 2)
 
 def _meetpass_helper(df, time_tolerance):
     """Identifies potential instances of meeting and passing. If the timestamps
