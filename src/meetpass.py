@@ -28,7 +28,7 @@ def _calc_dist(lat1, long1, lat2, long2):
     """
     x = _radians(long2 - long1) * math.cos(_radians((lat1 + lat2) / 2))
     y = _radians(lat2 - lat1)
-    d = math.sqrt(x**2 + y**2) * 20902000 # Multuply by radius of Earth in feet
+    d = math.sqrt(x**2 + y**2) * 20902000 # multiply by radius of Earth in feet
     return round(d, 2)
 
 def _meetpass_helper(df, time_tolerance):
