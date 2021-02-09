@@ -26,10 +26,9 @@ def _calc_dist(lat1, long1, lat2, long2):
     Computes distance in feet between two points using Pythagoras' theorem on an
     equirectuangular projection of the Earth.
     """
-    radius = 20902000 # radius of Earth in feet
     x = _radians(long2 - long1) * math.cos(_radians((lat1 + lat2) / 2))
     y = _radians(lat2 - lat1)
-    d = math.sqrt(x**2 + y**2) * radius
+    d = math.sqrt(x**2 + y**2) * 20902000 # Multuply by radius of Earth in feet
     return round(d, 2)
 
 def _meetpass_helper(df, time_tolerance):
