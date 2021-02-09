@@ -10,6 +10,7 @@ from datetime import timedelta
 import pandas as pd
 import numpy as np
 import scipy
+import math
 
 MEET_PASS_TIME_TOL = 1 # in hours
 MIN_DISTANCE = 20000 # in feet
