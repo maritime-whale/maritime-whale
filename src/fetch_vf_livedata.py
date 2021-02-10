@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-#
+# Description...
 
 from log import *
 
@@ -87,7 +87,7 @@ def _fetch_vesselfinder_data():
 def _use_frozen_stream(logfile):
     print("Importing 'freeze.csv' (PARALLEL)...")
     print("Creating 'LiveData' plots... (PARALLEL)")
-    print("Uploading 'LiveData' plots and files... (PARALLEL)")
+    print("Uploading 'LiveData' plots... (PARALLEL)")
 
 def infinitely_fetch():
     i = 0
@@ -110,7 +110,7 @@ def infinitely_fetch():
         _fetch_vesselfinder_data()
         # elapsed is now NEGATIVE
         elapsed -= datetime.datetime.now().timestamp()
-        if abs(elapsed) >= 60:
+        if abs(elapsed) >= SECONDS:
             print("WARNING! LOOP IS RUNNING SLOW! " + str(elapsed) +
                   " SECONDS ELAPSED BEFORE SLEEP!")
             i += abs(elapsed)

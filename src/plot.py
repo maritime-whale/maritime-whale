@@ -19,6 +19,12 @@ def check_wind_outages(df, df_dropna):
         return True
     return False
 
+def generate_livedata_plot(df):
+    """Generates LiveData geo plot using MapBox token."""
+    fig = None
+    # TODO(omrinewman): need to implement
+    return fig
+
 def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
     """Generates geo plot using MapBox token."""
     fig = None

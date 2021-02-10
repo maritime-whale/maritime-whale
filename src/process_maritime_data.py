@@ -149,6 +149,10 @@ def _add_channel_occ(ports, i):
             ports[i].loc[row, "% Channel Occupied"] = float("NaN")
     return ports[i]
 
+def process_chunk(path):
+    # TODO(omrinewman): need to implement
+    return
+
 def process_report(path):
     """Processes data from vessel movement report. Adds data from wind buoys,
     performs meeting and passing analysis. Creates other relevant columns.
@@ -230,16 +234,16 @@ def process_report(path):
         ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] -
                                          ports[i].loc[:, "Heading"])
         # compute effective beam based on vessel beam, loa, and yaw
-        EB = []
+        eff_beam = []
         loa = ports[i]["LOA ft"].values
         beam = ports[i]["Beam ft"].values
         yaw = ports[i]["Yaw deg"].values
         for l in range(ports[i].shape[0]):
             # effective beam formula derived using trigonometry and geometry
             # of vessel positions
-            EB.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
+            eff_beam.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
                             (math.cos(math.radians(yaw[l])) * beam[l])))
-        ports[i].loc[:, "Effective Beam ft"] = EB
+        ports[i].loc[:, "Effective Beam ft"] = eff_beam
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
                                                "Effective Beam ft"].round(0)
         # remove unwanted blacklist vessels
