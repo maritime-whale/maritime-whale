@@ -26,9 +26,9 @@ from the data (e.g. abnormally high vessel speed, course errors, heading
 errors). If a single position is reported for a given ship the entry is also
 removed. Sample areas include ships under mandatory pilotage and exclude data
 from pilot boarding areas. Bends in the Savannah entrance channel—which
-naturally require vessels to turn—incur high yaw values. To prevent skewing
-this analysis these areas are ignored. Doing so allows for a more lucid
-characterization of vessel behavior in adverse and non-adverse conditions.
+naturally require vessels to turn—incur higher than normal yaw values. 
+To prevent skewing this analysis these areas are ignored. Doing so allows for 
+a more lucid characterization of vessel behavior in adverse and non-adverse conditions.
 
 ### Wind data retrieval and matching
 
