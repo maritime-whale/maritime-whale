@@ -1,6 +1,6 @@
 # Maritime Whale docs
 
-This directory contains [maritime-whale](https://www.maritimewhale.com/)
+This directory contains [maritime-whale](https://github.com/riwhale/maritime-whale)
 project documentation.
 
 ## Methodologies
