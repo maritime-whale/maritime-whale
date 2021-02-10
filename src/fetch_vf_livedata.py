@@ -86,8 +86,10 @@ def _fetch_vesselfinder_data():
 
 def _use_frozen_stream(logfile):
     print("Importing 'freeze.csv' (PARALLEL)...")
+    # call curl
     print("Creating 'LiveData' plots... (PARALLEL)")
     print("Uploading 'LiveData' plots... (PARALLEL)")
+    # upload with git
 
 def infinitely_fetch():
     i = 0
