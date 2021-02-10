@@ -22,7 +22,9 @@ def check_wind_outages(df, df_dropna):
 def generate_livedata_plot(df):
     """Generates LiveData geo plot using MapBox token."""
     fig = None
-    # TODO(omrinewman): need to implement
+    # TODO: need to implement
+    # TODO: add (separate) wind buoy df
+    # TODO: use trace to overlay buoys (depending on px/go limitations)
     return fig
 
 def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
