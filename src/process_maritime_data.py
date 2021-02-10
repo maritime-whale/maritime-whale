@@ -241,8 +241,9 @@ def process_report(path):
         for l in range(ports[i].shape[0]):
             # effective beam formula derived using trigonometry and geometry
             # of vessel positions
-            eff_beam.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
-                            (math.cos(math.radians(yaw[l])) * beam[l])))
+            eff_beam.append(round((math.cos(math.radians(90 - yaw[l])) *
+                            loa[l]) + (math.cos(math.radians(yaw[l])) *
+                            beam[l])))
         ports[i].loc[:, "Effective Beam ft"] = eff_beam
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
                                                "Effective Beam ft"].round(0)
