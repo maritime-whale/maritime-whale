@@ -16,6 +16,6 @@ _GitHub Pages_. Plots and download links for the processed data files are
 embedded within the https://www.maritimewhale.com website. Remote caching
 handled by the [secure-cache](https://github.com/riwhale/secure-cache) repo.
 
-Documentation in the source is rooted in [docs/README.md](docs/README.md).
+Documentation is rooted in [docs/README.md](docs/README.md).
 
 _For more help please contact [@riwhale](https://github.com/riwhale) at [dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
