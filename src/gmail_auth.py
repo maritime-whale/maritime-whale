@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
 # Copyright 2020 The Maritime Whale Authors. All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
+#
+# Handles Gmail OAuth token validation, creation, and storage.
 
-# NOTES:
+# see details at
 # https://developers.google.com/gmail/api/quickstart/python?authuser=2
 
 from func_timeout import func_timeout, FunctionTimedOut
@@ -23,6 +24,7 @@ SCOPES = [
 ]
 
 def gmail_auth(logfile):
+    """Handles Gmail authorization via Gmail API."""
     creds = None
     # the file .token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -40,7 +42,7 @@ def gmail_auth(logfile):
                 log(logfile, "Request was not completed within " + str(LIMIT) +
                              " seconds.")
                 exit(1)
-            except Exception as e:
+            except:
                 log(logfile, "Something unexpected happened when trying to " +
                              "refresh Google credentials.")
                 exit(1)
@@ -56,8 +58,7 @@ def gmail_auth(logfile):
                 log(logfile, "Authorization was not completed within " +
                               str(LIMIT) + " seconds.")
                 exit(1)
-            except Exception as e:
-                log(logfile, str(e))
+            except:
                 log(logfile, "Something unexpected happened when trying to " +
                              "load Google credentials.")
                 exit(1)

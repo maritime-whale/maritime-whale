@@ -2,140 +2,232 @@
 # Copyright 2020 The Maritime Whale Authors. All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
+#
+# Validate repo structure and GitHub credentials. Download wind data and
+# latest changes to the riwhale.github.io and secure-cache repos.
+# Run main.py and log program execution. With debug mode turned off, changes are
+# uploaded to riwhale.github.io and secure-cache. Report web app health status.
 
-debug_mode=0
+debug_mode=0 # init debug flag to FALSE
+# loop through arguments passed to the script from the command line
 for arg in "$@"; do
+    # enable debug and notify user
     if [ "$arg" == "debug" ]; then
         echo "Running in debug mode..."
         debug_mode=1
-    else
+    else # invalid argument; display error and usage, then exit
         echo "./run: illegal option -- $arg"
         echo "Usage: ./run [debug]"
         exit 1
     fi
 done
+
+# check that the logs directory exists
 LOGS=logs
 if [ ! -d "$LOGS" ]; then
-    mkdir $LOGS
+    mkdir $LOGS # create the directory if it doesn't exist
 fi
+
+# wipe subset of logs before initiating new run
 rm logs/sync_*.log > /dev/null 2>&1
 rm logs/vmr_*.log > /dev/null 2>&1
 rm logs/wind_*.log > /dev/null 2>&1
 rm logs/depend_*.log > /dev/null 2>&1
 rm logs/report_*.log > /dev/null 2>&1
+
+# update dependencies as listed in requirements.txt
 if [ $debug_mode == 0 ]; then
-    pip-upgrade --skip-virtualenv-check -p all 2>> logs/depend_err.log 1>> logs/depend_out.log
-else
+    pip-upgrade --skip-virtualenv-check -p all \
+    2>> logs/depend_err.log 1>> logs/depend_out.log
+else # display pip-upgrader output if not in debug mode
     pip-upgrade --skip-virtualenv-check -p all
 fi
+
+# remove any logs older than 1 day
 if [ $debug_mode == 0 ]; then
     find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
     rm -rf temp/* > /dev/null 2>&1
 fi
+
+# check that the conf directory exists
 CONFIG=conf
 RICONF=conf/riwhale.config
 if [ ! -d "$CONFIG" ]; then
-    mkdir $CONFIG
+    mkdir $CONFIG # create the directory if it doesn't exist
     echo "Config directory not found. Creating directory: ./$CONFIG ."
     exit 1
 else
-    if [ ! -f "$RICONF" ]; then
+    if [ ! -f "$RICONF" ]; then # checks if riwhale.config exists
         echo "Missing config file. ./$RICONF does not exist."
         exit 1
     fi
 fi
+
+# use Personal Access Token (PAT) from riwhale.config for GitHub OAuth
+RIWHALE_GITHUB=github.com/riwhale/riwhale.github.io.git
 REPO=html/riwhale.github.io/
 OAUTH_TOKEN="$( jq -r ".oauth" "$RICONF" )"
+# checks that the html directory exists
 if [ ! -d "$REPO" ]; then
     HTML=html
     if [ ! -d "$HTML" ]; then
-        mkdir $HTML
+        mkdir $HTML # create the directory if it doesn't exist
     fi
     cd html
-    git clone https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
+    # clone the riwhale.github.io repo to the html/riwhale.github.io directory
+    git clone https://$OAUTH_TOKEN:x-oauth-basic@$RIWHALE_GITHUB \
+    2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
     cd ..
 fi
+
+# ensure that the src directory exists (you never know)
 SRCDIR=src
 if [ ! -d "$SRCDIR" ]; then
     echo "No src directory found."
-    echo "Please follow the installation instructions at https://github.com/davnajork/maritime-whale-map and try again."
+    echo "Please follow the installation instructions at" \
+    "https://github.com/riwhale/maritime-whale/docs/README.md#installation" \
+    "and try again."
     exit 1
 fi
+
+# check that the temp directory exists
 TEMP=temp
 if [ ! -d "$TEMP" ]; then
-    mkdir $TEMP
+    mkdir $TEMP # create the directory if it doesn't exist
 fi
 
-# LINKS
-# https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
+# see details at
 # https://www.ndbc.noaa.gov/data/realtime2/
-# https://www.ndbc.noaa.gov/wstat.shtml
+# https://www.ndbc.noaa.gov/station_page.php?station=41004 (Charleston Buoy)
+# https://www.ndbc.noaa.gov/station_page.php?station=41008 (Savannah Buoy)
 
-# USEFUL SENSOR INFO (DO NOT DELETE):
-# 41004 ch off 32.501 /  -79.099
-# 41008 sv off 31.400 / -80.866
+# download wind buoy data to the temp directory
 BUOYS="41004"
 for BUOY in $BUOYS; do
-    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
+    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.txt -o \
+    "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
 ADV_BUOYS="41008"
 for BUOY in $ADV_BUOYS; do
-  curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.cwind -o "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
+    curl https://www.ndbc.noaa.gov/data/realtime2/$BUOY.cwind -o \
+    "$TEMP/$BUOY.txt" 2>> logs/wind_err.log 1>> logs/wind_out.log
 done
+
+# sync the contents of the html/riwhale.github.io directory with the remote
 cd html/riwhale.github.io
-git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+git pull https://$OAUTH_TOKEN:x-oauth-basic@$RIWHALE_GITHUB \
+2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+
+# check that the cache directory exists
 CACHE=../../cache
 if [ ! -d "$CACHE" ]; then
-    mkdir $CACHE
+    mkdir $CACHE # create the directory if it doesn't exist
 fi
+
+# copy the latest version of the vessel blacklist to the cache directory
 yes | cp -rf blacklist.txt ../../cache/blacklist.txt
+
+# check if the secure-cache directory exists
 cd ../../cache
 SECURE_CACHE=secure-cache/
+CACHE_GITHUB=github.com/riwhale/secure-cache.git
+# clone the secure-cache repo to the cache directory if it doesn't exist
 if [ ! -d "$SECURE_CACHE" ]; then
-    git clone https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
+    git clone https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+    2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
 fi
+
+# sync the contents of the cache/secure-cache directory with the remote
 cd secure-cache
-git pull https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+git pull https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 cd ..
 cp -rf secure-cache/[0-9]* . > /dev/null 2>&1
+
+# run main.py
 cd ../src
-MAIN_RET_VAL=1
+MAIN_RET_VAL=1 # init exit code to 1 (errors encountered)
+# when debug mode is turned off
 if [ $debug_mode == 0 ]; then
+    # log stderr and stdout
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
-    MAIN_RET_VAL=$?
+    MAIN_RET_VAL=$? # record main.py exit code
 else
     python3 main.py
 fi
+
+# when debug mode is turned off
 cd ../html/riwhale.github.io
 if [ $debug_mode == 0 ]; then
+    # check that at least the level_one.html plot exists
     PLOT=../level_one.html
-    if [ ! -f "$PLOT" ]; then
-        echo "Cache up to date. No new plots generated." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-    else
-        echo "Initiating upload..." 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        rm -rf level_one.html level_two_*.html seasonal_ticker.png vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* blacklist.txt dashboard.csv dashboard.pdf 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "wipe plots, master XLSXs/CSVs, blacklist, and dashboard" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../../cache/master-*.* . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../../cache/blacklist.txt . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../dashboard.csv . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../dashboard.pdf . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../*.html . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        mv ../seasonal_ticker.png . 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git add level_one.html level_two_*.html seasonal_ticker.png vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* blacklist.txt dashboard.csv dashboard.pdf 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "upload plots, master XLSXs/CSVs, blacklist, and dashboard" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/riwhale.github.io.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+    if [ ! -f "$PLOT" ]; then # otherwise no new plots were generated
+        echo "Cache up to date. No new plots generated." \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+    else # if at least level_one.html exists
+        # begin uploading plot, XLSX, CSV, blacklist, ticker, and dashboard
+        # files to the riwhale.github.io repo
+        echo "Initiating upload..." \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # to avoid merge conflicts, nuke the appropriate files first
+        rm -rf level_one.html level_two_*.html seasonal_ticker.png \
+        vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html \
+        vspd_strip_*.html line_*.html channel_occupation_*.html master-*.* \
+        blacklist.txt dashboard.csv dashboard.pdf \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am \
+        "wipe plots, master XLSXs/CSVs, blacklist, ticker, and dashboard" \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # move appropriate files to html/riwhale.github.io
+        mv ../../cache/master-*.* . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../../cache/blacklist.txt . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../dashboard.csv . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../dashboard.pdf . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../*.html . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        mv ../seasonal_ticker.png . \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # sync the remote with the contents of html/riwhale.github.io
+        git add level_one.html level_two_*.html seasonal_ticker.png \
+        vspd_hist_*.html wspd_hist_*.html wspd_vs_vspd_*.html \
+        vspd_strip_*.html line_*.html channel_occupation_*.html \
+        master-*.* blacklist.txt dashboard.csv dashboard.pdf \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am \
+        "upload plots, master XLSXs/CSVs, blacklist, ticker, and dashboard" \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git push https://$OAUTH_TOKEN:x-oauth-basic@$RIWHALE_GITHUB \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # copy cache files in the cache directory to the cache/secure-cache
+        # directory and sync the remote with the contents of cache/secure-cache
         cd ../../cache
         cp -rnf [0-9]* secure-cache
         cd secure-cache
         git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "update cache file(s)" 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git push https://$OAUTH_TOKEN:x-oauth-basic@github.com/riwhale/secure-cache.git 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git commit -am "update cache file(s)" \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+
+        # try to send a web app health report
         cd ../../src
         if [ $MAIN_RET_VAL == 0 ]; then
-            python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            # an exit code of 0 implies that previous Gmail interactions
+            # were successful (in main.py)
+            python3 error_reporting.py \
+            2>> ../logs/report_err.log 1>> ../logs/report_out.log
         else
-            echo "FATAL ERROR -- SILENT (NON-COMM) CASE" 2>> ../logs/report_err.log 1>> ../logs/report_out.log
-            python3 error_reporting.py 2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            # a nonzero exit code means that there could be a chance that
+            # communication with Gmail has failed
+            echo "FATAL ERROR! Something is wrong..." \
+            2>> ../logs/report_err.log 1>> ../logs/report_out.log
+            # therefore the line below may be in vain
+            python3 error_reporting.py \
+            2>> ../logs/report_err.log 1>> ../logs/report_out.log
         fi
         cd ../html/riwhale.github.io
     fi
