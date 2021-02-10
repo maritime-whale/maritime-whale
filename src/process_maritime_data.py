@@ -151,7 +151,52 @@ def _add_channel_occ(ports, i):
 
 def process_chunk(path):
     # TODO(omrinewman): need to implement
-    return
+    # TODO: add dependencies such that this will work with no data from SV or CH
+    # TODO: ensure this works on a dataframe with only 1 row as well...
+    # think of other edge cases this needs to handle..
+    blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
+                                            "r").readlines()]
+    df = pd.read_csv(path)
+    df = _wrangle_vmr(df)
+    ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
+    sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
+    course_ranges = (ch_course_ranges, sv_course_ranges)
+    course_behavior = ("Outbound", "Inbound")
+    ports = [None, None] # ch, sv
+    # split data into Charleston and Savannah DataFrames based on latitude
+    for i in range(len(ports)):
+        ch_df = (df.Latitude >= 32.033)
+        sv_df = (df.Latitude < 32.033)
+        ports[i] = df[ch_df] if (i == 0) else df[sv_df]
+        ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
+                            (ports[i].Course <= course_ranges[i][0][1]) |
+                            (ports[i].Course >= course_ranges[i][1][0]) &
+                            (ports[i].Course <= course_ranges[i][1][1])]
+        ports[i].Course = round(ports[i].Course).astype("int")
+        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course"]
+        # replace course values with general inbound and outbound behavior
+        courses = {}
+        for behavior, course_range in zip(course_behavior, course_ranges[i]):
+            lower_bound = course_range[0]
+            upper_bound = course_range[1]
+            for j in range(lower_bound, upper_bound + 1):
+                courses[j] = behavior
+        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
+                                             "Course Behavior"].replace(
+                                             courses).astype("str")
+        # initialize Vessel Class column to Panamax, and update based on
+        # Post-Panamax LOA ft values to minimize computation
+        ports[i].loc[:, "Vessel Class"] = "Panamax"
+        post_pan = ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)
+        ports[i].loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+        # remove unwanted blacklist vessels
+        ports[i] = _filter_blacklisters(ports[i], blacklist)
+
+        ports[i] = ports[i][["Name", "MMSI", "VSPD kn", "Vessel Class",
+                           "Course Behavior", "Latitude", "Longitude",
+                           "Date/Time UTC"]]
+
+    return ports[0], ports[1] # ch, sv
 
 def process_report(path):
     """Processes data from vessel movement report. Adds data from wind buoys,
