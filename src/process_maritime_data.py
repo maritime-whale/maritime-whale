@@ -151,6 +151,9 @@ def _add_channel_occ(ports, i):
 
 def process_chunk(path):
     # TODO(omrinewman): need to implement
+    # TODO: add dependencies such that this will work with no data from SV or CH
+    # TODO: ensure this works on a dataframe with only 1 row as well...
+    # think of other edge cases this needs to handle..
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
