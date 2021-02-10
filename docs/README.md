@@ -48,7 +48,7 @@ vice versa.
 
 One-way transits are channel conditions where there is no oncoming traffic for a
 given vessel position. Conversely, two-way transits are channel conditions where
-ships travel towards each other in the entrance channel. The two-way condition 
+ships travel toward each other in the entrance channel. The two-way condition 
 applies to all entries up until the point where the last set of ships meet and pass. 
 After, they are considered to be one-way. The `meetpass` algorithm iteratively compares
 AIS vessel positions, identifying meeting and passing instances, while
