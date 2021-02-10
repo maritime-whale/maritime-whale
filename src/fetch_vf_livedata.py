@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Description...
+#
 
 from log import *
 
@@ -78,24 +78,24 @@ def _fetch_vesselfinder_data():
         # TODO: LOG TO STDOUT IN ADDITION TO STDERR
         print("No data...")
     else:
-        date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-        livedata.to_csv("../temp/" + date + ".csv", mode="a", header=False,
-                        index=False)
-        livedata.to_csv("../temp/stream.csv", mode="a", header=False,
-                        index=False)
+        # date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+        livedata.to_csv("../temp/stream.csv", mode="a", header=(not
+                        os.path.exists("../temp/stream.csv")), index=False)
+        # livedata.to_csv("../temp/" + date + ".csv", mode="a", header=(not
+        #                 os.path.exists("../temp/" + date + ".csv")), index=False)
 
 def _use_frozen_stream(logfile):
     print("Importing 'freeze.csv' (PARALLEL)...")
     print("Creating 'LiveData' plots... (PARALLEL)")
-    print("Uploading 'LiveData' plots... (PARALLEL)")
+    print("Uploading 'LiveData' plots and files... (PARALLEL)")
 
 def infinitely_fetch():
-    i = 0
+    cycle_duration = 0
     while True:
         # track any lag as the loop cycles by marking the start time
         elapsed = datetime.datetime.now().timestamp()
-        if i >= UPLOAD_INTERVAL * SECONDS:
-            i = 0
+        if cycle_duration >= UPLOAD_INTERVAL * SECONDS:
+            cycle_duration = 0
             if os.path.exists("../temp/stream.csv"):
                 shutil.move("../temp/stream.csv", "../temp/freeze.csv")
                 # USE MULTITHREADING; WILL THROW OFF SLEEP OTHERWISE
@@ -104,19 +104,19 @@ def infinitely_fetch():
                 _use_frozen_stream("")
             else:
                 # NO NEW DATA SO NO NEED TO UPLOAD ANYTHING
-                print("No new data in the last " + str(i / SECONDS) +
-                      " minutes...")
+                print("No new data in the last " + str(cycle_duration /
+                      SECONDS) + " minutes...")
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         _fetch_vesselfinder_data()
         # elapsed is now NEGATIVE
         elapsed -= datetime.datetime.now().timestamp()
-        if abs(elapsed) >= SECONDS:
+        if abs(elapsed) >= 60:
             print("WARNING! LOOP IS RUNNING SLOW! " + str(elapsed) +
                   " SECONDS ELAPSED BEFORE SLEEP!")
-            i += abs(elapsed)
+            cycle_duration += abs(elapsed)
             continue # avoid sleep
-        i += SECONDS
-        # print(i)
+        cycle_duration += SECONDS
+        # print(cycle_duration)
         # print(elapsed)
         time.sleep(SECONDS + elapsed) # add the NEGATIVE elapsed time
 

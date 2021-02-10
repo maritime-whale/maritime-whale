@@ -37,7 +37,7 @@ def _sanitize_vmr(df):
              df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
     return df
 
-def _wrangle_vmr(df):
+def _wrangle_vmr(df, rename):
     """Rounds, renames, and sanitizes vessel movment DataFrame. Creates new
     columns.
 
@@ -47,10 +47,7 @@ def _wrangle_vmr(df):
     Returns:
         Cleaned vessel movement report DataFrame.
     """
-    df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
-               "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
-               "SPEED": "VSPD kn", "COURSE": "Course", "HEADING": "Heading",
-               "AIS TYPE": "AIS Type"}, axis=1, inplace=True)
+    df.rename(rename, axis=1, inplace=True)
     df["LOA ft"] = (df["A"] + df["B"]) * M_TO_FT
     df["LOA ft"] = df["LOA ft"].round(0)
     df["Beam ft"] = (df["C"] + df["D"]) * M_TO_FT
@@ -149,53 +146,60 @@ def _add_channel_occ(ports, i):
             ports[i].loc[row, "% Channel Occupied"] = float("NaN")
     return ports[i]
 
+def _add_vessel_class(df):
+    """Creates 'Vessel Class' column based on vessel LOA ft."""
+    df.loc[:, "Vessel Class"] = "Panamax"
+    post_pan = df.index.isin(df[df["LOA ft"] > 965].index)
+    df.loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+
+def _course_behavior(port, ranges):
+    """Creates 'Course Behavior' column based on channel specific course ranges.
+    """
+    course_behavior = ("Outbound", "Inbound")
+    # filter on course ranges to isolate inbound and outbound ships only
+    port = port[(port.Course >= ranges[0][0]) & (port.Course <= ranges[0][1]) |
+                (port.Course >= ranges[1][0]) & (port.Course <= ranges[1][1])]
+    port.Course = round(port.Course).astype("int")
+    port.loc[:, "Course Behavior"] = port.loc[:, "Course"]
+    # replace course values with general inbound and outbound behavior
+    courses = {}
+    for behavior, range in zip(course_behavior, ranges):
+        lower_bound = range[0]
+        upper_bound = range[1]
+        for j in range(lower_bound, upper_bound + 1):
+            courses[j] = behavior
+    port.loc[:, "Course Behavior"] = (port.loc[:, "Course Behavior"]
+                                      .replace(courses).astype("str"))
+
 def process_chunk(path):
-    # TODO(omrinewman): need to implement
-    # TODO: add dependencies such that this will work with no data from SV or CH
-    # TODO: ensure this works on a dataframe with only 1 row as well...
-    # think of other edge cases this needs to handle..
+    """Processes LiveData chunk. Creates other relevant columns."""
+    # TODO: need to test (think of other edge cases this needs to handle)
+    # TODO: decompose and document new functions
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
-    df = _wrangle_vmr(df)
+    df = _wrangle_vmr(df, {"TIMESTAMP": "Date/Time UTC", "NAME": "Name",
+                           "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
+                           "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
+                           "Heading", "TYPE": "AIS Type"})
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
     course_ranges = (ch_course_ranges, sv_course_ranges)
-    course_behavior = ("Outbound", "Inbound")
     ports = [None, None] # ch, sv
     # split data into Charleston and Savannah DataFrames based on latitude
     for i in range(len(ports)):
         ch_df = (df.Latitude >= 32.033)
         sv_df = (df.Latitude < 32.033)
         ports[i] = df[ch_df] if (i == 0) else df[sv_df]
-        ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
-                            (ports[i].Course <= course_ranges[i][0][1]) |
-                            (ports[i].Course >= course_ranges[i][1][0]) &
-                            (ports[i].Course <= course_ranges[i][1][1])]
-        ports[i].Course = round(ports[i].Course).astype("int")
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course"]
-        # replace course values with general inbound and outbound behavior
-        courses = {}
-        for behavior, course_range in zip(course_behavior, course_ranges[i]):
-            lower_bound = course_range[0]
-            upper_bound = course_range[1]
-            for j in range(lower_bound, upper_bound + 1):
-                courses[j] = behavior
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
-                                             "Course Behavior"].replace(
-                                             courses).astype("str")
-        # initialize Vessel Class column to Panamax, and update based on
-        # Post-Panamax LOA ft values to minimize computation
-        ports[i].loc[:, "Vessel Class"] = "Panamax"
-        post_pan = ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)
-        ports[i].loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+        if not len(ports[i]):
+            continue
+        _course_behavior(ports[i], course_ranges[i])
+        _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
-
         ports[i] = ports[i][["Name", "MMSI", "VSPD kn", "Vessel Class",
-                           "Course Behavior", "Latitude", "Longitude",
-                           "Date/Time UTC"]]
-
+                             "Course Behavior", "Latitude", "Longitude",
+                             "Date/Time UTC"]]
     return ports[0], ports[1] # ch, sv
 
 def process_report(path):
@@ -216,7 +220,10 @@ def process_report(path):
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
-    df = _wrangle_vmr(df)
+    df = _wrangle_vmr(df, {"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
+                           "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
+                           "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
+                           "Heading", "AIS TYPE": "AIS Type"})
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
     # longitudinal channel midpoint for Charleston and Savannah respectively
@@ -253,28 +260,8 @@ def process_report(path):
         offshore_indices = ports[i].index.isin(off_locs)
         ports[i].loc[:, "Location"][offshore_indices] = "Offshore"
         ports[i] = add_wind(ports, i, buoys, alt_buoys)
-        # filter on course ranges to isolate inbound and outbound ships only
-        ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
-                            (ports[i].Course <= course_ranges[i][0][1]) |
-                            (ports[i].Course >= course_ranges[i][1][0]) &
-                            (ports[i].Course <= course_ranges[i][1][1])]
-        ports[i].Course = round(ports[i].Course).astype("int")
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course"]
-        # replace course values with general inbound and outbound behavior
-        courses = {}
-        for behavior, course_range in zip(course_behavior, course_ranges[i]):
-            lower_bound = course_range[0]
-            upper_bound = course_range[1]
-            for j in range(lower_bound, upper_bound + 1):
-                courses[j] = behavior
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
-                                             "Course Behavior"].replace(
-                                             courses).astype("str")
-        # initialize Vessel Class column to Panamax, and update based on
-        # Post-Panamax LOA ft values to minimize computation
-        ports[i].loc[:, "Vessel Class"] = "Panamax"
-        post_pan = ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)
-        ports[i].loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+        _course_behavior(ports[i], course_ranges[i])
+        _add_vessel_class(ports[i])
         # create yaw column based on difference between course and heading
         ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] -
                                          ports[i].loc[:, "Heading"])
