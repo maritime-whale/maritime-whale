@@ -109,7 +109,7 @@ technologies such as Amazon Web Services, GitHub, Gmail, and Wix.
 2. Set your current working directory to the root directory of this repo.
 3. Run `./install`.
 
-### First-time use & validation
+### First-time use and validation
 1. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the
 `conf` directory (if you have a valid `.token.pickle` move that to `conf`
 and _skip_ steps 2-4).
