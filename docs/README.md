@@ -1,6 +1,6 @@
 # Maritime Whale docs
 
-This directory contains [maritime-whale](https://github.com/riwhale/maritime-whale)
+This directory contains [maritime-whale](https://github.com/maritime-whale)
 project documentation.
 
 ## Methodologies
@@ -18,17 +18,17 @@ any questions you may have to
 This analysis focuses on Post-Panamax and Panamax vessels in accordance with the
 [USACE approach](https://erdc-library.erdc.dren.mil/jspui/handle/11681/32750) of
 evaluating the largest ships in dredged channels. Vessels not subject to the
-speed rule (e.g. military ops, law enforcement, search and rescue) as well as
-pusher tugs, fishing vessels, and dredge operations are filtered out. Thus,
+speed rule (e.g. military ops, law enforcement, search and rescue) as well as tugs, 
+fishing vessels, and dredge operations are filtered out. Thus,
 container ships, general cargo, bulk cargo, tankers, ro-ro, car carriers, and
 cruise ships are the targets of this analysis. Erroneous entries are removed
 from the data (e.g. abnormally high vessel speed, course errors, heading
 errors). If a single position is reported for a given ship the entry is also
 removed. Sample areas include ships under mandatory pilotage and exclude data
 from pilot boarding areas. Bends in the Savannah entrance channel—which
-naturally require vessels to turn—incur high yaw values. To prevent skewing
-this analysis these areas are ignored. Doing so allows for a more lucid
-characterization of vessel behavior in adverse and non-adverse conditions.
+naturally require vessels to turn—incur higher than normal yaw values. 
+To prevent skewing this analysis these areas are ignored. Doing so allows for 
+a more lucid characterization of vessel behavior in adverse and non-adverse conditions.
 
 ### Wind data retrieval and matching
 
@@ -36,7 +36,7 @@ The wind matching algorithm associates wind data with each AIS vessel position
 based on timestamps, using data from the [NBDC](https://www.ndbc.noaa.gov/). The
 algorithm matches wind buoy and vessel timestamps, finding the closest match
 within a three-hour window. When operational, the buoys typically record every
-ten minutes. If no match is found, fall back on alternate buoy data. In the
+ten minutes. If no match is found, it falls back on alternate buoy data. In the
 event of primary and alternate buoy failure corresponding wind entries get set
 to `NaN`. Charleston’s buoy ID is
 [41004](https://www.ndbc.noaa.gov/station_page.php?station=41004) and Savannah’s
@@ -48,9 +48,9 @@ vice versa.
 
 One-way transits are channel conditions where there is no oncoming traffic for a
 given vessel position. Conversely, two-way transits are channel conditions where
-ships are traveling in opposite directions. The two-way condition applies to all
-entries up until the point where the last set of ships meet and pass. After,
-they are considered to be one-way. The `meetpass` algorithm iteratively compares
+ships travel toward each other in the entrance channel. The two-way condition 
+applies to all entries up until the point where the last set of ships meet and pass. 
+After, they are considered to be one-way. The `meetpass` algorithm iteratively compares
 AIS vessel positions, identifying meeting and passing instances, while
 classifying two-way and one-way transit entries. Potential instances of meeting
 and passing are identified by checking if a pair of ships have timestamps within
