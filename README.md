@@ -1,4 +1,4 @@
-# ![Logo](assets/logo_64.png) Maritime Whale
+# Maritime Whale
 
 Maritime Whale tracks ship traffic in the ports of Charleston, North Carolina
 and Savannah, Georgia.
