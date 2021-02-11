@@ -18,4 +18,4 @@ handled by the [secure-cache](https://github.com/riwhale/secure-cache) repo.
 
 Documentation is rooted in [docs/README.md](docs/README.md).
 
-_For more help please contact [@riwhale](https://github.com/riwhale) at [dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
+_For more help please contact [@maritime-whale](https://github.com/maritime-whale) at [dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
