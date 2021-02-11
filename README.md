@@ -14,7 +14,7 @@ the [riwhale.github.io repo](https://github.com/riwhale/riwhale.github.io/).
 These files are hosted with live changes at https://riwhale.github.io via
 _GitHub Pages_. Plots and download links for the processed data files are
 embedded within the https://www.maritimewhale.com website. Remote caching
-handled by the [secure-cache](https://github.com/riwhale/secure-cache) repo.
+handled by the [secure-cache repo](https://github.com/riwhale/secure-cache).
 
 Documentation is rooted in [docs/README.md](docs/README.md).
 
