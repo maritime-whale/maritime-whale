@@ -8,6 +8,8 @@
 # Run main.py and log program execution. With debug mode turned off, changes are
 # uploaded to riwhale.github.io and secure-cache. Report web app health status.
 
+# TODO: improve debug mode to exclude secure-cache manipulations
+
 debug_mode=0 # init debug flag to FALSE
 # loop through arguments passed to the script from the command line
 for arg in "$@"; do
@@ -205,13 +207,13 @@ if [ $debug_mode == 0 ]; then
         # copy cache files in the cache directory to the cache/secure-cache
         # directory and sync the remote with the contents of cache/secure-cache
         cd ../../cache
-        cp -rnf [0-9]* secure-cache
+        # cp -rnf [0-9]* secure-cache
         cd secure-cache
-        git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git commit -am "update cache file(s)" \
-        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
-        2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # git commit -am "update cache file(s)" \
+        # 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        # git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+        # 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 
         # try to send a web app health report
         cd ../../src
