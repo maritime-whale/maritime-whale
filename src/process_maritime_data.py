@@ -407,7 +407,24 @@ def process_report(path):
 # report = process_chunk("../temp/freeze.csv")
 # ch = report[0]
 # sv = report[1]
-# ch_str = ch.to_html(index=False, justify="left", border=0)
-# ch_html = open("../temp/test.html", "w")
+# ch_str = ch.to_html(classes="table table-striped") # classes="table table-striped"
+# ch_html = open("../html/index.html", "w")
 # ch_html.write(ch_str)
 # ch_html.close()
+
+
+# pd.set_option("colheader_justify", "center")
+#
+# html_string = '''
+# <html>
+#   <head><title>HTML Pandas Dataframe with CSS</title></head>
+#   <link rel="stylesheet" type="text/css" href="df_style.css"/>
+#   <body>
+#     {table}
+#   </body>
+# </html>.
+# '''
+#
+# # OUTPUT AN HTML FILE
+# with open("../html/myhtml.html", "w") as f:
+#     f.write(html_string.format(table=ch.to_html(classes='mystyle', index=False)))
