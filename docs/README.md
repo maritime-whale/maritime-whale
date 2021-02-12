@@ -1,7 +1,9 @@
 # Maritime Whale docs
 
 This directory contains [Maritime Whale](https://github.com/maritime-whale)
-project documentation.
+project documentation.</br>
+_</br>Please direct any questions you may have to
+[dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
 
 ## Methodologies
 
@@ -10,8 +12,6 @@ and Savannah port entrances during the [migratory season](https://www.fisheries.
 of the North Atlantic right whale. By placing a high value on transparency and
 including the rationale behind specific design decisions, we hope to provide a
 clear picture of the intricacies of our data handling process.
-_</br>Please direct any questions you may have to
-[dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
 
 ### Vessel data retrieval and filtering
 
