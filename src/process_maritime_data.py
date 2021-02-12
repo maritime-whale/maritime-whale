@@ -58,16 +58,16 @@ def _wrangle_vmr(df, rename):
         Cleaned vessel movement report DataFrame.
     """
     df.rename(rename, axis=1, inplace=True)
-    df["LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
-    df["LOA ft"] = df.loc[:, "LOA ft"].round(0)
-    df["Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
-    df["Beam ft"] = df.loc[:, "Beam ft"].round(0)
-    df["Latitude"] = df.loc[:, "Latitude"].round(5)
-    df["Longitude"] = df.loc[:, "Longitude"].round(5)
+    df.loc[:, "LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
+    df.loc[:, "LOA ft"] = df.loc[:, "LOA ft"].round(0)
+    df.loc[:, "Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
+    df.loc[:, "Beam ft"] = df.loc[:, "Beam ft"].round(0)
+    df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
+    df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
     df = _sanitize_vmr(df)
-    df = df.loc[df["LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
-    df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
-    df["Date/Time UTC"] = pd.to_datetime(df.loc[:, "Date/Time UTC"])
+    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
+    df.loc[:, "Date/Time UTC"] = df.loc[:, "Date/Time UTC"].str.strip("UTC")
+    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df.loc[:, "Date/Time UTC"])
     # df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
     #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     df = df.loc[:, (["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
@@ -86,20 +86,18 @@ def _wrangle_live(df):
     Returns:
         Cleaned vessel movement report DataFrame.
     """
-    # DATETIME (UTC) should be timestamp
-    #AIS TYPE should be TYPE
-    df.rename({"DATETIME (UTC)": "UTC", "NAME": "Name",
+    df.rename({"TIMESTAMP": "UTC", "NAME": "Name",
                "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
                "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
-               "Heading", "AIS TYPE": "AIS Type"}, axis=1, inplace=True)
-    df["LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
-    df["LOA ft"] = df.loc[:, "LOA ft"].round(0)
-    df["Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
-    df["Beam ft"] = df.loc[:, "Beam ft"].round(0)
-    df["Latitude"] = df.loc[:, "Latitude"].round(5)
-    df["Longitude"] = df.loc[:, "Longitude"].round(5)
+               "Heading", "TYPE": "AIS Type"}, axis=1, inplace=True)
+    df.loc[:, "LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
+    df.loc[:, "LOA ft"] = df.loc[:, "LOA ft"].round(0)
+    df.loc[:, "Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
+    df.loc[:, "Beam ft"] = df.loc[:, "Beam ft"].round(0)
+    df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
+    df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
     df = _sanitize_vmr(df)
-    df = df.loc[df["LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
+    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
     df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][10:19] for i in range(len(df.loc[:, "UTC"].values))]
     # df = df[["UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
     #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
@@ -139,7 +137,7 @@ def _fold_vmr(ports, i):
     maxes = pd.DataFrame(ports[i].groupby(["Name", "MMSI"])["VSPD kn"]
             .max()).rename({"VSPD kn": "Max Speed kn"}, axis=1)
     merged_speeds = maxes.merge(mean, on=["Name", "MMSI"])
-    max_dict = merged_speeds["Max Speed kn"].to_dict()
+    max_dict = merged_speeds.loc[:, "Max Speed kn"].to_dict()
     columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[],
                "LOA ft":[], "Course":[], "AIS Type":[], "WSPD mph":[],
                "GST mph":[], "WDIR degT":[], "Buoy Source":[], "Beam ft":[],
@@ -240,8 +238,8 @@ def process_chunk(path):
     ports = [None, None] # ch, sv
     # split data into Charleston and Savannah DataFrames based on latitude
     for i in range(len(ports)):
-        ch_df = (df.Latitude >= 32.033)
-        sv_df = (df.Latitude < 32.033)
+        ch_df = (df.loc[:, "Latitude"] >= 32.033)
+        sv_df = (df.loc[:, "Latitude"] < 32.033)
         ports[i] = df[ch_df] if (i == 0) else df[sv_df]
         if not len(ports[i]):
             continue
@@ -344,7 +342,7 @@ def process_report(path):
         # run meetpass analysis and create Transit column based on results
         mp = meetpass(ports[i])
         two_way = twoway(ports[i], mp)
-        ports[i]["Transit"] = "One-way Transit"
+        ports[i].loc[:, "Transit"] = "One-way Transit"
         if not isinstance(two_way, type(None)):
             two_way_indices = ports[i].index.isin(two_way.index)
             ports[i].loc[two_way_indices, "Transit"] = "Two-way Transit"
@@ -405,3 +403,11 @@ def process_report(path):
 # df = _filter_blacklisters(df, blacklist)
 # df = _course_behavior(df, ((100, 140), (280, 320)))
 # df = _course_behavior(df, ((100, 160), (280, 340)))
+
+# report = process_chunk("../temp/freeze.csv")
+# ch = report[0]
+# sv = report[1]
+# ch_str = ch.to_html(index=False, justify="left", border=0)
+# ch_html = open("../temp/test.html", "w")
+# ch_html.write(ch_str)
+# ch_html.close()
