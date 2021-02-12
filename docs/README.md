@@ -9,9 +9,9 @@ This web application monitors and characterizes ship behavior at the Charleston
 and Savannah port entrances during the [migratory season](https://www.fisheries.noaa.gov/species/north-atlantic-right-whale)
 of the North Atlantic right whale. By placing a high value on transparency and
 including the rationale behind specific design decisions, we hope to provide a
-clear picture of the intricacies of our data handling process. Please direct
-any questions you may have to
-[dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com).
+clear picture of the intricacies of our data handling process.
+_</br>Please direct any questions you may have to
+[dev.riwhale+help@gmail.com](mailto:dev.riwhale+help@gmail.com)._
 
 ### Vessel data retrieval and filtering
 
