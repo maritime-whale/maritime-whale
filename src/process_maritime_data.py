@@ -65,6 +65,36 @@ def _wrangle_vmr(df, rename):
              "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     return df
 
+def _wrangle_live(df):
+    # TODO: Add into one function above that checks type
+    """Rounds, renames, and sanitizes vessel movment DataFrame. Creates new
+    columns.
+
+    Args:
+        df: Vessel movement DataFrame.
+
+    Returns:
+        Cleaned vessel movement report DataFrame.
+    """
+    # DATETIME (UTC) should be timestamp
+    #AIS TYPE should be TYPE
+    df.rename({"DATETIME (UTC)": "UTC", "NAME": "Name",
+               "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
+               "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
+               "Heading", "AIS TYPE": "AIS Type"}, axis=1, inplace=True)
+    df["LOA ft"] = (df["A"] + df["B"]) * M_TO_FT
+    df["LOA ft"] = df["LOA ft"].round(0)
+    df["Beam ft"] = (df["C"] + df["D"]) * M_TO_FT
+    df["Beam ft"] = df["Beam ft"].round(0)
+    df["Latitude"] = df["Latitude"].round(5)
+    df["Longitude"] = df["Longitude"].round(5)
+    df = _sanitize_vmr(df)
+    df = df[df["LOA ft"] >= SUB_PANAMAX] # filter out sub-panamax class vessels
+    df["UTC"] = [df["UTC"].values[i][10:19] for i in range(len(df["UTC"].values))]
+    df = df[["UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
+             "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
+    return df
+
 def _filter_blacklisters(df, blacklist):
     """Checks vessel AIS types and ommits blacklisted vessel types from the
     filtered data. Appends ommitted vessels' MMSI's to blacklist.txt.
@@ -185,10 +215,7 @@ def process_chunk(path):
     # TODO: PROTECT ALL FILE IO (including read_csv, like the line below); need
     # try execpts
     df = pd.read_csv(path)
-    df = _wrangle_vmr(df, {"TIMESTAMP": "Date/Time UTC", "NAME": "Name",
-                           "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
-                           "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
-                           "Heading", "TYPE": "AIS Type"})
+    df = _wrangle_live(df)
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
     course_ranges = (ch_course_ranges, sv_course_ranges)
@@ -204,9 +231,8 @@ def process_chunk(path):
         ports[i] = _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
-        ports[i] = ports[i][["Name", "MMSI", "VSPD kn", "Vessel Class",
-                             "Course Behavior", "Latitude", "Longitude",
-                             "Date/Time UTC"]]
+        ports[i] = ports[i][["UTC", "Name", "VSPD kn",
+                             "Course Behavior", "Vessel Class"]]
     return ports[0], ports[1] # ch, sv
 
 def process_report(path):
