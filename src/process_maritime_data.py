@@ -244,6 +244,7 @@ def process_chunk(path):
         if not len(ports[i]):
             continue
         ports[i] = _course_behavior(ports[i], course_ranges[i])
+        ports[i].rename({"Course":"course"}, axis=1, inplace=True)
         ports[i].rename({"Course Behavior":"Course"}, axis=1, inplace=True)
         ports[i] = _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
@@ -405,8 +406,8 @@ def process_report(path):
 # df = _course_behavior(df, ((100, 140), (280, 320)))
 # df = _course_behavior(df, ((100, 160), (280, 340)))
 
-# report = process_chunk("../temp/freeze.csv")
-# ch = report[0]
+report = process_chunk("../temp/freeze.csv")
+ch = report[0]
 # sv = report[1]
 # ch_str = ch.to_html(classes="table table-striped") # classes="table table-striped"
 # ch_html = open("../html/index.html", "w")
@@ -414,18 +415,18 @@ def process_report(path):
 # ch_html.close()
 
 
-# pd.set_option("colheader_justify", "center")
-#
-# html_string = '''
-# <html>
-#   <head><title>HTML Pandas Dataframe with CSS</title></head>
-#   <link rel="stylesheet" type="text/css" href="df_style.css"/>
-#   <body>
-#     {table}
-#   </body>
-# </html>.
-# '''
-#
-# # OUTPUT AN HTML FILE
-# with open("../html/myhtml.html", "w") as f:
-#     f.write(html_string.format(table=ch.to_html(classes='mystyle', index=False)))
+pd.set_option("colheader_justify", "center")
+
+html_string = '''
+<html>
+  <head><title>HTML Pandas Dataframe with CSS</title></head>
+  <link rel="stylesheet" type="text/css" href="df_style.css"/>
+  <body>
+    {table}
+  </body>
+</html>
+'''
+
+# OUTPUT AN HTML FILE
+with open("../html/myhtml.html", "w") as f:
+    f.write(html_string.format(table=ch.to_html(classes='mystyle', index=False)))
