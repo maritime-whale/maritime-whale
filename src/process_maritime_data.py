@@ -290,7 +290,7 @@ def process_report(path):
         ports[i].loc[:, "Location"] = "Nearshore"
         off_locs = ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index
         offshore_indices = ports[i].index.isin(off_locs)
-        ports[i].loc[:, "Location"][offshore_indices] = "Offshore"
+        ports[i].loc[offshore_indices, "Location"] = "Offshore"
         ports[i] = add_wind(ports, i, buoys, alt_buoys)
         ports[i] = _course_behavior(ports[i], course_ranges[i])
         ports[i] = _add_vessel_class(ports[i])
