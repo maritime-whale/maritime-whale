@@ -8,18 +8,20 @@
 # Run main.py and log program execution. With debug mode turned off, changes are
 # uploaded to riwhale.github.io and secure-cache. Report web app health status.
 
-# TODO: improve debug mode to exclude secure-cache manipulations
-
 debug_mode=0 # init debug flag to FALSE
+dev_mode=0 # init dev flag to FALSE
 # loop through arguments passed to the script from the command line
 for arg in "$@"; do
     # enable debug and notify user
-    if [ "$arg" == "debug" ]; then
+    if [ "$arg" == "debug" ] ; then
         echo "Running in debug mode..."
         debug_mode=1
+    elif [ "$arg" == "dev" ] ; then
+        echo "Running in dev mode..."
+        dev_mode=1
     else # invalid argument; display error and usage, then exit
         echo "./run: illegal option -- $arg"
-        echo "Usage: ./run [debug]"
+        echo "Usage: ./run [debug] [dev]"
         exit 1
     fi
 done
@@ -41,12 +43,12 @@ rm logs/report_*.log > /dev/null 2>&1
 if [ $debug_mode == 0 ]; then
     pip-upgrade --skip-virtualenv-check -p all \
     2>> logs/depend_err.log 1>> logs/depend_out.log
-else # display pip-upgrader output if not in debug mode
+else # display pip-upgrader output if in debug mode
     pip-upgrade --skip-virtualenv-check -p all
 fi
 
 # remove any logs older than 1 day
-if [ $debug_mode == 0 ]; then
+if [ $debug_mode == 0 ] && [ $dev_mode == 0 ]; then
     find logs/* -mtime +1 -exec rm {} \; > /dev/null 2>&1
     rm -rf temp/* > /dev/null 2>&1
 fi
@@ -68,6 +70,11 @@ fi
 # use Personal Access Token (PAT) from riwhale.config for GitHub OAuth
 RIWHALE_GITHUB=github.com/riwhale/riwhale.github.io.git
 REPO=html/riwhale.github.io/
+if [ $dev_mode == 1 ]; then
+    RIWHALE_GITHUB=github.com/riwhale/dev.git
+    REPO=html/dev/
+fi
+
 OAUTH_TOKEN="$( jq -r ".oauth" "$RICONF" )"
 # checks that the html directory exists
 if [ ! -d "$REPO" ]; then
@@ -116,7 +123,7 @@ for BUOY in $ADV_BUOYS; do
 done
 
 # sync the contents of the html/riwhale.github.io directory with the remote
-cd html/riwhale.github.io
+cd $REPO
 git pull https://$OAUTH_TOKEN:x-oauth-basic@$RIWHALE_GITHUB \
 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 
@@ -133,6 +140,10 @@ yes | cp -rf blacklist.txt ../../cache/blacklist.txt
 cd ../../cache
 SECURE_CACHE=secure-cache/
 CACHE_GITHUB=github.com/riwhale/secure-cache.git
+if [ $dev_mode == 1 ]; then
+    SECURE_CACHE=dev-cache/
+    CACHE_GITHUB=github.com/riwhale/dev-cache.git
+fi
 # clone the secure-cache repo to the cache directory if it doesn't exist
 if [ ! -d "$SECURE_CACHE" ]; then
     git clone https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
@@ -140,26 +151,30 @@ if [ ! -d "$SECURE_CACHE" ]; then
 fi
 
 # sync the contents of the cache/secure-cache directory with the remote
-cd secure-cache
+cd $SECURE_CACHE
 git pull https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
 cd ..
-cp -rf secure-cache/[0-9]* . > /dev/null 2>&1
+cp -rf $SECURE_CACHE/[0-9]* . > /dev/null 2>&1
 
 # run main.py
 cd ../src
 MAIN_RET_VAL=1 # init exit code to 1 (errors encountered)
 # when debug mode is turned off
-if [ $debug_mode == 0 ]; then
+if [ $debug_mode == 0 ] && [ $dev_mode == 0 ]; then
     # log stderr and stdout
     python3 main.py 2>> ../logs/vmr_err.log 1>> ../logs/vmr_out.log
     MAIN_RET_VAL=$? # record main.py exit code
 else
-    python3 main.py
+    if [ $dev_mode == 0 ]; then
+        python3 main.py
+    else
+        python3 main.py dev
+    fi
 fi
 
 # when debug mode is turned off
-cd ../html/riwhale.github.io
+cd ../$REPO
 if [ $debug_mode == 0 ]; then
     # check that at least the level_one.html plot exists
     PLOT=../level_one.html
@@ -207,13 +222,17 @@ if [ $debug_mode == 0 ]; then
         # copy cache files in the cache directory to the cache/secure-cache
         # directory and sync the remote with the contents of cache/secure-cache
         cd ../../cache
-        # cp -rnf [0-9]* secure-cache
-        cd secure-cache
-        # git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        # git commit -am "update cache file(s)" \
-        # 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-        # git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
-        # 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        if [ $dev_mode == 0 ]; then
+            cp -rnf [0-9]* $SECURE_CACHE
+        fi
+        cd $SECURE_CACHE
+        if [ $dev_mode == 0 ]; then
+            git add -A 2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+            git commit -am "update cache file(s)" \
+            2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+            git push https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+            2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+        fi
 
         # try to send a web app health report
         cd ../../src
@@ -231,7 +250,7 @@ if [ $debug_mode == 0 ]; then
             python3 error_reporting.py \
             2>> ../logs/report_err.log 1>> ../logs/report_out.log
         fi
-        cd ../html/riwhale.github.io
+        cd ../$REPO
     fi
 fi
 

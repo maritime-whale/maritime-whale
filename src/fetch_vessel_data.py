@@ -54,9 +54,9 @@ def _get_attachments(logfile, service, user_id, msg_id):
             os.rename("../temp/temp.csv", filepath)
     return filenames
 
-def fetch_latest_reports(logfile):
+def fetch_latest_reports(logfile, mode):
     """Retrieves latest 'unread' attachments from the Gmail inbox."""
-    creds = gmail_auth(logfile)
+    creds = gmail_auth(logfile, mode)
     # call the Gmail API
     days = []
     service = build("gmail", "v1", credentials=creds)
