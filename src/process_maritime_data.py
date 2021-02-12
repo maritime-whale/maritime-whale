@@ -244,11 +244,12 @@ def process_chunk(path):
         if not len(ports[i]):
             continue
         ports[i] = _course_behavior(ports[i], course_ranges[i])
+        ports[i].rename({"Course Behavior":"Course"}, axis=1, inplace=True)
         ports[i] = _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
         ports[i] = ports[i][["UTC", "Name", "VSPD kn",
-                             "Course Behavior", "Class"]]
+                             "Course", "Class"]]
     return ports[0], ports[1] # ch, sv
 
 def process_report(path):
