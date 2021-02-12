@@ -98,7 +98,7 @@ def generate_vspd_hist(df):
 def generate_strip_plot(df):
     """Generates vessel strip plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
-                  "% Channel Occupied":True, "Vessel Class":True,
+                  "% Channel Occupied":True, "Class":True,
                   "Course Behavior":True, "Yaw deg":True, "LOA ft":True,
                   "Beam ft":True, "Effective Beam ft":True, "Location":True,
                   "Date/Time UTC":True, "Name":False}
@@ -237,7 +237,7 @@ def generate_line_plot(df):
 def generate_channel_occ(df):
     """Generates channel occupancy and vessel speed scatter plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
-                  "Vessel Class":True, "Course Behavior":True, "Yaw deg":True,
+                  "Class":True, "Course Behavior":True, "Yaw deg":True,
                   "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Name":False, "Date/Time UTC":True}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Transit",

@@ -99,7 +99,7 @@ def meetpass(df):
             this_long = rounded_df[matching_keys &
                                    matching_times].Longitude.values[0].round(5)
             this_class = rounded_df[matching_keys &
-                                    matching_times]["Vessel Class"].values[0]
+                                    matching_times]["Class"].values[0]
             for inner_key, inner_val in potential_encs.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
@@ -114,7 +114,7 @@ def meetpass(df):
                                           ].Longitude.values[0].round(5)
                     that_class = rounded_df[matching_keys &
                                             matching_times
-                                           ]["Vessel Class"].values[0]
+                                           ]["Class"].values[0]
                     if ((this_time == that_time) and
                         (this_course != that_course)):
                         dist = _calc_dist(this_lat, this_long,

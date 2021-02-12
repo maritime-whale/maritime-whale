@@ -132,7 +132,7 @@ def _fold_vmr(ports, i):
                "LOA ft":[], "Course":[], "AIS Type":[], "WSPD mph":[],
                "GST mph":[], "WDIR degT":[], "Buoy Source":[], "Beam ft":[],
                "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
-               "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
+               "Class":[], "Location":[], "Yaw deg":[], "Transit":[],
                "% Channel Occupied":[]}
     # grab remaining data based on max speed position
     for key, value in max_dict.items():
@@ -149,12 +149,12 @@ def _fold_vmr(ports, i):
 def _add_channel_occ(ports, i):
     """Creates the channel occupancy column."""
     # total channel width for CH and SV are 1000 and 600 ft respectively,
-    # but vary based on vessel class and transit condition
+    # but vary based on Class and transit condition
     channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
     # create % channel occupancy column for each vessel position based on
     # effective beam, transit, and corresponding channel width
     for row in range(len(ports[i])):
-        vessel_class = ports[i].loc[row, "Vessel Class"]
+        vessel_class = ports[i].loc[row, "Class"]
         transit_type = ports[i].loc[row, "Transit"]
         eff_beam = ports[i].loc[row, "Effective Beam ft"]
         if ((vessel_class == "Post-Panamax") &
@@ -174,16 +174,16 @@ def _add_channel_occ(ports, i):
             occ = (eff_beam / channel_width[i][3]) * 100
             ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
         else:
-            sys.stderr.write("Error: Undefined vessel class and " +
+            sys.stderr.write("Error: Undefined Class and " +
                              "transit combination...\n")
             ports[i].loc[row, "% Channel Occupied"] = float("NaN")
     return ports[i]
 
 def _add_vessel_class(df):
-    """Creates 'Vessel Class' column based on vessel LOA ft."""
-    df.loc[:, "Vessel Class"] = "Panamax"
+    """Creates 'Class' column based on vessel LOA ft."""
+    df.loc[:, "Class"] = "Panamax"
     post_pan = df.index.isin(df[df["LOA ft"] > 965].index)
-    df.loc[post_pan, "Vessel Class"] = "Post-Panamax"
+    df.loc[post_pan, "Class"] = "Post-Panamax"
     return df
 
 def _course_behavior(df, ranges):
@@ -232,7 +232,7 @@ def process_chunk(path):
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
         ports[i] = ports[i][["UTC", "Name", "VSPD kn",
-                             "Course Behavior", "Vessel Class"]]
+                             "Course Behavior", "Class"]]
     return ports[0], ports[1] # ch, sv
 
 def process_report(path):
@@ -277,7 +277,7 @@ def process_report(path):
         if not len(ports[i]):
             empty = pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[],
                                   "Max Speed kn":[], "Mean Speed kn":[],
-                                  "LOA ft":[], "Beam ft":[], "Vessel Class":[],
+                                  "LOA ft":[], "Beam ft":[], "Class":[],
                                   "AIS Type":[], "Course":[], "Heading":[],
                                   "Course Behavior":[], "Yaw deg":[],
                                   "Effective Beam ft":[], "WDIR degT":[],
@@ -341,7 +341,7 @@ def process_report(path):
         # return max and mean positional data in specified order
         fold_res = fold_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
                              "Mean Speed kn", "LOA ft", "Beam ft",
-                             "Vessel Class", "AIS Type", "Course", "Heading",
+                             "Class", "AIS Type", "Course", "Heading",
                              "Course Behavior", "Yaw deg", "Effective Beam ft",
                              "WDIR degT", "WSPD mph", "GST mph", "Buoy Source",
                              "Location", "Latitude", "Longitude", "Transit",
@@ -349,7 +349,7 @@ def process_report(path):
         # return positional data in specified order
         all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
                            "% Channel Occupied", "Yaw deg", "Effective Beam ft",
-                           "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
+                           "LOA ft", "Beam ft", "Class", "AIS Type",
                            "Course", "Heading", "Course Behavior", "WDIR degT",
                            "GST mph", "Buoy Source", "Location", "Latitude",
                            "Longitude", "Date/Time UTC"]]

@@ -9,8 +9,8 @@ import pandas as pd
 
 def dashboard(df):
     """Generate DataFrame containing relevant port entrance statistics."""
-    panamax = (df["Vessel Class"] == "Panamax")
-    post_panamax = (df["Vessel Class"] == "Post-Panamax")
+    panamax = (df["Class"] == "Panamax")
+    post_panamax = (df["Class"] == "Post-Panamax")
     nearshore = (df["Location"] == "Nearshore")
     offshore = (df["Location"] == "Offshore")
     inbound = (df["Course Behavior"] == "Inbound")

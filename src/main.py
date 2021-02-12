@@ -163,7 +163,7 @@ def main():
             if i <= 1:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
                          "Mean Speed kn", "WSPD mph", "Buoy Source", "Transit",
-                         "Vessel Class", "LOA ft", "Beam ft", "Yaw deg",
+                         "Class", "LOA ft", "Beam ft", "Yaw deg",
                          "Effective Beam ft", "% Channel Occupied", "Location"]
             else:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
@@ -192,7 +192,7 @@ def main():
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
                           keys=["Charleston", "Savannah"],
                           axis=0).reset_index(level=1).rename(
-                          {"level_1": "Vessel Class"}, axis=1)
+                          {"level_1": "Class"}, axis=1)
         dash.to_csv("../html/dashboard.csv", mode="w", index=True)
         _write_image(generate_dashboard(dash), "../html/dashboard.pdf",
                      "pdf", 1)
