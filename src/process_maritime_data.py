@@ -153,7 +153,7 @@ def _add_vessel_class(df):
     """Creates 'Vessel Class' column based on vessel LOA ft."""
     df.loc[:, "Vessel Class"] = "Panamax"
     post_pan = df.index.isin(df[df["LOA ft"] > 965].index)
-    df.loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+    df.loc[post_pan, "Vessel Class"] = "Post-Panamax"
     return df
 
 def _course_behavior(df, ranges):
