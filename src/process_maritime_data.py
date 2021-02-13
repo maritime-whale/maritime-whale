@@ -12,6 +12,8 @@ import pandas as pd
 import math
 import sys
 
+# TODO: line wrapping and alignment
+
 # TODO: need to generalize this to apply to any port desired; will need to
 # do the same for main, run, plot, etc
 
@@ -32,6 +34,7 @@ def _sanitize_vmr(df):
     Returns:
         Sanitized vessel movement report DataFrame.
     """
+    # TODO: need to delete commented lines below
     # df = df[~df.index.isin(df[df["Beam ft"] >= 500].index)]
     df = df.loc[~df.index.isin(df[df.loc[:, "Beam ft"] >= 500].index), :]
     # df = df[~df.index.isin(df[df["Course"] == 511].index)]
@@ -65,9 +68,11 @@ def _wrangle_vmr(df, rename):
     df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
     df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
     df = _sanitize_vmr(df)
-    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
+    # filter out sub-panamax class vessels
+    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
     df.loc[:, "Date/Time UTC"] = df.loc[:, "Date/Time UTC"].str.strip("UTC")
     df.loc[:, "Date/Time UTC"] = pd.to_datetime(df.loc[:, "Date/Time UTC"])
+    # TODO: commented line below
     # df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
     #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     df = df.loc[:, (["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
@@ -97,8 +102,11 @@ def _wrangle_live(df):
     df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
     df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
     df = _sanitize_vmr(df)
-    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :] # filter out sub-panamax class vessels
-    df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][10:19] for i in range(len(df.loc[:, "UTC"].values))]
+    # filter out sub-panamax class vessels
+    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
+    df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][10:19] for i in
+                        range(len(df.loc[:, "UTC"].values))]
+    # TODO: commented line below
     # df = df[["UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
     #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     df = df.loc[:, ("UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
@@ -304,6 +312,7 @@ def process_report(path):
                                   "Transit":[], "% Channel Occupied":[]})
             ports[i] = [empty, empty]
             continue
+        # TODO: commented lines below
         # initialize location column to Nearshore; compute Offshore locations
         # ports[i].loc[:, "Location"] = "Nearshore"
         # off_locs = ports[i][ports[i].loc[:, "Longitude"] > channel_midpoint[i]].index
@@ -361,6 +370,7 @@ def process_report(path):
         else:
             all_res = all_res[all_res.loc[:, "Latitude"] >= 32.667473]
         fold_res = _fold_vmr(ports, i)
+        # TODO: commented lines below
         # return max and mean positional data in specified order
         # fold_res = fold_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
         #                      "Mean Speed kn", "LOA ft", "Beam ft",
@@ -369,13 +379,15 @@ def process_report(path):
         #                      "WDIR degT", "WSPD mph", "GST mph", "Buoy Source",
         #                      "Location", "Latitude", "Longitude", "Transit",
         #                      "% Channel Occupied"]]
-        fold_res = fold_res.loc[:, ("Date/Time UTC", "Name", "MMSI", "Max Speed kn",
-                             "Mean Speed kn", "LOA ft", "Beam ft",
-                             "Class", "AIS Type", "Course", "Heading",
-                             "Course Behavior", "Yaw deg", "Effective Beam ft",
-                             "WDIR degT", "WSPD mph", "GST mph", "Buoy Source",
-                             "Location", "Latitude", "Longitude", "Transit",
-                             "% Channel Occupied")]
+        fold_res = fold_res.loc[:, ("Date/Time UTC", "Name", "MMSI",
+                                    "Max Speed kn", "Mean Speed kn", "LOA ft",
+                                    "Beam ft", "Class", "AIS Type", "Course",
+                                    "Heading", "Course Behavior", "Yaw deg",
+                                    "Effective Beam ft", "WDIR degT",
+                                    "WSPD mph", "GST mph", "Buoy Source",
+                                    "Location", "Latitude", "Longitude",
+                                    "Transit", "% Channel Occupied")]
+        # TODO: commented lines below
         # return positional data in specified order
         # all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
         #                    "% Channel Occupied", "Yaw deg", "Effective Beam ft",
@@ -383,50 +395,14 @@ def process_report(path):
         #                    "Course", "Heading", "Course Behavior", "WDIR degT",
         #                    "GST mph", "Buoy Source", "Location", "Latitude",
         #                    "Longitude", "Date/Time UTC"]]
-        all_res = all_res.loc[:, ("Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
-                           "% Channel Occupied", "Yaw deg", "Effective Beam ft",
-                           "LOA ft", "Beam ft", "Class", "AIS Type",
-                           "Course", "Heading", "Course Behavior", "WDIR degT",
-                           "GST mph", "Buoy Source", "Location", "Latitude",
-                           "Longitude", "Date/Time UTC")]
+        all_res = all_res.loc[:, ("Name", "MMSI", "VSPD kn", "WSPD mph",
+                                  "Transit", "% Channel Occupied", "Yaw deg",
+                                  "Effective Beam ft", "LOA ft", "Beam ft",
+                                  "Class", "AIS Type", "Course", "Heading",
+                                  "Course Behavior", "WDIR degT", "GST mph",
+                                  "Buoy Source", "Location", "Latitude",
+                                  "Longitude", "Date/Time UTC")]
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vessel speed positions
         ports[i] = [fold_res, all_res]
     return ports[0], ports[1] # ch, sv
-
-# report = process_report("../temp/2021-02-09.csv")
-# blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
-#                                         "r").readlines()]
-# df = pd.read_csv("../temp/2021-02-09.csv")
-# df = _wrangle_vmr(df, {"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
-#                        "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
-#                        "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
-#                        "Heading", "AIS TYPE": "AIS Type"})
-# df = _filter_blacklisters(df, blacklist)
-# df = _course_behavior(df, ((100, 140), (280, 320)))
-# df = _course_behavior(df, ((100, 160), (280, 340)))
-
-report = process_chunk("../temp/freeze.csv")
-ch = report[0]
-# sv = report[1]
-# ch_str = ch.to_html(classes="table table-striped") # classes="table table-striped"
-# ch_html = open("../html/index.html", "w")
-# ch_html.write(ch_str)
-# ch_html.close()
-
-
-pd.set_option("colheader_justify", "center")
-
-html_string = '''
-<html>
-  <head><title>HTML Pandas Dataframe with CSS</title></head>
-  <link rel="stylesheet" type="text/css" href="df_style.css"/>
-  <body>
-    {table}
-  </body>
-</html>
-'''
-
-# OUTPUT AN HTML FILE
-with open("../html/myhtml.html", "w") as f:
-    f.write(html_string.format(table=ch.to_html(classes='mystyle', index=False)))

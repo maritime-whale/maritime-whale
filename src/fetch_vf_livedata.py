@@ -2,14 +2,15 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-#
+# TODO: description...
 
+from process_maritime_data import *
+from tables import *
 from log import *
 
 import pandas as pd
 import datetime
 import requests
-import shutil
 import time
 import json
 import os
@@ -17,9 +18,8 @@ import os
 # TODO: Use logfile constants in a consistent fashion (i.e. using both STDERR
 # and STDOUT, passed as argument in helpers vs using constant directly on all
 # levels, etc)
-ERR_LOGFILE = "../logs/livedata_err.log"
-OUT_LOGFILE = "../logs/livedata_out.log"
-UPLOAD_INTERVAL = 30 # number of cycles before upload
+LOGFILE = "../logs/livedata.log"
+UPLOAD_INTERVAL = 1 # number of cycles before upload
 SECONDS = 60 # cycle duration in seconds
 
 def _read_token(logfile, filename):
@@ -59,10 +59,12 @@ def _fetch_vesselfinder_data_helper(logfile, userkey):
                         orient="index"))
     except Exception as e:
         print("Error: " + str(e))
+        # log(logfile, "Error: " + str(e))
         return
     if rows:
         df = pd.concat(rows)
         print(df)
+        # log(logfile, df)
         return df
     return # no rows (no vessel movement reported)
 
@@ -71,50 +73,67 @@ def _fetch_vesselfinder_data():
     response provides the latest AIS dataset for all vessels in JSON format."""
     userkey = _read_token("", ".vf_token")
     if userkey is None:
-        print("ERROR: INVALID USERKEY!")
+        print("Error: Invalid API key!")
+        # log(logfile, "")
         return
     livedata = _fetch_vesselfinder_data_helper("", userkey)
     if livedata is None:
-        # TODO: LOG TO STDOUT IN ADDITION TO STDERR
         print("No data...")
+        # log(logfile, "No data...")
     else:
-        # date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+        date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
         livedata.to_csv("../temp/stream.csv", mode="a", header=(not
-                        os.path.exists("../temp/stream.csv")), index=False)
-        # livedata.to_csv("../temp/" + date + ".csv", mode="a", header=(not
-        #                 os.path.exists("../temp/" + date + ".csv")), index=False)
+                        os.path.exists("../temp/stream-" + date + ".csv")),
+                        index=False)
 
-def _use_frozen_stream(logfile):
-    print("Importing 'freeze.csv' (PARALLEL)...")
-    # call curl
-    print("Creating 'LiveData' plots... (PARALLEL)")
-    print("Uploading 'LiveData' plots and files... (PARALLEL)")
-    # upload with git
+# TODO: FINISH IMPLEMENTING
+def _process_stream(logfile, stream):
+    print("Processing chunk...")
+    report = process_chunk(stream)
+    ch = report[0]
+    print(ch)
+    print("Creating LiveData HTML tables...")
+    # log(logfile, "Creating 'LiveData' HTML tables...")
+    generate_table(ch, "livedata")
+    # TODO: upload with git
+    print("Uploading LiveData...")
+    # log(logfile, "Uploading 'LiveData'...")
 
-def infinitely_fetch():
+def _infinitely_fetch():
     cycle_duration = 0
     while True:
         # track any lag as the loop cycles by marking the start time
         elapsed = datetime.datetime.now().timestamp()
+        date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+        #
+        #
+        # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
+        # stream = "../temp/stream-" + date + ".csv"
+        #
+        #
+        stream = "../temp/stream.csv"
         if cycle_duration >= UPLOAD_INTERVAL * SECONDS:
             cycle_duration = 0
-            if os.path.exists("../temp/stream.csv"):
-                shutil.move("../temp/stream.csv", "../temp/freeze.csv")
-                # USE MULTITHREADING; WILL THROW OFF SLEEP OTHERWISE
-                # UNLESS the process ALWAYS takes less than 60 SECONDS
-                # TODO: INVESTIGATE BOTH OF THE ABOVE OPTIONS
-                _use_frozen_stream("")
+            if os.path.exists(stream):
+                _process_stream("", stream)
             else:
-                # NO NEW DATA SO NO NEED TO UPLOAD ANYTHING
+                # no new data (first run or daily stream file roll over)
                 print("No new data in the last " + str(cycle_duration /
                       SECONDS) + " minutes...")
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        _fetch_vesselfinder_data()
-        # elapsed is now NEGATIVE
+        #
+        #
+        # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
+        # _fetch_vesselfinder_data()
+        #
+        #
+        # NOTE: elapsed is now NEGATIVE
         elapsed -= datetime.datetime.now().timestamp()
-        if abs(elapsed) >= 60:
+        if abs(elapsed) >= SECONDS:
             print("WARNING! LOOP IS RUNNING SLOW! " + str(elapsed) +
                   " SECONDS ELAPSED BEFORE SLEEP!")
+            # log(logfile, "WARNING! LOOP IS RUNNING SLOW! " + str(elapsed) +
+            #              " SECONDS ELAPSED BEFORE SLEEP!")
             cycle_duration += abs(elapsed)
             continue # avoid sleep
         cycle_duration += SECONDS
@@ -122,4 +141,8 @@ def infinitely_fetch():
         # print(elapsed)
         time.sleep(SECONDS + elapsed) # add the NEGATIVE elapsed time
 
-infinitely_fetch()
+def main():
+    _infinitely_fetch()
+
+if __name__ == "__main__":
+    main()

@@ -29,7 +29,8 @@ def _write_image(fig, filename, format, scale):
     return pio.write_image(fig, file=filename, format=format, engine="kaleido",
                            scale=scale)
 
-def _verify_mode(flags):
+def _parse_flags(flags):
+    """Interprets flags from argv."""
     flags = [flag.lower() for flag in flags]
     if "dev" in flags:
         return "dev"
@@ -140,7 +141,7 @@ def _create_masters(last_seven_days, rest_of_season, filenames):
 def main():
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
-    if _fetch_latest_data(logfile, _verify_mode(sys.argv)):
+    if _fetch_latest_data(logfile, _parse_flags(sys.argv)):
         # load cache into memory if there is new data
         names = ["ch-max.csv", "sv-max.csv", "ch.csv", "sv.csv"]
         split_season = _load_cache(logfile, [], 0, names)

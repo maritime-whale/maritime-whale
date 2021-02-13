@@ -13,7 +13,7 @@ import pandas as pd
 
 OUTAGE_THRESHOLD = 0.65 # ratio
 
-def check_wind_outages(df, df_dropna):
+def _check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day."""
     if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:
         return True
@@ -119,7 +119,7 @@ def generate_strip_plot(df):
 def generate_wspd_hist(df, df_dropna):
     """Generates windspeed histogram."""
     fig = None
-    if not check_wind_outages(df, df_dropna):
+    if not _check_wind_outages(df, df_dropna):
         fig = px.histogram(df_dropna["WSPD mph"],
                            color_discrete_sequence=["steelblue"], nbins=15)
         fig.update_layout(title="<b>Windspeed Histogram</b><br>" +
@@ -162,7 +162,7 @@ def generate_wspd_hist(df, df_dropna):
 def generate_wspd_vs_vspd(df, df_dropna):
     """Generates vessel speed and wind speed density plot."""
     fig = None
-    if not check_wind_outages(df, df_dropna):
+    if not _check_wind_outages(df, df_dropna):
         fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
         fig.update_traces(contours_coloring="fill", colorscale="blues")
         fig.update_layout(xaxis_title_text="VSPD kn",
