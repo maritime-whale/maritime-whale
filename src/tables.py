@@ -1,5 +1,4 @@
 import pandas as pd
-from df_style import *
 
 def generate_table(df, filename, style):
     pd.set_option("colheader_justify", "center")
