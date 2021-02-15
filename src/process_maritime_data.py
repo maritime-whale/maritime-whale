@@ -257,6 +257,7 @@ def process_chunk(path):
         ports[i] = _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
+        ports[i].sort_values("UTC", ascending=False, inplace=True)
         ports[i] = ports[i][["UTC", "Name", "VSPD kn",
                              "Course", "Class"]]
     return ports[0], ports[1] # ch, sv
