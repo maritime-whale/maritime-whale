@@ -406,9 +406,3 @@ def process_report(path):
         # positions and one for maximum vessel speed positions
         ports[i] = [fold_res, all_res]
     return ports[0], ports[1] # ch, sv
-
-rep = process_chunk("../temp/freeze.csv")
-ch = rep[0]
-
-from tables import *
-generate_table(ch, "test", "livedata")
