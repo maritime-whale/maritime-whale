@@ -257,7 +257,6 @@ def process_chunk(path):
         ports[i] = _add_vessel_class(ports[i])
         # remove unwanted blacklist vessels
         ports[i] = _filter_blacklisters(ports[i], blacklist)
-        ports[i].sort_values("UTC", ascending=False, inplace=True)
         ports[i] = ports[i][["UTC", "Name", "VSPD kn",
                              "Course", "Class"]]
     return ports[0], ports[1] # ch, sv
@@ -408,24 +407,8 @@ def process_report(path):
         ports[i] = [fold_res, all_res]
     return ports[0], ports[1] # ch, sv
 
-
 rep = process_chunk("../temp/freeze.csv")
 ch = rep[0]
-
-# pd.set_option("colheader_justify", "center")
-#
-# html_string = """
-#     <html>
-#       <head><title>HTML Pandas Dataframe with CSS</title></head>
-#       <link rel="stylesheet" type="text/css" href="df_style.css"/>
-#       <body>
-#         {table}
-#       </body>
-#     </html>
-#     """
-#
-# with open("../html/" + "test" + ".html", "w") as f:
-#     f.write(html_string.format(table=ch.to_html(classes="mystyle", index=False)))
 
 from tables import *
 generate_table(ch, "test", "livedata")

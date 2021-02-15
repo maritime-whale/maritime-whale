@@ -2,6 +2,7 @@ import pandas as pd
 
 def generate_table(df, filename, style):
     pd.set_option("colheader_justify", "center")
+    df.sort_values("UTC", ascending=False, inplace=True)
     html_string = """
         <html>
           <head><title>HTML Pandas Dataframe with CSS</title></head>
