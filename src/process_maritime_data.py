@@ -104,7 +104,7 @@ def _wrangle_live(df):
     df = _sanitize_vmr(df)
     # filter out sub-panamax class vessels
     df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
-    df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][10:19] for i in
+    df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][11:19] for i in
                         range(len(df.loc[:, "UTC"].values))]
     # TODO: commented line below
     # df = df[["UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
