@@ -34,17 +34,10 @@ def _sanitize_vmr(df):
     Returns:
         Sanitized vessel movement report DataFrame.
     """
-    # TODO: need to delete commented lines below
-    # df = df[~df.index.isin(df[df["Beam ft"] >= 500].index)]
     df = df.loc[~df.index.isin(df[df.loc[:, "Beam ft"] >= 500].index), :]
-    # df = df[~df.index.isin(df[df["Course"] == 511].index)]
     df = df.loc[~df.index.isin(df[df.loc[:, "Course"] == 511].index), :]
-    # df = df[~df.index.isin(df[df["Heading"] == 511].index)]
     df = df.loc[~df.index.isin(df[df.loc[:, "Heading"] == 511].index), :]
-    # df = df[~df.index.isin(df[df["VSPD kn"] >= 40].index)]
     df = df.loc[~df.index.isin(df[df.loc[:, "VSPD kn"] >= 40].index), :]
-    # df = df[~df.MMSI.isin(
-    #          df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
     singleton = (df.loc[:, "MMSI"].value_counts() == 1)
     single_mmsi = df.loc[:, "MMSI"].value_counts()[singleton].index.values
     df = df.loc[~df.loc[:, "MMSI"].isin(single_mmsi), :]
@@ -72,9 +65,6 @@ def _wrangle_vmr(df, rename):
     df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
     df.loc[:, "Date/Time UTC"] = df.loc[:, "Date/Time UTC"].str.strip("UTC")
     df.loc[:, "Date/Time UTC"] = pd.to_datetime(df.loc[:, "Date/Time UTC"])
-    # TODO: commented line below
-    # df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
-    #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     df = df.loc[:, (["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
                      "Longitude", "Course", "AIS Type", "Heading", "VSPD kn",
                      "Beam ft"])]
@@ -106,9 +96,6 @@ def _wrangle_live(df):
     df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
     df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][11:19] for i in
                         range(len(df.loc[:, "UTC"].values))]
-    # TODO: commented line below
-    # df = df[["UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
-    #          "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
     df = df.loc[:, ("UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
              "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft")]
     return df
@@ -312,12 +299,6 @@ def process_report(path):
                                   "Transit":[], "% Channel Occupied":[]})
             ports[i] = [empty, empty]
             continue
-        # TODO: commented lines below
-        # initialize location column to Nearshore; compute Offshore locations
-        # ports[i].loc[:, "Location"] = "Nearshore"
-        # off_locs = ports[i][ports[i].loc[:, "Longitude"] > channel_midpoint[i]].index
-        # offshore_indices = ports[i].index.isin(off_locs)
-        # ports[i].loc[offshore_indices, "Location"] = "Offshore"
         ports[i].loc[:, "Location"] = "Nearshore"
         off_row = (ports[i].loc[:, "Longitude"] > -79.74169)
         off_loc = ports[i].loc[off_row, :].index
@@ -370,15 +351,7 @@ def process_report(path):
         else:
             all_res = all_res[all_res.loc[:, "Latitude"] >= 32.667473]
         fold_res = _fold_vmr(ports, i)
-        # TODO: commented lines below
         # return max and mean positional data in specified order
-        # fold_res = fold_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
-        #                      "Mean Speed kn", "LOA ft", "Beam ft",
-        #                      "Class", "AIS Type", "Course", "Heading",
-        #                      "Course Behavior", "Yaw deg", "Effective Beam ft",
-        #                      "WDIR degT", "WSPD mph", "GST mph", "Buoy Source",
-        #                      "Location", "Latitude", "Longitude", "Transit",
-        #                      "% Channel Occupied"]]
         fold_res = fold_res.loc[:, ("Date/Time UTC", "Name", "MMSI",
                                     "Max Speed kn", "Mean Speed kn", "LOA ft",
                                     "Beam ft", "Class", "AIS Type", "Course",
@@ -387,14 +360,7 @@ def process_report(path):
                                     "WSPD mph", "GST mph", "Buoy Source",
                                     "Location", "Latitude", "Longitude",
                                     "Transit", "% Channel Occupied")]
-        # TODO: commented lines below
         # return positional data in specified order
-        # all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
-        #                    "% Channel Occupied", "Yaw deg", "Effective Beam ft",
-        #                    "LOA ft", "Beam ft", "Class", "AIS Type",
-        #                    "Course", "Heading", "Course Behavior", "WDIR degT",
-        #                    "GST mph", "Buoy Source", "Location", "Latitude",
-        #                    "Longitude", "Date/Time UTC"]]
         all_res = all_res.loc[:, ("Name", "MMSI", "VSPD kn", "WSPD mph",
                                   "Transit", "% Channel Occupied", "Yaw deg",
                                   "Effective Beam ft", "LOA ft", "Beam ft",

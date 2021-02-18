@@ -9,51 +9,51 @@ import pandas as pd
 
 def dashboard(df):
     """Generate DataFrame containing relevant port entrance statistics."""
-    panamax = (df["Class"] == "Panamax")
-    post_panamax = (df["Class"] == "Post-Panamax")
-    nearshore = (df["Location"] == "Nearshore")
-    offshore = (df["Location"] == "Offshore")
-    inbound = (df["Course Behavior"] == "Inbound")
-    outbound = (df["Course Behavior"] == "Inbound")
+    panamax = (df.loc[:, "Class"] == "Panamax")
+    post_panamax = (df.loc[:, "Class"] == "Post-Panamax")
+    nearshore = (df.loc[:, "Location"] == "Nearshore")
+    offshore = (df.loc[:, "Location"] == "Offshore")
+    inbound = (df.loc[:, "Course Behavior"] == "Inbound")
+    outbound = (df.loc[:, "Course Behavior"] == "Inbound")
     dat = {"Proportion<br>of Transits":[
            str(round(sum(panamax) / len(df) * 100, 2)) + "%",
            str(round(sum(post_panamax) / len(df) * 100, 2)) + "%", "100%"
            ],
            "Compliance<br>Rate":[
-           str(round(sum(panamax & (df["VSPD kn"] <= 10)) /
+           str(round(sum(panamax & (df.loc[:, "VSPD kn"] <= 10)) /
                      sum(panamax) * 100, 2)) + "%",
-           str(round(sum(post_panamax & (df["VSPD kn"] <= 10)) /
+           str(round(sum(post_panamax & (df.loc[:, "VSPD kn"] <= 10)) /
                      sum(post_panamax) * 100, 2)) + "%",
-           str(round(sum(df["VSPD kn"] <= 10) / len(df) * 100, 2)) + "%"
+           str(round(sum(df.loc[:, "VSPD kn"] <= 10) / len(df) * 100, 2)) + "%"
            ],
            "Mean<br>VSPD":[
-           str(round(df[panamax]["VSPD kn"].mean(), 2)) + " kn",
-           str(round(df[post_panamax]["VSPD kn"].mean(), 2)) + " kn",
-           str(round(df["VSPD kn"].mean(), 2)) + " kn"
+           str(round(df[panamax].loc[:, "VSPD kn"].mean(), 2)) + " kn",
+           str(round(df[post_panamax].loc[:, "VSPD kn"].mean(), 2)) + " kn",
+           str(round(df.loc[:, "VSPD kn"].mean(), 2)) + " kn"
            ],
            "Nearshore<br>Median VSPD":[
-           str(round(df[nearshore & panamax]["VSPD kn"].median(), 2)) + " kn",
-           str(round(df[nearshore & post_panamax]["VSPD kn"].median(), 2)) +
+           str(round(df[nearshore & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
+           str(round(df[nearshore & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
-           str(round(df[nearshore]["VSPD kn"].median(), 2)) + " kn"
+           str(round(df[nearshore].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Offshore<br>Median VSPD":[
-           str(round(df[offshore & panamax]["VSPD kn"].median(), 2)) + " kn",
-           str(round(df[offshore & post_panamax]["VSPD kn"].median(), 2)) +
+           str(round(df[offshore & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
+           str(round(df[offshore & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
-           str(round(df[offshore]["VSPD kn"].median(), 2)) + " kn"
+           str(round(df[offshore].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Inbound<br>Median VSPD":[
-           str(round(df[inbound & panamax]["VSPD kn"].median(), 2)) + " kn",
-           str(round(df[inbound & post_panamax]["VSPD kn"].median(), 2)) +
+           str(round(df[inbound & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
+           str(round(df[inbound & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
-           str(round(df[inbound]["VSPD kn"].median(), 2)) + " kn"
+           str(round(df[inbound].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Outbound<br>Median VSPD":[
-           str(round(df[outbound & panamax]["VSPD kn"].median(), 2)) + " kn",
-           str(round(df[outbound & post_panamax]["VSPD kn"].median(), 2)) +
+           str(round(df[outbound & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
+           str(round(df[outbound & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
-           str(round(df[outbound]["VSPD kn"].median(), 2)) + " kn"
+           str(round(df[outbound].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "VSPD-WSPD<br>Correlation":[
            str(round(df[panamax].dropna()[["VSPD kn", "WSPD mph"]].corr()
