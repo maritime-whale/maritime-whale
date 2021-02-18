@@ -150,12 +150,15 @@ if [ ! -d "$SECURE_CACHE" ]; then
     2>> ../logs/sync_err.log 1>> ../logs/sync_out.log
 fi
 
-# sync the contents of the cache/secure-cache directory with the remote
-cd $SECURE_CACHE
-git pull https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
-2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
-cd ..
-cp -rf $SECURE_CACHE/[0-9]* . > /dev/null 2>&1
+# when debug mode is turned off
+if [ $debug_mode == 0 ]; then
+    # sync the contents of the cache/secure-cache directory with the remote
+    cd $SECURE_CACHE
+    git pull https://$OAUTH_TOKEN:x-oauth-basic@$CACHE_GITHUB \
+    2>> ../../logs/sync_err.log 1>> ../../logs/sync_out.log
+    cd ..
+    cp -rf $SECURE_CACHE/[0-9]* . > /dev/null 2>&1
+fi
 
 # run main.py
 cd ../src

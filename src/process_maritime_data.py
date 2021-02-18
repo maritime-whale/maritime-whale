@@ -97,7 +97,7 @@ def _wrangle_live(df):
     df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][11:19] for i in
                         range(len(df.loc[:, "UTC"].values))]
     df = df.loc[:, ("UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
-             "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft")]
+                    "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft")]
     return df
 
 def _filter_blacklisters(df, blacklist):

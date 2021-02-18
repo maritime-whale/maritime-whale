@@ -68,7 +68,7 @@ def _fetch_vesselfinder_data_helper(logfile, userkey):
         return df
     return # no rows (no vessel movement reported)
 
-def _fetch_vesselfinder_data():
+def _fetch_vesselfinder_data(filename):
     """Query the AIS dataset at a regular interval (every one minute). Each API
     response provides the latest AIS dataset for all vessels in JSON format."""
     userkey = _read_token("", ".vf_token")
@@ -82,19 +82,21 @@ def _fetch_vesselfinder_data():
         # log(logfile, "No data...")
     else:
         date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-        livedata.to_csv("../temp/stream.csv", mode="a", header=(not
-                        os.path.exists("../temp/stream-" + date + ".csv")),
+        livedata.to_csv(filename, mode="a", header=(not
+                        os.path.exists(filename)),
                         index=False)
 
 # TODO: FINISH IMPLEMENTING
 def _process_stream(logfile, stream):
     print("Processing chunk...")
-    report = process_chunk(stream)
-    ch = report[0]
-    print(ch)
+    ports = process_chunk(stream)
+    ch = ports[0]
+    sv = ports[1]
+    # print(ch)
     print("Creating LiveData HTML tables...")
     # log(logfile, "Creating 'LiveData' HTML tables...")
-    generate_table(ch, "livedata")
+    generate_table(ch, "ch-livedata", "livedata")
+    generate_table(sv, "sv-livedata", "livedata")
     # TODO: upload with git
     print("Uploading LiveData...")
     # log(logfile, "Uploading 'LiveData'...")
@@ -108,23 +110,23 @@ def _infinitely_fetch():
         #
         #
         # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
-        # stream = "../temp/stream-" + date + ".csv"
+        stream = "../temp/stream-" + date + ".csv"
         #
         #
-        stream = "../temp/stream.csv"
+        # stream = "../temp/stream.csv"
         if cycle_duration >= UPLOAD_INTERVAL * SECONDS:
-            cycle_duration = 0
             if os.path.exists(stream):
                 _process_stream("", stream)
             else:
                 # no new data (first run or daily stream file roll over)
-                print("No new data in the last " + str(cycle_duration /
-                      SECONDS) + " minutes...")
+                print("No new data in the last " + str(cycle_duration) +
+                      " second(s)...")
+            cycle_duration = 0
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         #
         #
         # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
-        # _fetch_vesselfinder_data()
+        _fetch_vesselfinder_data(stream)
         #
         #
         # NOTE: elapsed is now NEGATIVE
