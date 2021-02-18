@@ -46,13 +46,13 @@ def generate_ticker(ch, sv):
                     fill_color="#FFFFFF",
                     height=0),
         cells=dict(values=[["<b>Charleston:</b> " +
-                            str(round(sum(ch.loc[:, "VSPD kn"] <= 10) / len(ch) *
-                            100, 2)) + "% Compliance, " +
+                            str(round(sum(ch.loc[:, "VSPD kn"] <= 10) /
+                            len(ch) * 100, 2)) + "% Compliance, " +
                             str(round(ch.loc[:, "VSPD kn"].mean(), 2)) +
                             " kn Mean VSPD",
                             "<b>Savannah:</b>  " +
-                            str(round(sum(sv.loc[:, "VSPD kn"] <= 10) / len(sv) *
-                            100, 2)) + "% Compliance, " +
+                            str(round(sum(sv.loc[:, "VSPD kn"] <= 10) /
+                            len(sv) * 100, 2)) + "% Compliance, " +
                             str(round(sv.loc[:, "VSPD kn"].mean(), 2)) +
                             " kn Mean VSPD"]],
                    line_color="white", fill_color="#FFFFFF", align="left",
@@ -212,9 +212,9 @@ def generate_line_plot(df):
     fig = go.Figure(data=[t1, t2])
     fig.update_layout(title="<b>Vessel Speed and Yaw Line Plot</b><br>" +
                              "VSPD-Yaw Correlation: " +
-                             str(round(df.dropna().loc[:, ("VSPD kn", "Yaw deg")]
-                             .corr().iloc[0][1], 2)) + "<br>" +
-                             "Compliant VSPD mean Yaw: " +
+                             str(round(df.dropna().loc[:,
+                             ("VSPD kn", "Yaw deg")].corr().iloc[0][1], 2)) +
+                             "<br>" + "Compliant VSPD mean Yaw: " +
                              str(round(df[df.loc[:, "VSPD kn"] <= 10].loc[:,
                              "Yaw deg"].mean(), 2)) + " deg" + "<br>" +
                              "Non-compliant VSPD mean Yaw:  " +
