@@ -214,7 +214,7 @@ def _course_behavior(df, ranges):
         for j in range(lower_bound, upper_bound + 1):
             courses[j] = behavior
     df.loc[:, "Course Behavior"] = (df.loc[:, "Course Behavior"]
-                                    .replace(courses).astype("str")) # why astype str? it's already a string
+                                    .replace(courses).astype("str")) 
     return df
 
 def process_chunk(path):

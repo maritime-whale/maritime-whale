@@ -72,7 +72,8 @@ def meetpass(df):
         Dictionary of verified meeting and passing encounters.
     """
     rounded_df = df.copy()
-    rounded_df.loc[:, "Date/Time UTC"] = df.loc[:, "Date/Time UTC"].values.astype("<M8[m]")
+    rounded_df.loc[:, "Date/Time UTC"] = df.loc[:,
+    ("Date/Time UTC")].values.astype("<M8[m]")
     flagged = _meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
                              ["MMSI", "Course Behavior", pd.Grouper(
                               key="Date/Time UTC", freq="min")])[[
@@ -95,9 +96,11 @@ def meetpass(df):
             matching_keys = (rounded_df.loc[:, "MMSI"] == cur_key)
             matching_times = (rounded_df.loc[:, "Date/Time UTC"] == this_time)
             this_lat = rounded_df[matching_keys &
-                                  matching_times].loc[:, "Latitude"].values[0].round(5)
+                                  matching_times].loc[:,
+                                  ("Latitude")].values[0].round(5)
             this_long = rounded_df[matching_keys &
-                                   matching_times].loc[:, "Longitude"].values[0].round(5)
+                                   matching_times].loc[:,
+                                   ("Longitude")].values[0].round(5)
             this_class = rounded_df[matching_keys &
                                     matching_times].loc[:, "Class"].values[0]
             for inner_key, inner_val in potential_encs.items():
@@ -105,13 +108,16 @@ def meetpass(df):
                     that_course = that[0]
                     that_time = that[1]
                     matching_keys = (rounded_df.loc[:, "MMSI"] == inner_key)
-                    matching_times = (rounded_df.loc[:, "Date/Time UTC"] == that_time)
+                    matching_times = (rounded_df.loc[:,
+                    ("Date/Time UTC")] == that_time)
                     that_lat = rounded_df[matching_keys &
                                           matching_times
-                                         ].loc[:, "Latitude"].values[0].round(5)
+                                         ].loc[:,
+                                         ("Latitude")].values[0].round(5)
                     that_long = rounded_df[matching_keys &
                                            matching_times
-                                          ].loc[:, "Longitude"].values[0].round(5)
+                                          ].loc[:,
+                                          ("Longitude")].values[0].round(5)
                     that_class = rounded_df[matching_keys &
                                             matching_times
                                            ].loc[:, "Class"].values[0]
@@ -145,8 +151,8 @@ def _twoway_helper(df, mmsi, course, enc_time):
     """Isolates entries up to and including encounter time, based on specified
     vessel MMSI and course.
     """
-    res = df[(df.loc[:, "MMSI"] == mmsi) & (df.loc[:, "Course Behavior"] == course) &
-             (df.loc[:, "rounded date"] <= enc_time)]
+    res = df[(df.loc[:, "MMSI"] == mmsi) & (df.loc[:,
+    ("Course Behavior")] == course) & (df.loc[:, "rounded date"] <= enc_time)]
     return res
 
 def twoway(df, true_encs):
