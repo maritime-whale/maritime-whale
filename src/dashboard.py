@@ -32,35 +32,40 @@ def dashboard(df):
            str(round(df.loc[:, "VSPD kn"].mean(), 2)) + " kn"
            ],
            "Nearshore<br>Median VSPD":[
-           str(round(df[nearshore & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
-           str(round(df[nearshore & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
+           str(round(df[nearshore & panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
+           str(round(df[nearshore & post_panamax].loc[:,
+           ("VSPD kn")].median(), 2)) + " kn",
            str(round(df[nearshore].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Offshore<br>Median VSPD":[
-           str(round(df[offshore & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
-           str(round(df[offshore & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
+           str(round(df[offshore & panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
+           str(round(df[offshore & post_panamax].loc[:,
+           ("VSPD kn")].median(), 2)) + " kn",
            str(round(df[offshore].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Inbound<br>Median VSPD":[
-           str(round(df[inbound & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
-           str(round(df[inbound & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
+           str(round(df[inbound & panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
+           str(round(df[inbound & post_panamax].loc[:,
+           ("VSPD kn")].median(), 2)) + " kn",
            str(round(df[inbound].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "Outbound<br>Median VSPD":[
-           str(round(df[outbound & panamax].loc[:, "VSPD kn"].median(), 2)) + " kn",
-           str(round(df[outbound & post_panamax].loc[:, "VSPD kn"].median(), 2)) +
+           str(round(df[outbound & panamax].loc[:, "VSPD kn"].median(), 2)) +
            " kn",
+           str(round(df[outbound & post_panamax].loc[:,
+           ("VSPD kn")].median(), 2)) + " kn",
            str(round(df[outbound].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "VSPD-WSPD<br>Correlation":[
            str(round(df[panamax].dropna().loc[:, ("VSPD kn", "WSPD mph")].corr()
            .iloc[0][1], 2)),
-           str(round(df[post_panamax].dropna().loc[:, ("VSPD kn", "WSPD mph")].corr()
-           .iloc[0][1], 2)),
-           str(round(df.dropna().loc[:, ("VSPD kn", "WSPD mph")].corr().iloc[0][1], 2))
+           str(round(df[post_panamax].dropna().loc[:,
+           ("VSPD kn", "WSPD mph")].corr().iloc[0][1], 2)),
+           str(round(df.dropna().loc[:,
+           ("VSPD kn", "WSPD mph")].corr().iloc[0][1], 2))
            ]
           }
     index = ["Panamax", "Post-Panamax", "Combined"]

@@ -6,7 +6,7 @@
 
 from match_wind_data import *
 from datetime import *
-from meetpass import *
+from meet_and_pass import *
 
 import pandas as pd
 import math
@@ -196,8 +196,6 @@ def _add_vessel_class(df):
 def _course_behavior(df, ranges):
     """Creates 'Course Behavior' column based on channel specific course ranges.
     """
-    # TODO: lots of SettingWithCopyWarnings get introduced in this function..
-    # ive fixed some of the places that introduce issues, but not all
     course_behavior = ("Outbound", "Inbound")
     # filter on course ranges to isolate inbound and outbound ships only
     df = df[(df.loc[:, "Course"] >= ranges[0][0]) &
