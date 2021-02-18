@@ -12,11 +12,6 @@ import pandas as pd
 import math
 import sys
 
-# TODO: line wrapping and alignment
-
-# TODO: need to generalize this to apply to any port desired; will need to
-# do the same for main, run, plot, etc
-
 # vessel (AIS) types that should be automatically purged from analysis
 # see details at https://api.vesselfinder.com/docs/ref-aistypes.html
 AUTO_BLACKLIST = [30, 31, 32, 33, 34, 35, 36, 37, 51, 52, 53, 55, 57, 58, 59]
@@ -71,7 +66,6 @@ def _wrangle_vmr(df, rename):
     return df
 
 def _wrangle_live(df):
-    # TODO: Add into one function above that checks type
     """Rounds, renames, and sanitizes vessel movment DataFrame. Creates new
     columns.
 
@@ -196,8 +190,6 @@ def _add_vessel_class(df):
 def _course_behavior(df, ranges):
     """Creates 'Course Behavior' column based on channel specific course ranges.
     """
-    # TODO: lots of SettingWithCopyWarnings get introduced in this function..
-    # ive fixed some of the places that introduce issues, but not all
     course_behavior = ("Outbound", "Inbound")
     # filter on course ranges to isolate inbound and outbound ships only
     df = df[(df.loc[:, "Course"] >= ranges[0][0]) &
@@ -214,7 +206,7 @@ def _course_behavior(df, ranges):
         for j in range(lower_bound, upper_bound + 1):
             courses[j] = behavior
     df.loc[:, "Course Behavior"] = (df.loc[:, "Course Behavior"]
-                                    .replace(courses).astype("str")) 
+                                    .replace(courses).astype("str"))
     return df
 
 def process_chunk(path):
