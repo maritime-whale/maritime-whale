@@ -2,7 +2,9 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# TODO: description...
+# Fetches AIS data from VesselFinder using LiveData method in API. Retrieves,
+# processes, and constructs table of realtime vessel movements (once every
+# minute).
 
 from process_maritime_data import *
 from tables import *
@@ -14,6 +16,8 @@ import requests
 import time
 import json
 import os
+
+# TODO: MOVE TO NEW BRANCH
 
 # TODO: Use logfile constants in a consistent fashion (i.e. using both STDERR
 # and STDOUT, passed as argument in helpers vs using constant directly on all
@@ -74,7 +78,7 @@ def _fetch_vesselfinder_data(filename):
     userkey = _read_token("", ".vf_token")
     if userkey is None:
         print("Error: Invalid API key!")
-        # log(logfile, "")
+        # log(logfile, "Error: Invalid API key!")
         return
     livedata = _fetch_vesselfinder_data_helper("", userkey)
     if livedata is None:
@@ -107,13 +111,7 @@ def _infinitely_fetch():
         # track any lag as the loop cycles by marking the start time
         elapsed = datetime.datetime.now().timestamp()
         date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-        #
-        #
-        # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
         stream = "../temp/stream-" + date + ".csv"
-        #
-        #
-        # stream = "../temp/stream.csv"
         if cycle_duration >= UPLOAD_INTERVAL * SECONDS:
             if os.path.exists(stream):
                 _process_stream("", stream)
@@ -123,13 +121,7 @@ def _infinitely_fetch():
                       " second(s)...")
             cycle_duration = 0
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        #
-        #
-        # TODO: UNCOMMENT WHEN API KEY IS BACK ONLINE (replace in .vf_token)
         _fetch_vesselfinder_data(stream)
-        #
-        #
-        # NOTE: elapsed is now NEGATIVE
         elapsed -= datetime.datetime.now().timestamp()
         if abs(elapsed) >= SECONDS:
             print("WARNING! LOOP IS RUNNING SLOW! " + str(elapsed) +
