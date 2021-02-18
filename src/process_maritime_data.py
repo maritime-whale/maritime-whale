@@ -6,7 +6,7 @@
 
 from match_wind_data import *
 from datetime import *
-from meetpass import *
+from meet_and_pass import *
 
 import pandas as pd
 import math
