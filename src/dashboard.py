@@ -56,11 +56,11 @@ def dashboard(df):
            str(round(df[outbound].loc[:, "VSPD kn"].median(), 2)) + " kn"
            ],
            "VSPD-WSPD<br>Correlation":[
-           str(round(df[panamax].dropna()[["VSPD kn", "WSPD mph"]].corr()
+           str(round(df[panamax].dropna().loc[:, ("VSPD kn", "WSPD mph")].corr()
            .iloc[0][1], 2)),
-           str(round(df[post_panamax].dropna()[["VSPD kn", "WSPD mph"]].corr()
+           str(round(df[post_panamax].dropna().loc[:, ("VSPD kn", "WSPD mph")].corr()
            .iloc[0][1], 2)),
-           str(round(df.dropna()[["VSPD kn", "WSPD mph"]].corr().iloc[0][1], 2))
+           str(round(df.dropna().loc[:, ("VSPD kn", "WSPD mph")].corr().iloc[0][1], 2))
            ]
           }
     index = ["Panamax", "Post-Panamax", "Combined"]
