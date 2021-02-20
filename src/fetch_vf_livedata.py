@@ -30,7 +30,7 @@ def _read_token(logfile, filename):
     # TODO: consider moving conf handling stuff to its own file? Maybe even
     # combine gmail_auth.py with other related functions
     # (call new file "config.py"); need to protect for errors when reading the
-    # MapBox token as well (probably just reuse this function)
+    # Mapbox token as well (probably just reuse this function)
     token = None
     try:
         token = open("../conf/" + filename).read()

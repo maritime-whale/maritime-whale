@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Generates plots using Plotly and MapBox.
+# Generates plots using Plotly and Mapbox.
 
 # see details at https://plotly.com/python/mapbox-layers/
 
@@ -20,7 +20,7 @@ def _check_wind_outages(df, df_dropna):
     return False
 
 def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
-    """Generates geo plot using MapBox token."""
+    """Generates geo plot using Mapbox token."""
     fig = None
     fig = px.scatter_mapbox(df, hover_name="Name",
                             lat="Latitude", lon="Longitude",
