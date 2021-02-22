@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be
 # found in the LICENSE.txt file.
 #
-# Generates plots using Plotly and MapBox.
+# Generates plots using Plotly and Mapbox.
 
 # see details at https://plotly.com/python/mapbox-layers/
 
@@ -13,14 +13,14 @@ import pandas as pd
 
 OUTAGE_THRESHOLD = 0.65 # ratio
 
-def check_wind_outages(df, df_dropna):
+def _check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day."""
     if 1 - len(df_dropna) / len(df) >= OUTAGE_THRESHOLD:
         return True
     return False
 
 def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
-    """Generates geo plot using MapBox token."""
+    """Generates geo plot using Mapbox token."""
     fig = None
     fig = px.scatter_mapbox(df, hover_name="Name",
                             lat="Latitude", lon="Longitude",
@@ -46,14 +46,14 @@ def generate_ticker(ch, sv):
                     fill_color="#FFFFFF",
                     height=0),
         cells=dict(values=[["<b>Charleston:</b> " +
-                            str(round(sum(ch["VSPD kn"] <= 10) / len(ch) *
-                            100, 2)) + "% Compliance, " +
-                            str(round(ch["VSPD kn"].mean(), 2)) +
+                            str(round(sum(ch.loc[:, "VSPD kn"] <= 10) /
+                            len(ch) * 100, 2)) + "% Compliance, " +
+                            str(round(ch.loc[:, "VSPD kn"].mean(), 2)) +
                             " kn Mean VSPD",
                             "<b>Savannah:</b>  " +
-                            str(round(sum(sv["VSPD kn"] <= 10) / len(sv) *
-                            100, 2)) + "% Compliance, " +
-                            str(round(sv["VSPD kn"].mean(), 2)) +
+                            str(round(sum(sv.loc[:, "VSPD kn"] <= 10) /
+                            len(sv) * 100, 2)) + "% Compliance, " +
+                            str(round(sv.loc[:, "VSPD kn"].mean(), 2)) +
                             " kn Mean VSPD"]],
                    line_color="white", fill_color="#FFFFFF", align="left",
                    font_size=14, height=0))
@@ -69,9 +69,10 @@ def generate_vspd_hist(df):
                        yaxis_title_text = "Unique AIS Positions",
                        title = "<b>Vessel Speed Histogram</b><br>" +
                                "Compliance Rate: " +
-                               str(round(sum(df["VSPD kn"] <= 10) /
+                               str(round(sum(df.loc[:, "VSPD kn"] <= 10) /
                                df.shape[0] * 100, 2)) + "%<br>Mean VSPD: " +
-                               str(round(df["VSPD kn"].mean(), 2)) + " kn",
+                               str(round(df.loc[:, "VSPD kn"].mean(), 2)) +
+                               " kn",
                        showlegend = True, hoverlabel=dict(bgcolor="white",
                                                           font_size=13),
                        legend_title_text="", width=875, height=600,
@@ -90,7 +91,7 @@ def generate_vspd_hist(df):
 def generate_strip_plot(df):
     """Generates vessel strip plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
-                  "% Channel Occupied":True, "Vessel Class":True,
+                  "% Channel Occupied":True, "Class":True,
                   "Course Behavior":True, "Yaw deg":True, "LOA ft":True,
                   "Beam ft":True, "Effective Beam ft":True, "Location":True,
                   "Date/Time UTC":True, "Name":False}
@@ -101,10 +102,12 @@ def generate_strip_plot(df):
                    width=900, height=600,
                    title= "<b>Vessel Speed Plot</b><br>" +
                            "One-way Transits: " +
-                           str(round((df[df.Transit == "One-way Transit"]
+                           str(round((df[df.loc[:,
+                           ("Transit")] == "One-way Transit"]
                            .shape[0] / df.shape[0]) * 100, 2)) + "%<br>" +
                            "Two-way Transits: " +
-                           str(round((df[df.Transit == "Two-way Transit"]
+                           str(round((df[df.loc[:,
+                           ("Transit")] == "Two-way Transit"]
                            .shape[0] / df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=0, y0=10, x1=1, y1=10, xref="paper", yref="y",
                   line=dict(color="red", dash="solid", width=1.5))
@@ -119,17 +122,17 @@ def generate_strip_plot(df):
 def generate_wspd_hist(df, df_dropna):
     """Generates windspeed histogram."""
     fig = None
-    if not check_wind_outages(df, df_dropna):
-        fig = px.histogram(df_dropna["WSPD mph"],
+    if not _check_wind_outages(df, df_dropna):
+        fig = px.histogram(df_dropna.loc[:, "WSPD mph"],
                            color_discrete_sequence=["steelblue"], nbins=15)
         fig.update_layout(title="<b>Windspeed Histogram</b><br>" +
                                 "Wind Buoy Data Available: " +
                                 str(round(len(df.dropna()) / len(df) * 100, 2))
                                 + "%<br>" +
                                 "Adverse Wind Conditions: " +
-                                str(round((df_dropna[df_dropna["WSPD mph"] >=
-                                30].shape[0] / df_dropna.shape[0]) * 100, 2)) +
-                                "%",
+                                str(round((df_dropna[df_dropna.loc[:,
+                                ("WSPD mph")] >= 30].shape[0] /
+                                df_dropna.shape[0]) * 100, 2)) + "%",
                                 xaxis_title_text="WSPD mph",
                                 yaxis_title_text="Unique AIS Positions",
                                 showlegend=False,
@@ -162,7 +165,7 @@ def generate_wspd_hist(df, df_dropna):
 def generate_wspd_vs_vspd(df, df_dropna):
     """Generates vessel speed and wind speed density plot."""
     fig = None
-    if not check_wind_outages(df, df_dropna):
+    if not _check_wind_outages(df, df_dropna):
         fig = px.density_contour(df_dropna, x="VSPD kn", y="WSPD mph")
         fig.update_traces(contours_coloring="fill", colorscale="blues")
         fig.update_layout(xaxis_title_text="VSPD kn",
@@ -172,7 +175,8 @@ def generate_wspd_vs_vspd(df, df_dropna):
                                  str(round(len(df.dropna()) / len(df) * 100, 2))
                                  + "%<br>" +
                                  "VSPD-WSPD Correlation: " +
-                                 str(round(df_dropna[["VSPD kn", "WSPD mph"]]
+                                 str(round(df_dropna.loc[:,
+                                 ("VSPD kn", "WSPD mph")]
                                  .corr().iloc[0][1], 2)),
                           hoverlabel=dict(bgcolor="white", font_size=13),
                           width=875, height=600, plot_bgcolor="#F1F1F1",
@@ -199,23 +203,23 @@ def generate_wspd_vs_vspd(df, df_dropna):
 
 def generate_line_plot(df):
     """Generates vessel speed and yaw line plot."""
-    t1 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn")["VSPD kn"],
+    t1 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn").loc[:, "VSPD kn"],
                     mode="lines", name="VSPD kn", line=dict(width=1.5,
                     color="#19336A"), hoverinfo="skip")
-    t2 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn")["Yaw deg"],
+    t2 = go.Scatter(x=df.index, y=df.sort_values("VSPD kn").loc[:, "Yaw deg"],
                     mode="lines", name="Yaw deg",
                     line=dict(width=1.5, color="green"), hoverinfo="skip")
     fig = go.Figure(data=[t1, t2])
     fig.update_layout(title="<b>Vessel Speed and Yaw Line Plot</b><br>" +
                              "VSPD-Yaw Correlation: " +
-                             str(round(df.dropna()[["VSPD kn", "Yaw deg"]]
-                             .corr().iloc[0][1], 2)) + "<br>" +
-                             "Compliant VSPD mean Yaw: " +
-                             str(round(df[df["VSPD kn"] <= 10]["Yaw deg"]
-                             .mean(), 2)) + " deg" + "<br>" +
+                             str(round(df.dropna().loc[:,
+                             ("VSPD kn", "Yaw deg")].corr().iloc[0][1], 2)) +
+                             "<br>" + "Compliant VSPD mean Yaw: " +
+                             str(round(df[df.loc[:, "VSPD kn"] <= 10].loc[:,
+                             "Yaw deg"].mean(), 2)) + " deg" + "<br>" +
                              "Non-compliant VSPD mean Yaw:  " +
-                             str(round(df[df["VSPD kn"] > 10]["Yaw deg"]
-                             .mean(), 2)) + " deg",
+                             str(round(df[df.loc[:, "VSPD kn"] > 10].loc[:,
+                             "Yaw deg"].mean(), 2)) + " deg",
                       xaxis_title_text="AIS Positions",
                       yaxis_title_text="Degrees and Knots", width=875,
                       height=600, plot_bgcolor="#F1F1F1", font=dict(size=12),
@@ -229,7 +233,7 @@ def generate_line_plot(df):
 def generate_channel_occ(df):
     """Generates channel occupancy and vessel speed scatter plot."""
     hover_dict = {"VSPD kn":True, "WSPD mph":True, "Transit":True,
-                  "Vessel Class":True, "Course Behavior":True, "Yaw deg":True,
+                  "Class":True, "Course Behavior":True, "Yaw deg":True,
                   "LOA ft":True, "Beam ft":True, "Effective Beam ft":True,
                   "Location":True, "Name":False, "Date/Time UTC":True}
     fig = px.scatter(df, x="VSPD kn", y="% Channel Occupied", color="Transit",
@@ -237,10 +241,12 @@ def generate_channel_occ(df):
                      hover_data=hover_dict, hover_name="Name",
                      title="<b>Vessel Speed and Occupied Channel</b><br>" +
                      "One-way Transits: " +
-                     str(round((df[df.Transit == "One-way Transit"].shape[0] /
+                     str(round((df[df.loc[:,
+                     ("Transit")] == "One-way Transit"].shape[0] /
                      df.shape[0]) * 100, 2)) + "%<br>" +
                      "Two-way Transits: " +
-                     str(round((df[df.Transit == "Two-way Transit"].shape[0] /
+                     str(round((df[df.loc[:,
+                     ("Transit")] == "Two-way Transit"].shape[0] /
                      df.shape[0]) * 100, 2)) + "%")
     fig.add_shape(type="line", x0=10, y0=0, x1=10, y1=1, xref="x", yref="paper",
                   line=dict(color="red", dash="solid", width=1.5))

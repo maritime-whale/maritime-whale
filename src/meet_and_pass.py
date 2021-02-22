@@ -4,7 +4,6 @@
 #
 # Detect meeting and passing instances between ships.
 
-from process_maritime_data import *
 from datetime import timedelta
 
 import pandas as pd
@@ -46,9 +45,9 @@ def _meetpass_helper(df, time_tolerance):
     """
     # sorts timestamps such that entry channel data is in chronological order
     chrono_df = df.sort_values("Date/Time UTC")
-    mmsi = list(chrono_df.MMSI)
-    timestamp = list(chrono_df["Date/Time UTC"])
-    course = list(chrono_df["Course Behavior"])
+    mmsi = list(chrono_df.loc[:, "MMSI"])
+    timestamp = list(chrono_df.loc[:, "Date/Time UTC"])
+    course = list(chrono_df.loc[:, "Course Behavior"])
     potential_times = []
     for i in range(len(mmsi) - 1):
         if mmsi[i] != mmsi[i + 1]:
@@ -58,7 +57,7 @@ def _meetpass_helper(df, time_tolerance):
                     potential_times.append(timestamp[i])
                     potential_times.append(timestamp[i + 1])
                     sorted(potential_times)
-    res = chrono_df[chrono_df["Date/Time UTC"].isin(potential_times)]
+    res = chrono_df[chrono_df.loc[:, "Date/Time UTC"].isin(potential_times)]
     return res
 
 def meetpass(df):
@@ -73,11 +72,12 @@ def meetpass(df):
         Dictionary of verified meeting and passing encounters.
     """
     rounded_df = df.copy()
-    rounded_df["Date/Time UTC"] = df["Date/Time UTC"].values.astype("<M8[m]")
+    rounded_df.loc[:, "Date/Time UTC"] = (df.loc[:, "Date/Time UTC"].values
+                                          .astype("<M8[m]"))
     flagged = _meetpass_helper(df, MEET_PASS_TIME_TOL).groupby(
-                             ["MMSI", "Course Behavior", pd.Grouper(
-                              key="Date/Time UTC", freq="min")])[[
-                              "Date/Time UTC"]].size()
+                               ["MMSI", "Course Behavior", pd.Grouper(
+                                key="Date/Time UTC", freq="min")])[[
+                                "Date/Time UTC"]].size()
     # potential_encs should contain all the flagged times
     potential_encs = {}
     for entry in flagged.index.unique(0):
@@ -93,29 +93,27 @@ def meetpass(df):
         while not cur_val.empty:
             this_course = cur_val.get_level_values(0)[0]
             this_time = cur_val.get_level_values(1)[0]
-            matching_keys = (rounded_df.MMSI == cur_key)
-            matching_times = (rounded_df["Date/Time UTC"] == this_time)
-            this_lat = rounded_df[matching_keys &
-                                  matching_times].Latitude.values[0].round(5)
-            this_long = rounded_df[matching_keys &
-                                   matching_times].Longitude.values[0].round(5)
-            this_class = rounded_df[matching_keys &
-                                    matching_times]["Vessel Class"].values[0]
+            matching_keys = (rounded_df.loc[:, "MMSI"] == cur_key)
+            matching_times = (rounded_df.loc[:, "Date/Time UTC"] == this_time)
+            this_lat = (rounded_df[matching_keys & matching_times]
+                        .loc[:, "Latitude"].values[0].round(5))
+            this_long = (rounded_df[matching_keys & matching_times]
+                         .loc[:, "Longitude"].values[0].round(5))
+            this_class = (rounded_df[matching_keys & matching_times]
+                          .loc[:, "Class"].values[0])
             for inner_key, inner_val in potential_encs.items():
                 for j, that in enumerate(inner_val):
                     that_course = that[0]
                     that_time = that[1]
-                    matching_keys = (rounded_df.MMSI == inner_key)
-                    matching_times = (rounded_df["Date/Time UTC"] == that_time)
-                    that_lat = rounded_df[matching_keys &
-                                          matching_times
-                                         ].Latitude.values[0].round(5)
-                    that_long = rounded_df[matching_keys &
-                                           matching_times
-                                          ].Longitude.values[0].round(5)
-                    that_class = rounded_df[matching_keys &
-                                            matching_times
-                                           ]["Vessel Class"].values[0]
+                    matching_keys = (rounded_df.loc[:, "MMSI"] == inner_key)
+                    matching_times = (rounded_df.loc[:, "Date/Time UTC"] ==
+                                      that_time)
+                    that_lat = (rounded_df[matching_keys & matching_times]
+                                .loc[:, "Latitude"].values[0].round(5))
+                    that_long = (rounded_df[matching_keys & matching_times]
+                                 .loc[:, "Longitude"].values[0].round(5))
+                    that_class = (rounded_df[matching_keys & matching_times]
+                                  .loc[:, "Class"].values[0])
                     if ((this_time == that_time) and
                         (this_course != that_course)):
                         dist = _calc_dist(this_lat, this_long,
@@ -146,8 +144,9 @@ def _twoway_helper(df, mmsi, course, enc_time):
     """Isolates entries up to and including encounter time, based on specified
     vessel MMSI and course.
     """
-    res = df[(df.MMSI == mmsi) & (df["Course Behavior"] == course) &
-             (df["rounded date"] <= enc_time)]
+    res = df[(df.loc[:, "MMSI"] == mmsi) &
+             (df.loc[:, "Course Behavior"] == course) &
+             (df.loc[:, "rounded date"] <= enc_time)]
     return res
 
 def twoway(df, true_encs):

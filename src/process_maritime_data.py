@@ -6,11 +6,14 @@
 
 from match_wind_data import *
 from datetime import *
-from meetpass import *
+from meet_and_pass import *
 
 import pandas as pd
 import math
 import sys
+
+# TODO: need to generalize this to apply to any port desired; will need to
+# do the same for main, run, plot, etc
 
 # vessel (AIS) types that should be automatically purged from analysis
 # see details at https://api.vesselfinder.com/docs/ref-aistypes.html
@@ -29,15 +32,16 @@ def _sanitize_vmr(df):
     Returns:
         Sanitized vessel movement report DataFrame.
     """
-    df = df[~df.index.isin(df[df["Beam ft"] >= 500].index)]
-    df = df[~df.index.isin(df[df["Course"] == 511].index)]
-    df = df[~df.index.isin(df[df["Heading"] == 511].index)]
-    df = df[~df.index.isin(df[df["VSPD kn"] >= 40].index)]
-    df = df[~df.MMSI.isin(
-             df.MMSI.value_counts()[df.MMSI.value_counts() == 1].index.values)]
+    df = df.loc[~df.index.isin(df[df.loc[:, "Beam ft"] >= 500].index), :]
+    df = df.loc[~df.index.isin(df[df.loc[:, "Course"] == 511].index), :]
+    df = df.loc[~df.index.isin(df[df.loc[:, "Heading"] == 511].index), :]
+    df = df.loc[~df.index.isin(df[df.loc[:, "VSPD kn"] >= 40].index), :]
+    singleton = (df.loc[:, "MMSI"].value_counts() == 1)
+    single_mmsi = df.loc[:, "MMSI"].value_counts()[singleton].index.values
+    df = df.loc[~df.loc[:, "MMSI"].isin(single_mmsi), :]
     return df
 
-def _wrangle_vmr(df):
+def _wrangle_vmr(df, rename):
     """Rounds, renames, and sanitizes vessel movment DataFrame. Creates new
     columns.
 
@@ -47,22 +51,21 @@ def _wrangle_vmr(df):
     Returns:
         Cleaned vessel movement report DataFrame.
     """
-    df.rename({"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
-               "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
-               "SPEED": "VSPD kn", "COURSE": "Course", "HEADING": "Heading",
-               "AIS TYPE": "AIS Type"}, axis=1, inplace=True)
-    df["LOA ft"] = (df["A"] + df["B"]) * M_TO_FT
-    df["LOA ft"] = df["LOA ft"].round(0)
-    df["Beam ft"] = (df["C"] + df["D"]) * M_TO_FT
-    df["Beam ft"] = df["Beam ft"].round(0)
-    df["Latitude"] = df["Latitude"].round(5)
-    df["Longitude"] = df["Longitude"].round(5)
+    df.rename(rename, axis=1, inplace=True)
+    df.loc[:, "LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
+    df.loc[:, "LOA ft"] = df.loc[:, "LOA ft"].round(0)
+    df.loc[:, "Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
+    df.loc[:, "Beam ft"] = df.loc[:, "Beam ft"].round(0)
+    df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
+    df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
     df = _sanitize_vmr(df)
-    df = df[df["LOA ft"] >= SUB_PANAMAX] # filter out sub-panamax class vessels
-    df["Date/Time UTC"] = df["Date/Time UTC"].str.strip("UTC")
-    df["Date/Time UTC"] = pd.to_datetime(df["Date/Time UTC"])
-    df = df[["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
-             "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft"]]
+    # filter out sub-panamax class vessels
+    df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
+    df.loc[:, "Date/Time UTC"] = df.loc[:, "Date/Time UTC"].str.strip("UTC")
+    df.loc[:, "Date/Time UTC"] = pd.to_datetime(df.loc[:, "Date/Time UTC"])
+    df = df.loc[:, (["Date/Time UTC", "Name", "MMSI", "LOA ft", "Latitude",
+                     "Longitude", "Course", "AIS Type", "Heading", "VSPD kn",
+                     "Beam ft"])]
     return df
 
 def _filter_blacklisters(df, blacklist):
@@ -75,16 +78,16 @@ def _filter_blacklisters(df, blacklist):
     Returns:
         Filtered vessel movement DataFrame.
     """
-    df = df[~df.MMSI.isin(blacklist)]
+    df = df.loc[~df.loc[:, "MMSI"].isin(blacklist), :]
     new_blacklisters = []
     for j in range(df.shape[0]):
         if df.iloc[j]["AIS Type"] in AUTO_BLACKLIST:
-            new_blacklisters.append(df.iloc[j].MMSI)
+            new_blacklisters.append(df.iloc[j]["MMSI"])
     with open("../cache/blacklist.txt", "a") as f:
         contents = [str(mmsi) for mmsi in new_blacklisters]
         if contents:
             f.write("\n".join(contents) + "\n")
-    df = df[~df.MMSI.isin(new_blacklisters)]
+    df = df.loc[~df.loc[:, "MMSI"].isin(new_blacklisters), :]
     return df
 
 def _fold_vmr(ports, i):
@@ -97,18 +100,18 @@ def _fold_vmr(ports, i):
     maxes = pd.DataFrame(ports[i].groupby(["Name", "MMSI"])["VSPD kn"]
             .max()).rename({"VSPD kn": "Max Speed kn"}, axis=1)
     merged_speeds = maxes.merge(mean, on=["Name", "MMSI"])
-    max_dict = merged_speeds["Max Speed kn"].to_dict()
+    max_dict = merged_speeds.loc[:, "Max Speed kn"].to_dict()
     columns = {"Longitude":[], "Latitude":[], "Date/Time UTC":[],
                "LOA ft":[], "Course":[], "AIS Type":[], "WSPD mph":[],
                "GST mph":[], "WDIR degT":[], "Buoy Source":[], "Beam ft":[],
                "Heading":[], "Course Behavior":[], "Effective Beam ft":[],
-               "Vessel Class":[], "Location":[], "Yaw deg":[], "Transit":[],
+               "Class":[], "Location":[], "Yaw deg":[], "Transit":[],
                "% Channel Occupied":[]}
     # grab remaining data based on max speed position
     for key, value in max_dict.items():
         for k in columns.keys():
-            columns[k].append(ports[i][(ports[i].Name == key[0]) &
-                             (ports[i]["VSPD kn"] == value)][k].iloc[0])
+            columns[k].append(ports[i][(ports[i].loc[:, "Name"] == key[0]) &
+                             (ports[i].loc[:, "VSPD kn"] == value)][k].iloc[0])
     for key in columns.keys():
         merged_speeds[key] = columns[key]
     merged_speeds = merged_speeds.reset_index()
@@ -119,12 +122,12 @@ def _fold_vmr(ports, i):
 def _add_channel_occ(ports, i):
     """Creates the channel occupancy column."""
     # total channel width for CH and SV are 1000 and 600 ft respectively,
-    # but vary based on vessel class and transit condition
+    # but vary based on Class and transit condition
     channel_width = [[800, 400, 1000, 500], [600, 300, 600, 300]]
     # create % channel occupancy column for each vessel position based on
     # effective beam, transit, and corresponding channel width
     for row in range(len(ports[i])):
-        vessel_class = ports[i].loc[row, "Vessel Class"]
+        vessel_class = ports[i].loc[row, "Class"]
         transit_type = ports[i].loc[row, "Transit"]
         eff_beam = ports[i].loc[row, "Effective Beam ft"]
         if ((vessel_class == "Post-Panamax") &
@@ -144,10 +147,41 @@ def _add_channel_occ(ports, i):
             occ = (eff_beam / channel_width[i][3]) * 100
             ports[i].loc[row, "% Channel Occupied"] = round(occ, 2)
         else:
-            sys.stderr.write("Error: Undefined vessel class and " +
+            sys.stderr.write("Error: Undefined Class and " +
                              "transit combination...\n")
             ports[i].loc[row, "% Channel Occupied"] = float("NaN")
     return ports[i]
+
+def _add_vessel_class(df):
+    """Creates 'Class' column based on vessel LOA ft."""
+    df.loc[:, "Class"] = "Panamax"
+    post_row = (df.loc[:, "LOA ft"] > 965)
+    post_loc = df.loc[post_row, :].index
+    post_pan = df.index.isin(post_loc)
+    df.loc[post_pan, "Class"] = "Post-Panamax"
+    return df
+
+def _course_behavior(df, ranges):
+    """Creates 'Course Behavior' column based on channel specific course ranges.
+    """
+    course_behavior = ("Outbound", "Inbound")
+    # filter on course ranges to isolate inbound and outbound ships only
+    df = df[(df.loc[:, "Course"] >= ranges[0][0]) &
+            (df.loc[:, "Course"] <= ranges[0][1]) |
+            (df.loc[:, "Course"] >= ranges[1][0]) &
+            (df.loc[:, "Course"] <= ranges[1][1])]
+    df.loc[:, "Course"] = round(df.loc[:, "Course"]).astype("int")
+    df.loc[:, "Course Behavior"] = df.loc[:, "Course"].copy()
+    # replace course values with general inbound and outbound behavior
+    courses = {}
+    for behavior, bounds in zip(course_behavior, ranges):
+        lower_bound = bounds[0]
+        upper_bound = bounds[1]
+        for j in range(lower_bound, upper_bound + 1):
+            courses[j] = behavior
+    df.loc[:, "Course Behavior"] = (df.loc[:, "Course Behavior"]
+                                    .replace(courses).astype("str"))
+    return df
 
 def process_report(path):
     """Processes data from vessel movement report. Adds data from wind buoys,
@@ -167,13 +201,15 @@ def process_report(path):
     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
                                             "r").readlines()]
     df = pd.read_csv(path)
-    df = _wrangle_vmr(df)
+    df = _wrangle_vmr(df, {"DATETIME (UTC)": "Date/Time UTC", "NAME": "Name",
+                           "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
+                           "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
+                           "Heading", "AIS TYPE": "AIS Type"})
     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
     sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
     # longitudinal channel midpoint for Charleston and Savannah respectively
     channel_midpoint = ((-79.74169), (-80.78522))
     course_ranges = (ch_course_ranges, sv_course_ranges)
-    course_behavior = ("Outbound", "Inbound")
     ports = [None, None] # ch, sv
     # Charleston NOAA wind buoy ID (41004)
     # Savannah NOAA wind buoy ID (41008)
@@ -181,15 +217,15 @@ def process_report(path):
     alt_buoys = [{"41008":None}, {"41004":None}] # alternate wind buoys
     # split data into Charleston and Savannah DataFrames based on latitude
     for i in range(len(ports)):
-        ch_df = (df.Latitude >= 32.033)
-        sv_df = (df.Latitude < 32.033)
+        ch_df = (df.loc[:, "Latitude"] >= 32.033)
+        sv_df = (df.loc[:, "Latitude"] < 32.033)
         ports[i] = df[ch_df] if (i == 0) else df[sv_df]
         # if there is no vessel data on a given day (e.g. major holidays)
         # return empty DataFrames
         if not len(ports[i]):
             empty = pd.DataFrame({"Date/Time UTC":[], "Name":[], "MMSI":[],
                                   "Max Speed kn":[], "Mean Speed kn":[],
-                                  "LOA ft":[], "Beam ft":[], "Vessel Class":[],
+                                  "LOA ft":[], "Beam ft":[], "Class":[],
                                   "AIS Type":[], "Course":[], "Heading":[],
                                   "Course Behavior":[], "Yaw deg":[],
                                   "Effective Beam ft":[], "WDIR degT":[],
@@ -198,48 +234,29 @@ def process_report(path):
                                   "Transit":[], "% Channel Occupied":[]})
             ports[i] = [empty, empty]
             continue
-        # initialize location column to Nearshore; compute Offshore locations
         ports[i].loc[:, "Location"] = "Nearshore"
-        off_locs = ports[i][ports[i]["Longitude"] > channel_midpoint[i]].index
-        offshore_indices = ports[i].index.isin(off_locs)
-        ports[i].loc[:, "Location"][offshore_indices] = "Offshore"
+        off_row = (ports[i].loc[:, "Longitude"] > -79.74169)
+        off_loc = ports[i].loc[off_row, :].index
+        offshore_indices = ports[i].index.isin(off_loc)
+        ports[i].loc[offshore_indices, "Location"] = "Offshore"
         ports[i] = add_wind(ports, i, buoys, alt_buoys)
-        # filter on course ranges to isolate inbound and outbound ships only
-        ports[i] = ports[i][(ports[i].Course >= course_ranges[i][0][0]) &
-                            (ports[i].Course <= course_ranges[i][0][1]) |
-                            (ports[i].Course >= course_ranges[i][1][0]) &
-                            (ports[i].Course <= course_ranges[i][1][1])]
-        ports[i].Course = round(ports[i].Course).astype("int")
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:, "Course"]
-        # replace course values with general inbound and outbound behavior
-        courses = {}
-        for behavior, course_range in zip(course_behavior, course_ranges[i]):
-            lower_bound = course_range[0]
-            upper_bound = course_range[1]
-            for j in range(lower_bound, upper_bound + 1):
-                courses[j] = behavior
-        ports[i].loc[:, "Course Behavior"] = ports[i].loc[:,
-                                             "Course Behavior"].replace(
-                                             courses).astype("str")
-        # initialize Vessel Class column to Panamax, and update based on
-        # Post-Panamax LOA ft values to minimize computation
-        ports[i].loc[:, "Vessel Class"] = "Panamax"
-        post_pan = ports[i].index.isin(ports[i][ports[i]["LOA ft"] > 965].index)
-        ports[i].loc[:, "Vessel Class"][post_pan] = "Post-Panamax"
+        ports[i] = _course_behavior(ports[i], course_ranges[i])
+        ports[i] = _add_vessel_class(ports[i])
         # create yaw column based on difference between course and heading
         ports[i].loc[:, "Yaw deg"] = abs(ports[i].loc[:, "Course"] -
                                          ports[i].loc[:, "Heading"])
         # compute effective beam based on vessel beam, loa, and yaw
-        EB = []
-        loa = ports[i]["LOA ft"].values
-        beam = ports[i]["Beam ft"].values
-        yaw = ports[i]["Yaw deg"].values
+        eff_beam = []
+        loa = ports[i].loc[:, "LOA ft"].values
+        beam = ports[i].loc[:, "Beam ft"].values
+        yaw = ports[i].loc[:, "Yaw deg"].values
         for l in range(ports[i].shape[0]):
             # effective beam formula derived using trigonometry and geometry
             # of vessel positions
-            EB.append(round((math.cos(math.radians(90 - yaw[l])) * loa[l]) +
-                            (math.cos(math.radians(yaw[l])) * beam[l])))
-        ports[i].loc[:, "Effective Beam ft"] = EB
+            eff_beam.append(round((math.cos(math.radians(90 - yaw[l])) *
+                            loa[l]) + (math.cos(math.radians(yaw[l])) *
+                            beam[l])))
+        ports[i].loc[:, "Effective Beam ft"] = eff_beam
         ports[i].loc[:, "Effective Beam ft"] = ports[i].loc[:,
                                                "Effective Beam ft"].round(0)
         # remove unwanted blacklist vessels
@@ -252,10 +269,10 @@ def process_report(path):
         # run meetpass analysis and create Transit column based on results
         mp = meetpass(ports[i])
         two_way = twoway(ports[i], mp)
-        ports[i]["Transit"] = "One-way Transit"
+        ports[i].loc[:, "Transit"] = "One-way Transit"
         if not isinstance(two_way, type(None)):
             two_way_indices = ports[i].index.isin(two_way.index)
-            ports[i]["Transit"][two_way_indices] = "Two-way Transit"
+            ports[i].loc[two_way_indices, "Transit"] = "Two-way Transit"
         # reset index to clear previous pandas manipulations
         ports[i] = ports[i].reset_index()
         ports[i] = _add_channel_occ(ports, i)
@@ -263,27 +280,29 @@ def process_report(path):
         all_res = ports[i]
         # remove sections of channel where ships turn
         if i % 2:
-            all_res = all_res[(all_res.Latitude <= 32.02838) &
-                              (all_res.Latitude >= 31.9985) |
-                              (all_res.Latitude <= 31.99183)]
+            all_res = all_res[(all_res.loc[:, "Latitude"] <= 32.02838) &
+                              (all_res.loc[:, "Latitude"] >= 31.9985) |
+                              (all_res.loc[:, "Latitude"] <= 31.99183)]
         else:
-            all_res = all_res[all_res.Latitude >= 32.667473]
+            all_res = all_res[all_res.loc[:, "Latitude"] >= 32.667473]
         fold_res = _fold_vmr(ports, i)
         # return max and mean positional data in specified order
-        fold_res = fold_res[["Date/Time UTC", "Name", "MMSI", "Max Speed kn",
-                             "Mean Speed kn", "LOA ft", "Beam ft",
-                             "Vessel Class", "AIS Type", "Course", "Heading",
-                             "Course Behavior", "Yaw deg", "Effective Beam ft",
-                             "WDIR degT", "WSPD mph", "GST mph", "Buoy Source",
-                             "Location", "Latitude", "Longitude", "Transit",
-                             "% Channel Occupied"]]
+        fold_res = fold_res.loc[:, ("Date/Time UTC", "Name", "MMSI",
+                                    "Max Speed kn", "Mean Speed kn", "LOA ft",
+                                    "Beam ft", "Class", "AIS Type", "Course",
+                                    "Heading", "Course Behavior", "Yaw deg",
+                                    "Effective Beam ft", "WDIR degT",
+                                    "WSPD mph", "GST mph", "Buoy Source",
+                                    "Location", "Latitude", "Longitude",
+                                    "Transit", "% Channel Occupied")]
         # return positional data in specified order
-        all_res = all_res[["Name", "MMSI", "VSPD kn", "WSPD mph", "Transit",
-                           "% Channel Occupied", "Yaw deg", "Effective Beam ft",
-                           "LOA ft", "Beam ft", "Vessel Class", "AIS Type",
-                           "Course", "Heading", "Course Behavior", "WDIR degT",
-                           "GST mph", "Buoy Source", "Location", "Latitude",
-                           "Longitude", "Date/Time UTC"]]
+        all_res = all_res.loc[:, ("Name", "MMSI", "VSPD kn", "WSPD mph",
+                                  "Transit", "% Channel Occupied", "Yaw deg",
+                                  "Effective Beam ft", "LOA ft", "Beam ft",
+                                  "Class", "AIS Type", "Course", "Heading",
+                                  "Course Behavior", "WDIR degT", "GST mph",
+                                  "Buoy Source", "Location", "Latitude",
+                                  "Longitude", "Date/Time UTC")]
         # save two copies of daily vmr for each port, one for all vessel
         # positions and one for maximum vessel speed positions
         ports[i] = [fold_res, all_res]

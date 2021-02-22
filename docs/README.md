@@ -110,9 +110,9 @@ technologies such as Amazon Web Services, GitHub, Gmail, and Wix.
 3. Run `./install`.
 
 ### First-time use and validation
-1. Move a valid `credentials.json`, `riwhale.config`, and `.mapbox_token` to the
-`conf` directory (if you have a valid `.token.pickle` move that to `conf`
-and _skip_ steps 2-4).
+1. Move a valid `credentials.json`, `riwhale.config`, `.vf_token`, and
+`.mapbox_token` to the `conf` directory (if you have a valid `.token.pickle`
+move that to `conf` and _skip_ steps 2-4).
 2. Make sure you are logged in to Gmail on the special VMR account (see
 [this diagram](diagrams/web-app-diagram.pdf) for more details).
 3. Set your current working directory to the root directory of the repo and

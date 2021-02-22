@@ -14,6 +14,7 @@ from log import *
 
 import os.path
 import pickle
+import sys
 
 LIMIT = 45 # authorization time limit (in seconds)
 # if modifying these scopes, delete the file .token.pickle.
@@ -23,14 +24,21 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.compose"
 ]
 
-def gmail_auth(logfile):
+def gmail_auth(logfile, mode):
     """Handles Gmail authorization via Gmail API."""
     creds = None
     # the file .token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time
-    if os.path.exists("../conf/.token.pickle"):
-        with open("../conf/.token.pickle", "rb") as token:
+    pickled_token = "../conf/.token.pickle"
+    if mode == "dev":
+        pickled_token = "../conf/.dev.token.pickle"
+    elif mode != "norm":
+        sys.stderr.write("Error: Call to gmail_auth with unknown mode: '" +
+                         mode + "'...")
+        exit(1)
+    if os.path.exists(pickled_token):
+        with open(pickled_token, "rb") as token:
             creds = pickle.load(token)
     # if there are no (valid) credentials available, let the user log in
     if not creds or not creds.valid:
@@ -63,6 +71,6 @@ def gmail_auth(logfile):
                              "load Google credentials.")
                 exit(1)
         # save the credentials for the next run
-        with open("../conf/.token.pickle", "wb") as token:
+        with open(pickled_token, "wb") as token:
             pickle.dump(creds, token)
     return creds

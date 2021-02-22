@@ -1,10 +1,11 @@
 logs
 html
 temp
-conf
 tests
+conf/*
 cache/*
 *__pycache__
 */.token.pickle
 !tests/sample.zip
 !cache/.gitkeep
+!conf/.gitkeep

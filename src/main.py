@@ -19,6 +19,7 @@ import plotly.io as pio
 import pandas as pd
 import datetime
 import glob
+import sys
 import os
 
 def _write_html(fig, filename):
@@ -28,11 +29,22 @@ def _write_image(fig, filename, format, scale):
     return pio.write_image(fig, file=filename, format=format, engine="kaleido",
                            scale=scale)
 
-def _fetch_latest_data(logfile):
+def _parse_flags(flags):
+    """Interprets flags from argv."""
+    flags = [flag.lower() for flag in flags]
+    if "dev" in flags:
+        return "dev"
+    else:
+        if len(flags) == 1:
+            return "norm"
+        sys.stderr.write("Error: main.py received an unknown flag...")
+        exit(1)
+
+def _fetch_latest_data(logfile, mode):
     """Checks for new data. If a cache already exists then ignore it. Any unseen
     data is processed and cached. Stores a simplified and an unsimplified
     version of the data. Indicates whether backend files are up-to-date."""
-    days = fetch_latest_reports(logfile)
+    days = fetch_latest_reports(logfile, mode)
     if not days:
         return False
     dates = (day.strftime("%Y_%m_%d") for day in days)
@@ -129,7 +141,7 @@ def _create_masters(last_seven_days, rest_of_season, filenames):
 def main():
     logfile = datetime.datetime.now().strftime("../logs/%Y_%m_%d_%H_%M_%S.log")
     # fetch any vessel movement report CSVs marked as UNSEEN from Gmail
-    if _fetch_latest_data(logfile):
+    if _fetch_latest_data(logfile, _parse_flags(sys.argv)):
         # load cache into memory if there is new data
         names = ["ch-max.csv", "sv-max.csv", "ch.csv", "sv.csv"]
         split_season = _load_cache(logfile, [], 0, names)
@@ -152,7 +164,7 @@ def main():
             if i <= 1:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
                          "Mean Speed kn", "WSPD mph", "Buoy Source", "Transit",
-                         "Vessel Class", "LOA ft", "Beam ft", "Yaw deg",
+                         "Class", "LOA ft", "Beam ft", "Yaw deg",
                          "Effective Beam ft", "% Channel Occupied", "Location"]
             else:
                 hover = ["Date/Time UTC", "Course Behavior", "Max Speed kn",
@@ -181,7 +193,7 @@ def main():
         dash = pd.concat([dashboard(charleston), dashboard(savannah)],
                           keys=["Charleston", "Savannah"],
                           axis=0).reset_index(level=1).rename(
-                          {"level_1": "Vessel Class"}, axis=1)
+                          {"level_1": "Class"}, axis=1)
         dash.to_csv("../html/dashboard.csv", mode="w", index=True)
         _write_image(generate_dashboard(dash), "../html/dashboard.pdf",
                      "pdf", 1)
