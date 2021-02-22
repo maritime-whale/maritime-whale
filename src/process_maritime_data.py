@@ -68,38 +68,6 @@ def _wrangle_vmr(df, rename):
                      "Beam ft"])]
     return df
 
-# TODO: MOVE TO NEW BRANCH
-
-# def _wrangle_live(df):
-#     # TODO: Add into one function above that checks type
-#     """Rounds, renames, and sanitizes vessel movment DataFrame. Creates new
-#     columns.
-#
-#     Args:
-#         df: Vessel movement DataFrame.
-#
-#     Returns:
-#         Cleaned vessel movement report DataFrame.
-#     """
-#     df.rename({"TIMESTAMP": "UTC", "NAME": "Name",
-#                "LATITUDE": "Latitude", "LONGITUDE": "Longitude",
-#                "SPEED": "VSPD kn", "COURSE": "Course", "HEADING":
-#                "Heading", "TYPE": "AIS Type"}, axis=1, inplace=True)
-#     df.loc[:, "LOA ft"] = (df.loc[:, "A"] + df.loc[:, "B"]) * M_TO_FT
-#     df.loc[:, "LOA ft"] = df.loc[:, "LOA ft"].round(0)
-#     df.loc[:, "Beam ft"] = (df.loc[:, "C"] + df.loc[:, "D"]) * M_TO_FT
-#     df.loc[:, "Beam ft"] = df.loc[:, "Beam ft"].round(0)
-#     df.loc[:, "Latitude"] = df.loc[:, "Latitude"].round(5)
-#     df.loc[:, "Longitude"] = df.loc[:, "Longitude"].round(5)
-#     df = _sanitize_vmr(df)
-#     # filter out sub-panamax class vessels
-#     df = df.loc[df.loc[:, "LOA ft"] >= SUB_PANAMAX, :]
-#     df.loc[:, "UTC"] = [df.loc[:, "UTC"].values[i][11:19] for i in
-#                         range(len(df.loc[:, "UTC"].values))]
-#     df = df.loc[:, ("UTC", "Name", "MMSI", "LOA ft", "Latitude", "Longitude",
-#                     "Course", "AIS Type", "Heading", "VSPD kn", "Beam ft")]
-#     return df
-
 def _filter_blacklisters(df, blacklist):
     """Checks vessel AIS types and ommits blacklisted vessel types from the
     filtered data. Appends ommitted vessels' MMSI's to blacklist.txt.
@@ -214,40 +182,6 @@ def _course_behavior(df, ranges):
     df.loc[:, "Course Behavior"] = (df.loc[:, "Course Behavior"]
                                     .replace(courses).astype("str"))
     return df
-
-# TODO: MOVE TO NEW BRANCH
-
-# def process_chunk(path):
-#     """Processes LiveData chunk. Creates other relevant columns."""
-#     # TODO: need to test (think of other edge cases this needs to handle)
-#     # TODO: decompose and document new functions
-#     blacklist = [int(mmsi) for mmsi in open("../cache/blacklist.txt",
-#                                             "r").readlines()]
-#     # TODO: PROTECT ALL FILE IO (including read_csv, like the line below); need
-#     # try execpts
-#     # TODO: THINK OF WHAT ELSE NEEDS TO BE PROTECTED WITH TRY EXCEPTS
-#     df = pd.read_csv(path)
-#     df = _wrangle_live(df)
-#     ch_course_ranges = ((100, 140), (280, 320)) # (outbound, inbound)
-#     sv_course_ranges = ((100, 160), (280, 340)) # (outbound, inbound)
-#     course_ranges = (ch_course_ranges, sv_course_ranges)
-#     ports = [None, None] # ch, sv
-#     # split data into Charleston and Savannah DataFrames based on latitude
-#     for i in range(len(ports)):
-#         ch_df = (df.loc[:, "Latitude"] >= 32.033)
-#         sv_df = (df.loc[:, "Latitude"] < 32.033)
-#         ports[i] = df[ch_df] if (i == 0) else df[sv_df]
-#         if not len(ports[i]):
-#             continue
-#         ports[i] = _course_behavior(ports[i], course_ranges[i])
-#         ports[i].rename({"Course":"course"}, axis=1, inplace=True)
-#         ports[i].rename({"Course Behavior":"Course"}, axis=1, inplace=True)
-#         ports[i] = _add_vessel_class(ports[i])
-#         # remove unwanted blacklist vessels
-#         ports[i] = _filter_blacklisters(ports[i], blacklist)
-#         ports[i] = ports[i][["UTC", "Name", "VSPD kn",
-#                              "Course", "Class"]]
-#     return ports[0], ports[1] # ch, sv
 
 def process_report(path):
     """Processes data from vessel movement report. Adds data from wind buoys,
