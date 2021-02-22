@@ -36,15 +36,40 @@ def generate_geo_plot(df, zoom, center, size, opacity, hover, token):
         fig.update_layout(mapbox_center=center)
     fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
     return fig
-
+# old version without "seasonal ticker" header..
+# def generate_ticker(ch, sv):
+#     """Generates seasonal ticker for port compliance and mean vessel speed."""
+#     fig = None
+#     fig = go.Figure(data=[go.Table(
+#         header=dict(values=[""],
+#                     line_color="white",
+#                     fill_color="#FFFFFF",
+#                     height=0),
+#         cells=dict(values=[["<b>Charleston:</b> " +
+#                             str(round(sum(ch.loc[:, "VSPD kn"] <= 10) /
+#                             len(ch) * 100, 2)) + "% Compliance, " +
+#                             str(round(ch.loc[:, "VSPD kn"].mean(), 2)) +
+#                             " kn Mean VSPD",
+#                             "<b>Savannah:</b>  " +
+#                             str(round(sum(sv.loc[:, "VSPD kn"] <= 10) /
+#                             len(sv) * 100, 2)) + "% Compliance, " +
+#                             str(round(sv.loc[:, "VSPD kn"].mean(), 2)) +
+#                             " kn Mean VSPD"]],
+#                    line_color="white", fill_color="#FFFFFF", align="left",
+#                    font_size=14, height=0))
+#                    ])
+#     fig.update_layout(height=75, width=470, margin=dict(l=0, r=0, t=0, b=0))
+#     return fig
 def generate_ticker(ch, sv):
     """Generates seasonal ticker for port compliance and mean vessel speed."""
     fig = None
     fig = go.Figure(data=[go.Table(
-        header=dict(values=[""],
+        header=dict(values=["<b>Seasonal Ticker</b>"],
+                    align="left",
                     line_color="white",
                     fill_color="#FFFFFF",
-                    height=0),
+                    height=0,
+                    font_size=14),
         cells=dict(values=[["<b>Charleston:</b> " +
                             str(round(sum(ch.loc[:, "VSPD kn"] <= 10) /
                             len(ch) * 100, 2)) + "% Compliance, " +
@@ -56,9 +81,9 @@ def generate_ticker(ch, sv):
                             str(round(sv.loc[:, "VSPD kn"].mean(), 2)) +
                             " kn Mean VSPD"]],
                    line_color="white", fill_color="#FFFFFF", align="left",
-                   font_size=14, height=0))
+                   font_size=14, height=5))
                    ])
-    fig.update_layout(height=75, width=470, margin=dict(l=0, r=0, t=0, b=0))
+    fig.update_layout(height=100, width=470, margin=dict(l=0, r=0, t=0, b=0))
     return fig
 
 def generate_vspd_hist(df):
