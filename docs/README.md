@@ -18,7 +18,7 @@ clear picture of the intricacies of our data handling process.
 This analysis focuses on Post-Panamax and Panamax vessels in accordance with the
 [USACE approach](https://erdc-library.erdc.dren.mil/jspui/handle/11681/32750) of
 evaluating the largest ships in dredged channels. Vessels not subject to the
-speed rule (e.g. military ops, law enforcement, search and rescue) as well as tugs, 
+speed rule (e.g. military ops, law enforcement, search and rescue) as well as tugs,
 fishing vessels, and dredge operations are filtered out. Thus,
 container ships, general cargo, bulk cargo, tankers, ro-ro, car carriers, and
 cruise ships are the targets of this analysis. Erroneous entries are removed
@@ -26,8 +26,8 @@ from the data (e.g. abnormally high vessel speed, course errors, heading
 errors). If a single position is reported for a given ship the entry is also
 removed. Sample areas include ships under mandatory pilotage and exclude data
 from pilot boarding areas. Bends in the Savannah entrance channel—which
-naturally require vessels to turn—incur higher than normal yaw values. 
-To prevent skewing this analysis these areas are ignored. Doing so allows for 
+naturally require vessels to turn—incur higher than normal yaw values.
+To prevent skewing this analysis these areas are ignored. Doing so allows for
 a more lucid characterization of vessel behavior in adverse and non-adverse conditions.
 
 ### Wind data retrieval and matching
@@ -48,8 +48,8 @@ vice versa.
 
 One-way transits are channel conditions where there is no oncoming traffic for a
 given vessel position. Conversely, two-way transits are channel conditions where
-ships travel toward each other in the entrance channel. The two-way condition 
-applies to all entries up until the point where the last set of ships meet and pass. 
+ships travel toward each other in the entrance channel. The two-way condition
+applies to all entries up until the point where the last set of ships meet and pass.
 After, they are considered to be one-way. The `meetpass` algorithm iteratively compares
 AIS vessel positions, identifying meeting and passing instances, while
 classifying two-way and one-way transit entries. Potential instances of meeting
@@ -129,6 +129,20 @@ won't get generated and an error is produced.
 ([contact the dev team](mailto:dev.riwhale+help@gmail.com) for more info).<br/>
 Execute the `run` script with `debug` mode disabled: `./run`.
 
+### Using the `dev` flag
+* Execute the `run` script with `dev` mode enabled: `./run dev`.
+
+* _**WARNING!**_ Do _NOT_ run without `dev` unless you know the consequences
+([contact the dev team](mailto:dev.riwhale+help@gmail.com) for more info).<br/>
+Execute the `run` script with `dev` mode disabled: `./run`.
+
+### Using the `debug` and `dev` flags in conjunction
+* Execute the `run` script with `debug` and `dev` mode enabled:
+`./run debug dev`.<br/>
+The order of the flags does not matter. See documentation in the [run](../run)
+script and [email the dev team](mailto:dev.riwhale+help@gmail.com) for
+questions.
+
 ## Testing
 
-* Documentation still in progress...
+This project was manually tested throughout development.
