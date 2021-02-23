@@ -31,6 +31,10 @@ def _wrangle_winds(buoys, buoy_data, i, id, year, month, day):
     buoy_data = buoy_data[(buoy_data.loc[:, "WDIR degT"] != "MM") &
                           (buoy_data.loc[:, "WSPD m/s"] != "MM") &
                           (buoy_data.loc[:, "GST m/s"] != "MM")]
+    # remove erroneous entries from buoy data
+    buoy_data = buoy_data[(buoy_data.loc[:, "WDIR degT"] != "99.0") &
+                          (buoy_data.loc[:, "WSPD m/s"] != "99.0") &
+                          (buoy_data.loc[:, "GST m/s"] != "99.0")]
     # convert from m/s to mph and round
     buoy_data.loc[:, "WSPD mph"] = (buoy_data.loc[:, "WSPD m/s"].
                                     astype("float") * MPS_TO_MPH)
