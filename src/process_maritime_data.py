@@ -235,7 +235,7 @@ def process_report(path):
             ports[i] = [empty, empty]
             continue
         ports[i].loc[:, "Location"] = "Nearshore"
-        off_row = (ports[i].loc[:, "Longitude"] > -79.74169)
+        off_row = (ports[i].loc[:, "Longitude"] > channel_midpoint[i])
         off_loc = ports[i].loc[off_row, :].index
         offshore_indices = ports[i].index.isin(off_loc)
         ports[i].loc[offshore_indices, "Location"] = "Offshore"

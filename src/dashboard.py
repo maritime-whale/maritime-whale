@@ -14,7 +14,7 @@ def dashboard(df):
     nearshore = (df.loc[:, "Location"] == "Nearshore")
     offshore = (df.loc[:, "Location"] == "Offshore")
     inbound = (df.loc[:, "Course Behavior"] == "Inbound")
-    outbound = (df.loc[:, "Course Behavior"] == "Inbound")
+    outbound = (df.loc[:, "Course Behavior"] == "Outbound")
     dat = {"Proportion<br>of Transits":[
            str(round(sum(panamax) / len(df) * 100, 2)) + "%",
            str(round(sum(post_panamax) / len(df) * 100, 2)) + "%", "100%"
