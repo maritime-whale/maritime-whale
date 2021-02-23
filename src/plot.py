@@ -126,9 +126,6 @@ def generate_wspd_hist(df, df_dropna):
         fig = px.histogram(df_dropna.loc[:, "WSPD mph"],
                            color_discrete_sequence=["steelblue"], nbins=15)
         fig.update_layout(title="<b>Windspeed Histogram</b><br>" +
-                                "Wind Buoy Data Available: " +
-                                str(round(len(df.dropna()) / len(df) * 100, 2))
-                                + "%<br>" +
                                 "Adverse Wind Conditions: " +
                                 str(round((df_dropna[df_dropna.loc[:,
                                 ("WSPD mph")] >= 30].shape[0] /
@@ -171,9 +168,6 @@ def generate_wspd_vs_vspd(df, df_dropna):
         fig.update_layout(xaxis_title_text="VSPD kn",
                           title="<b>Vessel and Wind Speed Density Plot</b>" +
                                 "<br>" +
-                                 "Wind Buoy Data Available: " +
-                                 str(round(len(df.dropna()) / len(df) * 100, 2))
-                                 + "%<br>" +
                                  "VSPD-WSPD Correlation: " +
                                  str(round(df_dropna.loc[:,
                                  ("VSPD kn", "WSPD mph")]
