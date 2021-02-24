@@ -97,7 +97,7 @@ def _get_webapp_health_status():
     return "UNKNOWN"
 
 def main():
-    creds = gmail_auth(ERR_LOGFILE)
+    creds = gmail_auth(ERR_LOGFILE, "norm")
     service = build("gmail", "v1", credentials=creds)
     log(OUT_LOGFILE, "Google OAuth successful.")
     zip = "../temp/webapp_logs"
