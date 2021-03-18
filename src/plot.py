@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 
-OUTAGE_THRESHOLD = 0.65 # ratio
+OUTAGE_THRESHOLD = 0.75 # ratio
 
 def _check_wind_outages(df, df_dropna):
     """Checks for major wind outages on a given day."""
