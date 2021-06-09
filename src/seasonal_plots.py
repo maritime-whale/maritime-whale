@@ -9,6 +9,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 ch = pd.read_csv("../html/riwhale.github.io/master-ch.csv")
 ch_max = pd.read_csv("../html/riwhale.github.io/master-ch-max.csv")
@@ -475,3 +477,10 @@ _write_html(generate_geo_plot(sv_max.dropna(), 9.25, dict(lat=31.99753,
 _write_html(generate_geo_plot(pd.concat([ch_max, sv_max]).dropna(), 7, dict(),
             [431, 819], 0.6, hover, token),
             "../html/level_one.html")
+
+fig = sns.kdeplot(data=ch.dropna(), x="VSPD kn", y="WSPD mph", fill=True, cmap="mako_r")
+plt.title("Vessel and Wind Speed Density Plot\n" +
+       "VSPD-WSPD Correlation: " +
+       str(round(ch.dropna().loc[:, ("VSPD kn", "WSPD mph")].corr().iloc[0][1], 2)))
+plt.axvline(10,0,1, c="red")
+plt.show()
