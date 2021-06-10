@@ -164,4 +164,6 @@ for subdir in dirs:
     if path.endswith(".csv"):
         res.append(pd.read_csv(path))
 pd.concat(res).to_csv("../temp/raw_vmrs.csv")
-pd.concat(res).to_xlsx("../temp/raw_vmrs.xlsx")
+# pd.concat(res).to_excel("../temp/raw_vmrs.xlsx")
+
+pd.read_csv("../temp/raw_vmrs.csv").to_excel("../temp/raw_vmrs.xlsx")
