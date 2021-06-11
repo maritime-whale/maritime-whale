@@ -138,3 +138,11 @@ print("charleston sub-pan made 365 transits")
 len(sv_df.groupby(["MMSI", "Course Behavior"]).mean())
 
 497+550+234
+df.shape
+ch_df.shape[0] + sv_df.shape[0]
+df.shape[0] - (ch_df.shape[0] + sv_df.shape[0])
+
+
+
+sv_df.to_csv("../html/riwhale.github.io/sub_pan_sv.csv")
+ch_df.to_csv("../html/riwhale.github.io/sub_pan_ch.csv")
