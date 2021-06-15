@@ -189,27 +189,27 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 # fig = sns.kdeplot(data=ch, x="VSPD kn", y="WSPD mph", fill=True, cmap="mako_r")
 # plt.axvline(10,0,1, c="red")
 # text(10, 30, "Speed Limit", rotation=270, color="Red")
-# plt.savefig("../EOS_2020-2021/plots/vspd_vs_wspd_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_vs_wspd_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.kdeplot(data=sv, x="VSPD kn", y="WSPD mph", fill=True, cmap="mako_r")
 # plt.axvline(10,0,1, c="red")
 # text(10, 30, "Speed Limit", rotation=270, color="Red")
-# plt.savefig("../EOS_2020-2021/plots/vspd_vs_wspd_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_vs_wspd_sv.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.histplot(data=ch, x="VSPD kn", bins=22, color="#19336A")
 # plt.axvline(10,0,1, c="red")
 # fig.set(ylabel='Unique AIS Positions')
 # text(10, 4800, "Speed Limit", rotation=270, color="Red")
-# plt.savefig("../EOS_2020-2021/plots/vspd_hist_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_hist_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.histplot(data=sv, x="VSPD kn", bins=22, color="#19336A")
 # plt.axvline(10,0,1, c="red")
 # fig.set(ylabel='Unique AIS Positions')
 # text(10, 4000, "Speed Limit", rotation=270, color="Red")
-# plt.savefig("../EOS_2020-2021/plots/vspd_hist_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_hist_sv.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.stripplot(data=ch, x="Name", y="VSPD kn", size=4, hue="Transit", palette=["#19336A", "green"], edgecolor="white", linewidth=0.25)
@@ -221,7 +221,7 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 #            title_fontsize = 11,
 #            shadow = False,
 #            facecolor = 'white')
-# plt.savefig("../EOS_2020-2021/plots/vspd_strip4_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_strip4_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.stripplot(data=sv, x="Name", y="VSPD kn", size=4, hue="Transit", palette=["#19336A", "green"], edgecolor="white", linewidth=0.25)
@@ -233,21 +233,21 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 #            title_fontsize = 11,
 #            shadow = True,
 #            facecolor = 'white')
-# plt.savefig("../../EOS_2020-2021/plots/vspd_strip_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/vspd_strip_sv.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.histplot(data=ch, x="WSPD mph", bins=22, color="steelblue")
 # plt.axvline(30,0,1, c="Black")
 # fig.set(ylabel='Unique AIS Positions')
 # text(30, 1000, "Adverse WSPD Threshold", rotation=270, color="Black")
-# plt.savefig("../EOS_2020-2021/plots/wspd_hist_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/wspd_hist_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.histplot(data=sv, x="WSPD mph", bins=22, color="steelblue")
 # plt.axvline(30,0,1, c="Black")
 # fig.set(ylabel='Unique AIS Positions')
 # text(30, 1000, "Adverse WSPD Threshold", rotation=270, color="Black")
-# plt.savefig("../EOS_2020-2021/plots/wspd_hist_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/wspd_hist_sv.jpeg", dpi=300)
 #
 #
 # plt.figure(figsize=(10,6))
@@ -259,7 +259,7 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 # fig.legend(fontsize = 10,
 #            shadow = False,
 #            facecolor = 'white')
-# plt.savefig("../EOS_2020-2021/plots/yaw_lineplot_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/yaw_lineplot_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sv.reset_index().loc[:, "Yaw deg"].plot(color="green", lw=1)
@@ -270,7 +270,7 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 # fig.legend(fontsize = 10,
 #            shadow = False,
 #            facecolor = 'white');
-# plt.savefig("../EOS_2020-2021/plots/yaw_lineplot_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/yaw_lineplot_sv.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.scatterplot(data=ch, x="VSPD kn", y="% Channel Occupied", hue="Transit", palette=["#19336A", "green"])
@@ -282,7 +282,7 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 #            title_fontsize = 11,
 #            shadow = False,
 #            facecolor = 'white');
-# plt.savefig("../EOS_2020-2021/plots/channel_occupancy_ch.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/channel_occupancy_ch.jpeg", dpi=300)
 #
 # plt.figure(figsize=(10,6))
 # fig = sns.scatterplot(data=sv, x="VSPD kn", y="% Channel Occupied", hue="Transit", palette=["#19336A", "green"])
@@ -294,9 +294,9 @@ sv_two_way = sv[sv.loc[:, "Transit"] == "Two-way Transit"][["VSPD kn"]].describe
 #            title_fontsize = 11,
 #            shadow = False,
 #            facecolor = 'white')
-# plt.savefig("../EOS_2020-2021/plots/channel_occupancy_sv.pdf")
+# plt.savefig("../../EOS_2020-2021/plots2/channel_occupancy_sv.jpeg", dpi=300)
 #
-#
+# 
 # x = ['≤10', '(10-12]', '(12-14]', '(14-16]', '>16']
 # y = [ch[ch['VSPD kn'] <= 10].shape[0],
 #      ch[(ch['VSPD kn'] > 10) & (ch['VSPD kn'] <= 12)].shape[0],
