@@ -157,7 +157,8 @@ def main():
         centers = (dict(lat=32.7, lon=-79.82),
                    dict(lat=32.02,lon=-80.925),
                    dict())
-        # old geo plot centers
+        # old geo plot zooms and centers
+        # zooms = (8.5, 9.25, 7)
         # centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753,
         #            lon=-80.78728), dict())
         opacity = (0.75, 0.75, 0.6)
