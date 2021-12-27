@@ -153,9 +153,9 @@ def main():
             last_seven_days[0][i] = (pd.concat(last_seven_days[0][i])
                                      .reset_index().drop("index", axis=1))
         geo_plots = {"lvl2_CH":None, "lvl2_SV":None, "lvl1":None}
-        zooms = (8.5, 9.25, 7)
-        centers = (dict(lat=32.68376, lon=-79.72794), dict(lat=31.99753,
-                   lon=-80.78728), dict())
+        zooms = (9, 9.75, 7.5)
+        centers = (dict(lat=32.7, lon=-79.82), dict(lat=32.02,lon=-80.925),
+                   dict())
         opacity = (0.75, 0.75, 0.6)
         sizes = ([431, 819], [431, 819], [431, 819])
         token = open("../conf/.mapbox_token").read()
